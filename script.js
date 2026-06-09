@@ -5,10 +5,10 @@ let i = 0;
 let jawab = {};
 let token = "";
 let nama = "";
-let timer;
+let timerInterval;
 let isSubmitted = false;
 
-/* ========== LOGIN ========== */
+/* ================= LOGIN ================= */
 function login(){
 
   token = document.getElementById("token").value.trim();
@@ -31,12 +31,12 @@ function login(){
 
   })
   .catch(err => {
-    console.error(err);
-    alert("API error");
+    console.error("LOGIN ERROR:", err);
+    alert("Gagal konek ke server");
   });
 }
 
-/* ========== LOAD SOAL ========== */
+/* ================= LOAD SOAL ================= */
 function load(){
 
   fetch(`${API}?action=getSoal`)
@@ -48,16 +48,16 @@ function load(){
 
     render();
     nav();
-    startTimer();
+    start();
 
   })
   .catch(err => {
-    console.error(err);
+    console.error("LOAD SOAL ERROR:", err);
     alert("Gagal load soal");
   });
 }
 
-/* ========== RENDER ========== */
+/* ================= RENDER ================= */
 function render(){
 
   if(!soal[i]) return;
@@ -65,7 +65,7 @@ function render(){
   let s = soal[i];
 
   document.getElementById("q").innerHTML =
-    (i+1) + ". " + s.pertanyaan;
+    (i + 1) + ". " + s.pertanyaan;
 
   document.getElementById("opt").innerHTML = `
     <div class="opt ${jawab[i]=='A'?'active':''}" onclick="pilih('A')">A. ${s.a}</div>
@@ -75,89 +75,95 @@ function render(){
   `;
 }
 
-/* ========== PILIH ========== */
+/* ================= PILIH ================= */
 function pilih(v){
   jawab[i] = v;
   render();
   nav();
 }
 
-/* ========== NAV ========== */
+/* ================= NAV ================= */
 function nav(){
 
   let h = "";
 
-  for(let x=0;x<soal.length;x++){
+  for(let x = 0; x < soal.length; x++){
 
     let cls = "";
     if(jawab[x]) cls += "done ";
     if(x === i) cls += "active";
 
-    h += `<button class="${cls}" onclick="go(${x})">${x+1}</button>`;
+    h += `<button class="${cls}" onclick="go(${x})">${x + 1}</button>`;
   }
 
   document.getElementById("nav").innerHTML = h;
 }
 
-/* ========== GO ========== */
+/* ================= GO ================= */
 function go(x){
   i = x;
   render();
   nav();
 }
 
-/* ========== TIMER ========== */
-function startTimer(){
+/* ================= TIMER ================= */
+function start(){
 
   let t = 3600;
 
-  timer = setInterval(() => {
+  timerInterval = setInterval(() => {
 
     t--;
 
-    let m = Math.floor(t/60);
-    let s = t%60;
+    let m = Math.floor(t / 60);
+    let s = t % 60;
 
     document.getElementById("timer").innerHTML =
-      `${m}:${s<10?'0'+s:s}`;
+      `${m}:${s < 10 ? '0' + s : s}`;
 
     if(t <= 0){
+      clearInterval(timerInterval);
       submit();
     }
 
-  },1000);
+  }, 1000);
 }
 
-/* ========== SUBMIT ========== */
+/* ================= SUBMIT FIXED ================= */
 function submit(){
 
   if(isSubmitted) return;
   isSubmitted = true;
 
-  clearInterval(timer);
+  clearInterval(timerInterval);
 
   let skor = 0;
 
-  soal.forEach((s,x)=>{
+  soal.forEach((s, x) => {
     if(jawab[x] == s.kunci) skor++;
   });
 
-  fetch(API,{
-    method:"POST",
-    body:JSON.stringify({
-      action:"submit",
+  console.log("SUBMIT DATA:", {
+    nama, token, skor, jawaban: jawab
+  });
+
+  fetch(API, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "submit",
       nama,
       token,
       skor,
-      jawaban:jawab
+      jawaban: jawab
     })
   })
-  .then(r=>r.json())
-  .then(res=>{
+  .then(r => r.text())
+  .then(res => {
+    console.log("SUBMIT RESPONSE:", res);
     alert("Skor kamu: " + skor);
   })
-  .catch(err=>{
-    console.error(err);
-    alert("Submit error");
+  .catch(err => {
+    console.error("SUBMIT ERROR:", err);
+    alert("Gagal submit (cek console)");
   });
 }

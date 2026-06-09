@@ -493,3 +493,80 @@ function showResult(skor){
   });
 
 }
+
+/* =========================
+DARK MODE
+========================= */
+
+function toggleDarkMode(){
+
+  document.body.classList.toggle(
+    "dark-mode"
+  );
+
+}
+
+/* =========================
+CALCULATOR
+========================= */
+
+function toggleCalculator(){
+
+  const modal =
+  document.getElementById(
+    "calculatorModal"
+  );
+
+  if(
+    modal.style.display === "flex"
+  ){
+
+    modal.style.display = "none";
+
+  }else{
+
+    modal.style.display = "flex";
+
+  }
+
+}
+
+function calc(v){
+
+  document
+  .getElementById("calcDisplay")
+  .value += v;
+
+}
+
+function clearCalc(){
+
+  document
+  .getElementById("calcDisplay")
+  .value = "";
+
+}
+
+function calculateResult(){
+
+  try{
+
+    let result =
+    eval(
+      document.getElementById(
+        "calcDisplay"
+      ).value
+    );
+
+    document
+    .getElementById(
+      "calcDisplay"
+    ).value = result;
+
+  }catch{
+
+    alert("Perhitungan tidak valid");
+
+  }
+
+}

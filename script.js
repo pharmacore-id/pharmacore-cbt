@@ -1,40 +1,21 @@
-let currentQuestion = 0;
-let answers = [];
-let ragu = [];
-let totalSoal = 50;
-
-const API = "https://script.google.com/macros/s/AKfycbyo48NoxjaBHGHkRCxgkxOB3Cys2Wa3mBG7AvK_n3TidyCSQcjSf5vSbCJpkI0-QJhk/exec";
+/* =========================
+STATE (SOURCE OF TRUTH)
+========================= */
 
 let soal = [];
-let i = 0;
+let currentQuestion = 0;
 
-let jawab = {};
+let answers = {};
 let ragu = {};
 
-let token = "";
 let nama = "";
+let token = "";
 
 let timer;
 let isDone = false;
 
 /* =========================
-LOGIN
-========================= */
-
-function login(){
-
-  alert("LOGIN FIRED");
-
-  console.log("LOGIN FUNCTION RUNNING");
-
-  localStorage.setItem("cbt_state", "TEST");
-
-  console.log(localStorage.getItem("cbt_state"));
-
-}
-
-/* =========================
-SAVE & LOAD STATE
+LOCAL STORAGE HELPERS
 ========================= */
 
 function saveState(){
@@ -43,63 +24,39 @@ function saveState(){
     loggedIn: true,
     currentQuestion,
     answers,
-    ragu
+    ragu,
+    nama,
+    token
   }));
 
 }
 
+/* =========================
+LOAD STATE
+========================= */
+
 function loadState(){
 
   const data = localStorage.getItem("cbt_state");
-  return data ? JSON.parse(data) : null;
+  if(!data) return;
+
+  try{
+
+    const state = JSON.parse(data);
+
+    if(state.loggedIn !== true) return;
+
+    currentQuestion = state.currentQuestion || 0;
+    answers = state.answers || {};
+    ragu = state.ragu || {};
+    nama = state.nama || "";
+    token = state.token || "";
+
+  } catch(e){
+    localStorage.removeItem("cbt_state");
+  }
 
 }
-
-/* =========================
-INIT / AUTO RESTORE
-========================= */
-
-window.addEventListener("DOMContentLoaded", function(){
-
-  const raw = localStorage.getItem("cbt_state");
-
-  console.log("CBT STATE RAW:", raw);
-
-  if(!raw){
-    console.log("NO STATE → stay login");
-    return;
-  }
-
-  let state;
-
-  try {
-    state = JSON.parse(raw);
-  } catch (e) {
-    console.log("JSON ERROR → clear storage");
-    localStorage.removeItem("cbt_state");
-    return;
-  }
-
-  console.log("STATE PARSED:", state);
-
-  if(state.loggedIn !== true){
-    console.log("NOT LOGGED IN");
-    return;
-  }
-
-  console.log("RESTORE SUCCESS");
-
-  document.getElementById("login").style.display = "none";
-  document.getElementById("app").style.display = "block";
-
-  currentQuestion = state.currentQuestion || 0;
-  answers = state.answers || [];
-  ragu = state.ragu || [];
-
-  renderQuestion();
-  updateSidebarSummary();
-
-});
 
 /* =========================
 LOGIN
@@ -107,14 +64,18 @@ LOGIN
 
 function login(){
 
-  const nama = document.getElementById("nama").value;
-  if(!nama) return alert("Isi nama dulu");
+  const n = document.getElementById("nama").value;
+  if(!n) return alert("Isi nama dulu");
+
+  nama = n;
 
   const state = {
     loggedIn: true,
     currentQuestion: 0,
-    answers: [],
-    ragu: []
+    answers: {},
+    ragu: {},
+    nama,
+    token
   };
 
   localStorage.setItem("cbt_state", JSON.stringify(state));
@@ -122,114 +83,16 @@ function login(){
   document.getElementById("login").style.display = "none";
   document.getElementById("app").style.display = "block";
 
-  renderQuestion();
-  updateSidebarSummary();
+  render();
+  nav();
+  updateStats();
 
-}
-
-function isLoggedIn(){
-
-  const data = localStorage.getItem("cbt_state");
-
-  if(!data) return false;
-
-  try {
-    return JSON.parse(data).loggedIn === true;
-  } catch {
-    return false;
-  }
+  start(); // timer start
 
 }
 
 /* =========================
-QUESTION NAVIGATION
-========================= */
-
-function nextQuestion(){
-
-  if(currentQuestion < soal.length - 1){
-    currentQuestion++;
-  }
-
-  saveState();
-  renderQuestion();
-  updateSidebarSummary();
-
-}
-
-function prevQuestion(){
-
-  if(currentQuestion > 0){
-    currentQuestion--;
-  }
-
-  saveState();
-  renderQuestion();
-  updateSidebarSummary();
-
-}
-
-/* =========================
-ANSWER SYSTEM
-========================= */
-
-function saveAnswer(index, option){
-
-  answers[index] = option;
-
-  saveState();
-  updateSidebarSummary();
-
-}
-
-/* =========================
-RAGU SYSTEM
-========================= */
-
-function toggleRagu(){
-
-  ragu[currentQuestion] = !ragu[currentQuestion];
-
-  saveState();
-  renderQuestion();
-  updateSidebarSummary();
-
-}
-
-/* =========================
-SIDEBAR SUMMARY
-========================= */
-
-function updateSidebarSummary(){
-
-  let answered = 0;
-  let unanswered = 0;
-  let raguCount = 0;
-
-  for(let i = 0; i < soal.length; i++){
-
-    if(ragu[i]) raguCount++;
-
-    if(answers[i] === undefined || answers[i] === null){
-      unanswered++;
-    } else {
-      answered++;
-    }
-
-  }
-
-  const elAnswered = document.getElementById("answeredSummary");
-  const elUnanswered = document.getElementById("unansweredSummary");
-  const elRagu = document.getElementById("raguSummary");
-
-  if(elAnswered) elAnswered.innerText = answered;
-  if(elUnanswered) elUnanswered.innerText = unanswered;
-  if(elRagu) elRagu.innerText = raguCount;
-
-}
-
-/* =========================
-LOAD SOAL (BACKEND OPTIONAL)
+LOAD SOAL
 ========================= */
 
 function load(){
@@ -242,81 +105,55 @@ function load(){
 
     document.getElementById("totalCount").innerText = soal.length;
 
-    renderQuestion();
-    updateSidebarSummary();
+    render();
+    nav();
+    updateStats();
 
   });
 
 }
+
 /* =========================
-RENDER
+RENDER QUESTION
 ========================= */
 
 function render(){
 
-  let s = soal[i];
-
+  let s = soal[currentQuestion];
   if(!s) return;
 
-  document.getElementById("questionLabel").innerHTML =
-  `Soal ${i+1}`;
+  document.getElementById("questionLabel").innerText =
+  `Soal ${currentQuestion+1}`;
 
-  document.getElementById("q").innerHTML =
-  s.pertanyaan;
+  document.getElementById("q").innerHTML = s.pertanyaan;
 
   document.getElementById("opt").innerHTML = `
-
-    <div class="opt ${jawab[i]=='A'?'active':''}"
-         onclick="pick('A')">
-
-      <div class="letter">A</div>
-      <div>${s.a}</div>
-
+    <div class="opt ${answers[currentQuestion]=='A'?'active':''}" onclick="pick('A')">
+      <div class="letter">A</div><div>${s.a}</div>
     </div>
 
-    <div class="opt ${jawab[i]=='B'?'active':''}"
-         onclick="pick('B')">
-
-      <div class="letter">B</div>
-      <div>${s.b}</div>
-
+    <div class="opt ${answers[currentQuestion]=='B'?'active':''}" onclick="pick('B')">
+      <div class="letter">B</div><div>${s.b}</div>
     </div>
 
-    <div class="opt ${jawab[i]=='C'?'active':''}"
-         onclick="pick('C')">
-
-      <div class="letter">C</div>
-      <div>${s.c}</div>
-
+    <div class="opt ${answers[currentQuestion]=='C'?'active':''}" onclick="pick('C')">
+      <div class="letter">C</div><div>${s.c}</div>
     </div>
 
-    <div class="opt ${jawab[i]=='D'?'active':''}"
-         onclick="pick('D')">
-
-      <div class="letter">D</div>
-      <div>${s.d}</div>
-
+    <div class="opt ${answers[currentQuestion]=='D'?'active':''}" onclick="pick('D')">
+      <div class="letter">D</div><div>${s.d}</div>
     </div>
-
   `;
 
-  const raguBtn =
-  document.querySelector(".ragu-btn");
+  const btn = document.querySelector(".ragu-btn");
 
-  if(raguBtn){
-
-    if(ragu[i]){
-
-      raguBtn.classList.add("active");
-      raguBtn.innerHTML =
-      "🚩 Ditandai Ragu";
-
-    }else{
-
-      raguBtn.classList.remove("active");
-      raguBtn.innerHTML =
-      "🚩 Tandai Ragu";
-
+  if(btn){
+    if(ragu[currentQuestion]){
+      btn.classList.add("active");
+      btn.innerText = "🚩 Ditandai Ragu";
+    } else {
+      btn.classList.remove("active");
+      btn.innerText = "🚩 Tandai Ragu";
     }
   }
 
@@ -325,17 +162,57 @@ function render(){
 }
 
 /* =========================
-PICK
+NAVIGATION
+========================= */
+
+function nextQuestion(){
+
+  if(currentQuestion < soal.length - 1){
+    currentQuestion++;
+  }
+
+  saveState();
+  render();
+  nav();
+  updateStats();
+
+}
+
+function prevQuestion(){
+
+  if(currentQuestion > 0){
+    currentQuestion--;
+  }
+
+  saveState();
+  render();
+  nav();
+  updateStats();
+
+}
+
+function go(x){
+
+  currentQuestion = x;
+
+  saveState();
+  render();
+  nav();
+  updateStats();
+
+}
+
+/* =========================
+ANSWER
 ========================= */
 
 function pick(v){
 
-  jawab[i] = v;
+  answers[currentQuestion] = v;
 
+  saveState();
   render();
-
   nav();
-
   updateStats();
 
 }
@@ -346,161 +223,94 @@ PROGRESS
 
 function updateProgress(){
 
-  let progress =
-  ((i+1)/soal.length)*100;
+  let p = ((currentQuestion+1)/soal.length)*100;
 
-  document
-  .getElementById("progressFill")
-  .style.width =
-  progress + "%";
+  document.getElementById("progressFill").style.width = p + "%";
 
 }
 
 /* =========================
-STATISTICS
-========================= */
-
-function updateStats(){
-
-  const answered =
-  Object.keys(jawab).length;
-
-  const flagged =
-  Object.keys(ragu).length;
-
-  const unanswered =
-  soal.length - answered;
-
-  document.getElementById(
-    "answeredCount"
-  ).innerHTML = answered;
-
-  document.getElementById(
-    "answeredSummary"
-  ).innerHTML = answered;
-
-  document.getElementById(
-    "unansweredSummary"
-  ).innerHTML = unanswered;
-
-  const flagEl =
-  document.getElementById("flagSummary");
-
-  if(flagEl){
-    flagEl.innerHTML = flagged;
-  }
-}
-
-/* =========================
-NAVIGATION
+NAV UI
 ========================= */
 
 function nav(){
 
   let h = "";
 
-  for(let x=0; x<soal.length; x++){
+  for(let i=0;i<soal.length;i++){
 
     let cls = [];
 
-    if(jawab[x]){
-      cls.push("done");
-    }
+    if(answers[i]) cls.push("done");
+    if(ragu[i]) cls.push("ragu");
+    if(i === currentQuestion) cls.push("activeQ");
 
-    if(ragu[x]){
-      cls.push("ragu");
-    }
+    h += `<button class="${cls.join(" ")}" onclick="go(${i})">${i+1}</button>`;
 
-    if(x === i){
-      cls.push("activeQ");
-    }
-
-    h += `
-      <button
-        class="${cls.join(" ")}"
-        onclick="go(${x})">
-        ${x+1}
-      </button>
-    `;
   }
 
   document.getElementById("nav").innerHTML = h;
-}
-
-function go(x){
-
-  i = x;
-
-  render();
-
-  nav();
-
-}
-
-function nextQuestion(){
-
-  if(i < soal.length-1){
-
-    i++;
-
-    render();
-
-    nav();
-
-  }
-
-}
-
-function prevQuestion(){
-
-  if(i > 0){
-
-    i--;
-
-    render();
-
-    nav();
-
-  }
 
 }
 
 /* =========================
-TIMER
+STATS
+========================= */
+
+function updateStats(){
+
+  let answered = 0;
+  let flagged = 0;
+
+  for(let i=0;i<soal.length;i++){
+
+    if(answers[i]) answered++;
+    if(ragu[i]) flagged++;
+
+  }
+
+  let unanswered = soal.length - answered;
+
+  document.getElementById("answeredCount").innerText = answered;
+  document.getElementById("answeredSummary").innerText = answered;
+  document.getElementById("unansweredSummary").innerText = unanswered;
+
+  const el = document.getElementById("raguSummary");
+  if(el) el.innerText = flagged;
+
+}
+
+/* =========================
+TIMER (ANTI RESET)
 ========================= */
 
 function start(){
 
-  let t = 3600;
+  let endTime = localStorage.getItem("cbt_endTime");
+
+  if(!endTime){
+    endTime = Date.now() + 3600*1000;
+    localStorage.setItem("cbt_endTime", endTime);
+  }
 
   timer = setInterval(()=>{
 
-    t--;
+    let now = Date.now();
+    let t = Math.max(0, Math.floor((endTime - now)/1000));
 
-    let m =
-    Math.floor(t/60);
+    let m = Math.floor(t/60);
+    let s = t%60;
 
-    let s =
-    t%60;
-
-    document
-    .getElementById("timer")
-    .innerHTML =
+    document.getElementById("timer").innerText =
     `${m}:${s<10?'0'+s:s}`;
 
     if(t <= 300){
-
-      document
-      .getElementById("timer")
-      .style.color =
-      "#ef4444";
-
+      document.getElementById("timer").style.color = "#ef4444";
     }
 
     if(t <= 0){
-
+      clearInterval(timer);
       submit();
-
     }
 
   },1000);
@@ -515,13 +325,7 @@ function submit(){
 
   if(isDone) return;
 
-  let confirmSubmit =
-  confirm(
-    "Yakin ingin mengumpulkan jawaban?"
-  );
-
-  if(!confirmSubmit)
-    return;
+  if(!confirm("Yakin ingin submit?")) return;
 
   isDone = true;
 
@@ -529,207 +333,46 @@ function submit(){
 
   let skor = 0;
 
-  soal.forEach((s,x)=>{
-
-    if(jawab[x] == s.kunci){
-
+  soal.forEach((s,i)=>{
+    if(answers[i] == s.kunci){
       skor++;
-
     }
-
   });
 
   fetch(API,{
-
     method:"POST",
-
     body:JSON.stringify({
-
       action:"submit",
-
       nama,
-
       token,
-
       skor,
-
-      jawaban:jawab
-
+      jawaban: answers
     })
-
-  })
-
-  .then(()=>{
-
-    showResult(skor);
-
   });
 
-}
+  localStorage.removeItem("cbt_state");
+  localStorage.removeItem("cbt_endTime");
 
-/* =========================
-RESULT
-========================= */
-
-function showResult(skor){
-
-  document
-  .getElementById("app")
-  .style.display="none";
-
-  document
-  .getElementById("result")
-  .style.display="flex";
-
-  document
-  .getElementById("scoreNumber")
-  .innerHTML =
-  skor;
-
-  document
-  .getElementById("skor")
-  .innerHTML =
-  `Kamu menjawab benar ${skor} soal`;
-
-  fetch(
-    `${API}?action=leaderboard`
-  )
-  .then(r=>r.json())
-  .then(res=>{
-
-    let h = "";
-
-    res.leaderboard
-    .forEach((u,index)=>{
-
-      h +=
-      `
-      <div style="
-      display:flex;
-      justify-content:space-between;
-      padding:12px;
-      border-bottom:1px solid #eee;
-      ">
-
-        <span>
-          ${index+1}. ${u.nama}
-        </span>
-
-        <strong>
-          ${u.skor}
-        </strong>
-
-      </div>
-      `;
-
-    });
-
-    document
-    .getElementById("board")
-    .innerHTML = h;
-
-  });
+  showResult(skor);
 
 }
 
 /* =========================
-DARK MODE
+INIT AUTO RESTORE
 ========================= */
 
-function toggleDarkMode(){
+window.addEventListener("DOMContentLoaded",()=>{
 
-  document.body.classList.toggle(
-    "dark-mode"
-  );
+  loadState();
 
-}
+  if(localStorage.getItem("cbt_state")){
 
-/* =========================
-CALCULATOR
-========================= */
+    document.getElementById("login").style.display = "none";
+    document.getElementById("app").style.display = "block";
 
-function toggleCalculator(){
-
-  const modal =
-  document.getElementById(
-    "calculatorModal"
-  );
-
-  if(
-    modal.style.display === "flex"
-  ){
-
-    modal.style.display = "none";
-
-  }else{
-
-    modal.style.display = "flex";
+    load();
+    start();
 
   }
 
-}
-
-function calc(v){
-
-  document
-  .getElementById("calcDisplay")
-  .value += v;
-
-}
-
-function clearCalc(){
-
-  document
-  .getElementById("calcDisplay")
-  .value = "";
-
-}
-
-function calculateResult(){
-
-  try{
-
-    let result =
-    eval(
-      document.getElementById(
-        "calcDisplay"
-      ).value
-    );
-
-    document
-    .getElementById(
-      "calcDisplay"
-    ).value = result;
-
-  }catch{
-
-    alert("Perhitungan tidak valid");
-
-  }
-
-}
-
-function updateSidebarSummary(){
-
-  let answered = 0;
-  let unanswered = 0;
-  let raguCount = 0;
-
-  for(let i = 0; i < totalSoal; i++){
-
-    if(ragu[i]) raguCount++;
-
-    if(answers[i] === undefined || answers[i] === null){
-      unanswered++;
-    } else {
-      answered++;
-    }
-
-  }
-
-  document.getElementById("answeredSummary").innerText = answered;
-  document.getElementById("unansweredSummary").innerText = unanswered;
-  document.getElementById("raguSummary").innerText = raguCount;
-
-}
-
+});

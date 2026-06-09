@@ -1,155 +1,281 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PHARMACORE CBT</title>
+const API = "https://script.google.com/macros/s/AKfycbyo48NoxjaBHGHkRCxgkxOB3Cys2Wa3mBG7AvK_n3TidyCSQcjSf5vSbCJpkI0-QJhk/exec";
 
-<style>
-body{
-  margin:0;
-  font-family:system-ui;
-  background:#f4f5f7;
+let soal = [];
+
+let i = 0;
+
+let jawab = {};
+
+let token = "";
+
+let nama = "";
+
+let timerInterval;
+
+let isSubmitted = false;
+
+/* ======================
+
+   LOGIN
+
+====================== */
+
+function login(){
+
+  token = document.getElementById("token").value.trim();
+
+  nama = document.getElementById("nama").value.trim();
+
+  fetch(`${API}?action=validateToken&token=${token}`)
+
+  .then(r => r.json())
+
+  .then(res => {
+
+    if(res.valid){
+
+      document.getElementById("login").style.display = "none";
+
+      document.getElementById("app").style.display = "block";
+
+      load(); // ❗ timer DIPINDAH ke load()
+
+    } else {
+
+      alert("Token salah");
+
+    }
+
+  })
+
+  .catch(err => {
+
+    console.error(err);
+
+    alert("Gagal konek ke server");
+
+  });
+
 }
 
-/* LOGIN */
-.login{
-  max-width:360px;
-  margin:120px auto;
-  padding:20px;
-  background:white;
-  border-radius:12px;
-  box-shadow:0 4px 20px rgba(0,0,0,0.1);
+/* ======================
+
+   LOAD SOAL
+
+====================== */
+
+function load(){
+
+  fetch(`${API}?action=getSoal`)
+
+  .then(r => r.json())
+
+  .then(res => {
+
+    soal = res.soal || [];
+
+    i = 0;
+
+    render();
+
+    nav();
+
+    start(); // ✔ timer mulai setelah soal siap
+
+  })
+
+  .catch(err => {
+
+    console.error(err);
+
+    alert("Gagal load soal");
+
+  });
+
 }
 
-input{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-  border:1px solid #ddd;
-  border-radius:8px;
+/* ======================
+
+   RENDER SOAL
+
+====================== */
+
+function render(){
+
+  if(!soal[i]) return;
+
+  let s = soal[i];
+
+  document.getElementById("q").innerHTML =
+
+    (i + 1) + ". " + s.pertanyaan;
+
+  document.getElementById("opt").innerHTML = `
+
+    <div class="opt ${jawab[i]=='A'?'active':''}" onclick="pilih('A')">A. ${s.a}</div>
+
+    <div class="opt ${jawab[i]=='B'?'active':''}" onclick="pilih('B')">B. ${s.b}</div>
+
+    <div class="opt ${jawab[i]=='C'?'active':''}" onclick="pilih('C')">C. ${s.c}</div>
+
+    <div class="opt ${jawab[i]=='D'?'active':''}" onclick="pilih('D')">D. ${s.d}</div>
+
+  `;
+
 }
 
-button{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-  background:#6d28d9;
-  color:white;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
+/* ======================
+
+   PILIH JAWABAN
+
+====================== */
+
+function pilih(v){
+
+  jawab[i] = v;
+
+  render();
+
+  nav();
+
 }
 
-/* APP */
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  padding:12px 20px;
-  background:white;
-  border-bottom:1px solid #ddd;
-  position:sticky;
-  top:0;
+/* ======================
+
+   NAVIGASI SOAL
+
+====================== */
+
+function nav(){
+
+  let h = "";
+
+  for(let x = 0; x < soal.length; x++){
+
+    let cls = "";
+
+    if(jawab[x]) cls += "done ";
+
+    if(x === i) cls += "active";
+
+    h += `<button class="${cls}" onclick="go(${x})">${x + 1}</button>`;
+
+  }
+
+  document.getElementById("nav").innerHTML = h;
+
 }
 
-.wrapper{
-  display:flex;
-  gap:20px;
-  padding:20px;
-  max-width:1100px;
-  margin:auto;
+/* ======================
+
+   PINDAH SOAL
+
+====================== */
+
+function go(x){
+
+  i = x;
+
+  render();
+
+  nav();
+
 }
 
-.card{
-  flex:3;
-  background:white;
-  padding:20px;
-  border-radius:12px;
+/* ======================
+
+   TIMER
+
+====================== */
+
+function start(){
+
+  let t = 3600;
+
+  timerInterval = setInterval(() => {
+
+    t--;
+
+    let m = Math.floor(t / 60);
+
+    let s = t % 60;
+
+    document.getElementById("timer").innerHTML =
+
+      `${m}:${s < 10 ? '0' + s : s}`;
+
+    if(t <= 0){
+
+      clearInterval(timerInterval);
+
+      submit();
+
+    }
+
+  }, 1000);
+
 }
 
-.side{
-  flex:1;
-  background:white;
-  padding:15px;
-  border-radius:12px;
+/* ======================
+
+   SUBMIT
+
+====================== */
+
+function submit(){
+
+  if(isSubmitted) return;
+
+  isSubmitted = true;
+
+  clearInterval(timerInterval);
+
+  let skor = 0;
+
+  soal.forEach((s, x) => {
+
+    if(jawab[x] == s.kunci) skor++;
+
+  });
+
+  fetch(API, {
+
+    method: "POST",
+
+    headers: {
+
+      "Content-Type": "application/json"
+
+    },
+
+    body: JSON.stringify({
+
+      action: "submit",
+
+      nama,
+
+      token,
+
+      skor,
+
+      jawaban: jawab
+
+    })
+
+  })
+
+  .then(() => {
+
+    alert("Skor: " + skor);
+
+  })
+
+  .catch(err => {
+
+    console.error(err);
+
+    alert("Gagal submit");
+
+  });
+
 }
-
-.opt{
-  padding:10px;
-  border:1px solid #ddd;
-  border-radius:8px;
-  margin:8px 0;
-  cursor:pointer;
-}
-
-.opt:hover{
-  border-color:#6d28d9;
-}
-
-.opt.active{
-  background:#ede9fe;
-  border-color:#6d28d9;
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:5px;
-}
-
-.grid button{
-  padding:8px;
-  border:none;
-  border-radius:6px;
-  background:#eee;
-  cursor:pointer;
-}
-
-.grid button.done{
-  background:#6d28d9;
-  color:white;
-}
-
-.grid button.active{
-  outline:2px solid black;
-}
-</style>
-</head>
-
-<body>
-
-<!-- LOGIN -->
-<div id="login" class="login">
-  <h2>PHARMACORE CBT</h2>
-  <input id="token" placeholder="Token">
-  <input id="nama" placeholder="Nama">
-  <button onclick="login()">Masuk</button>
-</div>
-
-<!-- APP -->
-<div id="app" style="display:none;">
-
-  <div class="topbar">
-    <div><b>PHARMACORE CBT</b></div>
-    <div id="timer">60:00</div>
-  </div>
-
-  <div class="wrapper">
-
-    <div class="card">
-      <div id="q"></div>
-      <div id="opt"></div>
-    </div>
-
-    <div class="side">
-      <div id="nav" class="grid"></div>
-    </div>
-
-  </div>
-</div>
-
-<!-- JS -->
-<script src="script.js"></script>
-
-</body>
-</html>

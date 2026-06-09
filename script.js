@@ -91,31 +91,47 @@ function loadState(){
 INIT / AUTO RESTORE
 ========================= */
 
-window.onload = function(){
+window.addEventListener("DOMContentLoaded", function(){
 
-  const stateRaw = localStorage.getItem("cbt_state");
+  const raw = localStorage.getItem("cbt_state");
 
-  if(!stateRaw){
-    return; // tetap di login
+  console.log("CBT STATE RAW:", raw);
+
+  if(!raw){
+    console.log("NO STATE → stay login");
+    return;
   }
 
-  const state = JSON.parse(stateRaw);
+  let state;
+
+  try {
+    state = JSON.parse(raw);
+  } catch (e) {
+    console.log("JSON ERROR → clear storage");
+    localStorage.removeItem("cbt_state");
+    return;
+  }
+
+  console.log("STATE PARSED:", state);
 
   if(state.loggedIn !== true){
-    return; // tetap di login
+    console.log("NOT LOGGED IN");
+    return;
   }
+
+  console.log("RESTORE SUCCESS");
 
   document.getElementById("login").style.display = "none";
   document.getElementById("app").style.display = "block";
 
-  currentQuestion = state.currentQuestion ?? 0;
-  answers = state.answers ?? [];
-  ragu = state.ragu ?? [];
+  currentQuestion = state.currentQuestion || 0;
+  answers = state.answers || [];
+  ragu = state.ragu || [];
 
   renderQuestion();
   updateSidebarSummary();
 
-};
+});
 
 /* =========================
 LOGIN
@@ -126,16 +142,14 @@ function login(){
   const nama = document.getElementById("nama").value;
   if(!nama) return alert("Isi nama dulu");
 
-  currentQuestion = 0;
-  answers = [];
-  ragu = [];
-
-  localStorage.setItem("cbt_state", JSON.stringify({
+  const state = {
     loggedIn: true,
     currentQuestion: 0,
     answers: [],
     ragu: []
-  }));
+  };
+
+  localStorage.setItem("cbt_state", JSON.stringify(state));
 
   document.getElementById("login").style.display = "none";
   document.getElementById("app").style.display = "block";

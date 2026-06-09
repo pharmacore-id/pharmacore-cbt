@@ -61,7 +61,7 @@ function saveState(){
 }
 
 /* =========================
-RESTORE (FIXED SAFE)
+RESTORE (FIXED FLOW ONLY)
 ========================= */
 
 window.addEventListener("DOMContentLoaded", function(){
@@ -83,7 +83,7 @@ window.addEventListener("DOMContentLoaded", function(){
     document.getElementById("login").style.display = "none";
     document.getElementById("app").style.display = "block";
 
-    load(); // FIX: sebelumnya tidak load soal setelah refresh
+    load(); // FIX: ini WAJIB supaya UI jalan lagi
 
   } catch(e){
     localStorage.removeItem("cbt_state");
@@ -104,7 +104,7 @@ function load(){
 
     document.getElementById("totalCount").innerText = soal.length;
 
-    // FIX: reset kalau index out of range
+    // FIX: safety guard
     if(currentQuestion >= soal.length){
       currentQuestion = 0;
     }
@@ -113,7 +113,7 @@ function load(){
     nav();
     updateStats();
 
-    start(); // FIX: timer hanya start setelah soal ready
+    start(); // FIX: hanya start setelah soal ready
   });
 }
 
@@ -122,6 +122,8 @@ RENDER
 ========================= */
 
 function renderQuestion(){
+
+  if(!soal.length) return; // FIX: prevent crash
 
   let s = soal[currentQuestion];
   if(!s) return;
@@ -134,22 +136,35 @@ function renderQuestion(){
   document.getElementById("opt").innerHTML = `
 
     <div class="opt ${answers[currentQuestion]=='A'?'active':''}"
-         onclick="pick('A')">A. ${s.a}</div>
+         onclick="pick('A')">
+      <div class="letter">A</div>
+      <div>${s.a}</div>
+    </div>
 
     <div class="opt ${answers[currentQuestion]=='B'?'active':''}"
-         onclick="pick('B')">B. ${s.b}</div>
+         onclick="pick('B')">
+      <div class="letter">B</div>
+      <div>${s.b}</div>
+    </div>
 
     <div class="opt ${answers[currentQuestion]=='C'?'active':''}"
-         onclick="pick('C')">C. ${s.c}</div>
+         onclick="pick('C')">
+      <div class="letter">C</div>
+      <div>${s.c}</div>
+    </div>
 
     <div class="opt ${answers[currentQuestion]=='D'?'active':''}"
-         onclick="pick('D')">D. ${s.d}</div>
+         onclick="pick('D')">
+      <div class="letter">D</div>
+      <div>${s.d}</div>
+    </div>
 
   `;
 
   const raguBtn = document.querySelector(".ragu-btn");
 
   if(raguBtn){
+
     if(ragu[currentQuestion]){
       raguBtn.classList.add("active");
       raguBtn.innerHTML = "🚩 Ditandai Ragu";
@@ -163,7 +178,7 @@ function renderQuestion(){
 }
 
 /* =========================
-ANSWER
+PICK
 ========================= */
 
 function pick(v){
@@ -182,6 +197,8 @@ NAV
 ========================= */
 
 function nav(){
+
+  if(!soal.length) return; // FIX
 
   let h = "";
 
@@ -256,6 +273,8 @@ PROGRESS
 
 function updateProgress(){
 
+  if(!soal.length) return; // FIX
+
   let progress = ((currentQuestion+1)/soal.length)*100;
 
   document.getElementById("progressFill").style.width = progress + "%";
@@ -267,8 +286,8 @@ STATS
 
 function updateStats(){
 
-  const answered = Object.keys(answers).length;
-  const unanswered = soal.length - answered;
+  let answered = Object.keys(answers).length;
+  let unanswered = soal.length - answered;
 
   document.getElementById("answeredCount").innerText = answered;
   document.getElementById("answeredSummary").innerText = answered;
@@ -276,12 +295,12 @@ function updateStats(){
 }
 
 /* =========================
-TIMER (FIXED DOUBLE START SAFE)
+TIMER (FIXED DOUBLE SAFE)
 ========================= */
 
 function start(){
 
-  if(timer) clearInterval(timer); // FIX: prevent double timer
+  if(timer) clearInterval(timer); // FIX anti double timer
 
   let t = 3600;
 

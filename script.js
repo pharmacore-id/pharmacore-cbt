@@ -3,194 +3,139 @@ const API = "https://script.google.com/macros/s/AKfycbyo48NoxjaBHGHkRCxgkxOB3Cys
 let soal = [];
 let i = 0;
 let jawab = {};
+let ragu = {};
 let token = "";
 let nama = "";
-let timerInterval;
-let isSubmitted = false;
+let timer;
+let isSubmit = false;
 
-/* ================= LOGIN ================= */
+/* LOGIN */
 function login(){
-
   token = document.getElementById("token").value.trim();
   nama = document.getElementById("nama").value.trim();
 
-  if(!token || !nama){
-    alert("Isi token dan nama");
-    return;
-  }
-
   fetch(`${API}?action=validateToken&token=${token}`)
-  .then(r => r.json())
-  .then(res => {
-
+  .then(r=>r.json())
+  .then(res=>{
     if(res.valid){
-
-      document.getElementById("login").style.display = "none";
-      document.getElementById("app").style.display = "block";
-
+      document.getElementById("login").style.display="none";
+      document.getElementById("app").style.display="block";
       load();
-
-    } else {
-      alert("Token salah");
-    }
-
-  })
-  .catch(err => {
-    console.error("LOGIN ERROR:", err);
-    alert("Gagal konek ke server");
+    } else alert("Token salah");
   });
 }
 
-/* ================= LOAD SOAL ================= */
+/* LOAD */
 function load(){
-
   fetch(`${API}?action=getSoal`)
-  .then(r => r.json())
-  .then(res => {
-
+  .then(r=>r.json())
+  .then(res=>{
     soal = res.soal || [];
-    i = 0;
-
+    i=0;
     render();
     nav();
     start();
-
-  })
-  .catch(err => {
-    console.error("LOAD ERROR:", err);
-    alert("Gagal load soal");
   });
 }
 
-/* ================= RENDER ================= */
+/* RENDER */
 function render(){
-
-  if(!soal[i]) return;
-
   let s = soal[i];
+  if(!s) return;
 
   document.getElementById("q").innerHTML =
-    (i + 1) + ". " + s.pertanyaan;
+    (i+1)+". "+s.pertanyaan;
 
   document.getElementById("opt").innerHTML = `
-    <div class="opt ${jawab[i]=='A'?'active':''}" onclick="pilih('A')">A. ${s.a}</div>
-    <div class="opt ${jawab[i]=='B'?'active':''}" onclick="pilih('B')">B. ${s.b}</div>
-    <div class="opt ${jawab[i]=='C'?'active':''}" onclick="pilih('C')">C. ${s.c}</div>
-    <div class="opt ${jawab[i]=='D'?'active':''}" onclick="pilih('D')">D. ${s.d}</div>
+    <div class="opt ${jawab[i]=='A'?'active':''}" onclick="pick('A')">A. ${s.a}</div>
+    <div class="opt ${jawab[i]=='B'?'active':''}" onclick="pick('B')">B. ${s.b}</div>
+    <div class="opt ${jawab[i]=='C'?'active':''}" onclick="pick('C')">C. ${s.c}</div>
+    <div class="opt ${jawab[i]=='D'?'active':''}" onclick="pick('D')">D. ${s.d}</div>
   `;
 }
 
-/* ================= PILIH ================= */
-function pilih(v){
-  jawab[i] = v;
+/* PICK */
+function pick(v){
+  jawab[i]=v;
   render();
   nav();
 }
 
-/* ================= NAV ================= */
+/* NAV */
 function nav(){
+  let h="";
+  let done=0;
 
-  let h = "";
+  for(let x=0;x<soal.length;x++){
+    let c="";
 
-  for(let x = 0; x < soal.length; x++){
+    if(jawab[x]){ c+="done "; done++; }
+    if(ragu[x]) c+="ragu ";
+    if(x===i) c+="activeQ";
 
-    let cls = "";
-    if(jawab[x]) cls += "done ";
-    if(x === i) cls += "active";
-
-    h += `<button class="${cls}" onclick="go(${x})">${x + 1}</button>`;
+    h+=`<button class="${c}" onclick="go(${x})">${x+1}</button>`;
   }
 
-  document.getElementById("nav").innerHTML = h;
+  document.getElementById("nav").innerHTML=h;
+
+  document.getElementById("progress").innerHTML =
+    `Progress: ${done}/${soal.length}`;
 }
 
-/* ================= GO ================= */
+/* NAV GO */
 function go(x){
-  i = x;
+  i=x;
   render();
   nav();
 }
 
-/* ================= TIMER ================= */
-function start(){
+/* CONTROL */
+function prev(){ if(i>0){i--;render();nav();} }
+function next(){ if(i<soal.length-1){i++;render();nav();} }
 
-  let t = 3600;
-
-  timerInterval = setInterval(() => {
-
-    t--;
-
-    let m = Math.floor(t / 60);
-    let s = t % 60;
-
-    document.getElementById("timer").innerHTML =
-      `${m}:${s < 10 ? '0' + s : s}`;
-
-    if(t <= 0){
-      clearInterval(timerInterval);
-      submit();
-    }
-
-  }, 1000);
+function flag(){
+  ragu[i]=!ragu[i];
+  nav();
 }
 
-/* ================= FINAL SUBMIT (ANTI ERROR) ================= */
+/* TIMER */
+function start(){
+  let t=3600;
+
+  timer=setInterval(()=>{
+    t--;
+
+    let m=Math.floor(t/60);
+    let s=t%60;
+
+    document.getElementById("timer").innerHTML=
+      `${m}:${s<10?'0'+s:s}`;
+
+    if(t<=0) submit();
+
+  },1000);
+}
+
+/* SUBMIT */
 function submit(){
+  if(isSubmit) return;
+  isSubmit=true;
 
-  if(isSubmitted) return;
-  isSubmitted = true;
+  clearInterval(timer);
 
-  clearInterval(timerInterval);
+  let skor=0;
 
-  let skor = 0;
-
-  soal.forEach((s, x) => {
-    if(jawab[x] == s.kunci) skor++;
+  soal.forEach((s,x)=>{
+    if(jawab[x]==s.kunci) skor++;
   });
 
-  const payload = {
-    action: "submit",
-    nama,
-    token,
-    skor,
-    jawaban: jawab
-  };
-
-  console.log("SUBMIT:", payload);
-
-  // PRIMARY
-  fetch(API, {
-    method: "POST",
-    body: JSON.stringify(payload)
-  })
-  .then(r => r.text())
-  .then(res => {
-
-    console.log("RESPONSE:", res);
-    alert("Skor kamu: " + skor);
-
-  })
-  .catch(err => {
-
-    console.warn("PRIMARY FAIL, FALLBACK...", err);
-
-    // FALLBACK GET
-    fetch(
-      API +
-      "?action=submit" +
-      "&nama=" + encodeURIComponent(nama) +
-      "&token=" + encodeURIComponent(token) +
-      "&skor=" + skor
-    )
-    .then(r => r.text())
-    .then(res => {
-      console.log("FALLBACK:", res);
-      alert("Skor kamu: " + skor + " (fallback)");
+  fetch(API,{
+    method:"POST",
+    body:JSON.stringify({
+      action:"submit",
+      nama,token,skor,jawaban:jawab
     })
-    .catch(err2 => {
-      console.error("TOTAL FAIL:", err2);
-      alert("Submit gagal total");
-    });
-
   });
+
+  alert("SELESAI!\nSkor: "+skor);
 }

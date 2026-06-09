@@ -114,19 +114,31 @@ function render(){
 
   if(!s) return;
 
-  document
-  .getElementById("questionLabel")
-  .innerHTML =
-  `Soal ${i+1}`;
+  document.getElementById("q").innerHTML =
+  (i+1)+". "+s.pertanyaan;
 
-  document
-  .getElementById("q")
-  .innerHTML =
-  s.pertanyaan;
+  document.getElementById("opt").innerHTML = `
+    ...
+  `;
 
-  document
-  .getElementById("opt")
-  .innerHTML =
+  const raguBtn =
+  document.querySelector(".ragu-btn");
+
+  if(raguBtn){
+
+    if(ragu[i]){
+
+      raguBtn.classList.add("active");
+      raguBtn.innerHTML = "🚩 Ditandai";
+
+    }else{
+
+      raguBtn.classList.remove("active");
+      raguBtn.innerHTML = "🚩 Tandai";
+
+    }
+  }
+}
 
   `
   <div class="opt ${jawab[i]=='A'?'active':''}"

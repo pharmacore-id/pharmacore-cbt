@@ -1,219 +1,234 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+const API = "https://script.google.com/macros/s/AKfycbyo48NoxjaBHGHkRCxgkxOB3Cys2Wa3mBG7AvK_n3TidyCSQcjSf5vSbCJpkI0-QJhk/exec";
 
-<title>PHARMACORE CBT</title>
+/* =========================
+STATE
+========================= */
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+let soal = [];
+let current = 0;
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+let answers = {};
+let ragu = {};
 
-<link rel="stylesheet" href="style.css">
-</head>
+let nama = "";
+let timer;
 
-<body>
+/* =========================
+SAVE STATE
+========================= */
 
-<!-- LOGIN -->
-<div id="login">
+function saveState(){
 
-  <div class="login-card">
+  localStorage.setItem("cbt_state", JSON.stringify({
+    current,
+    answers,
+    ragu,
+    nama
+  }));
 
-    <div class="badge">✨ TRY OUT UKMPPAI</div>
+}
 
-    <h1>PHARMACORE CBT</h1>
+/* =========================
+LOAD + RESUME
+========================= */
 
-    <p class="subtitle">
-      Simulasi dan Prediksi UKMPPAI untuk Calon Apoteker Indonesia
-    </p>
+function loadState(){
 
-    <div class="form-group">
-      <label>Nama Peserta</label>
-      <input id="nama" placeholder="Masukkan nama lengkap">
-    </div>
+  const raw = localStorage.getItem("cbt_state");
+  if(!raw) return;
 
-    <div class="form-group">
-      <label>Token Ujian</label>
-      <input id="token" placeholder="Masukkan token ujian">
-    </div>
+  try{
 
-    <button class="start-btn" onclick="login()">
-      Mulai Ujian
-    </button>
+    const state = JSON.parse(raw);
 
-    <div class="exam-info">
-      50 Soal • 60 Menit • CBT Online
-    </div>
+    current = state.current || 0;
+    answers = state.answers || {};
+    ragu = state.ragu || {};
+    nama = state.nama || "";
 
-  </div>
+  } catch(e){
 
-</div>
+    localStorage.removeItem("cbt_state");
 
-<!-- APP -->
-<div id="app" style="display:none;">
+  }
 
-  <div class="topbar">
+}
 
-    <div class="brand">PHARMACORE CBT</div>
+/* =========================
+LOGIN
+========================= */
 
-    <div class="top-right">
+function login(){
 
-      <div class="progress-text">
-        <span id="answeredCount">0</span>/<span id="totalCount">0</span> dijawab
-      </div>
+  const n = document.getElementById("nama").value;
+  if(!n) return alert("Isi nama dulu");
 
-      <div class="timer" id="timer">60:00</div>
+  nama = n;
 
-    </div>
+  localStorage.setItem("cbt_state", JSON.stringify({
+    nama
+  }));
 
-  </div>
+  document.getElementById("login").style.display = "none";
+  document.getElementById("app").style.display = "block";
 
-  <div class="wrapper">
+  loadSoal();
 
-    <div class="card">
+}
 
-      <div class="question-header">
-        <div class="question-badge" id="questionLabel">Soal 1</div>
-      </div>
+/* =========================
+LOAD SOAL
+========================= */
 
-      <div class="progress">
-        <div class="fill" id="progressFill"></div>
-      </div>
+async function loadSoal(){
 
-      <div id="q"></div>
-      <div id="opt"></div>
+  try{
 
-      <div class="action-row">
+    const res = await fetch(`${API}?action=getSoal`);
+    const data = await res.json();
 
-        <button class="secondary-btn" onclick="prevQuestion()">
-          ← Sebelumnya
-        </button>
+    soal = data.soal || [];
 
-        <button class="ragu-btn" onclick="toggleRagu()">
-          🚩 Ragu
-        </button>
+    loadState(); // 🔥 RESUME DI SINI
 
-        <button class="secondary-btn" onclick="nextQuestion()">
-          Berikutnya →
-        </button>
+    init();
 
-      </div>
+  } catch(err){
 
-    </div>
+    console.error("LOAD ERROR:", err);
 
-    <div class="side">
+    document.getElementById("q").innerHTML =
+    "Gagal load soal";
 
-      <h3>Navigasi Soal</h3>
+  }
 
-      <div class="summary">
+}
 
-        <div class="summary-item">
-          <span>Terjawab</span>
-          <strong id="answeredSummary">0</strong>
-        </div>
+/* =========================
+INIT APP
+========================= */
 
-        <div class="summary-item">
-          <span>Belum</span>
-          <strong id="unansweredSummary">0</strong>
-        </div>
+function init(){
 
-      </div>
+  render();
+  nav();
+  updateStats();
 
-      <div id="nav" class="grid"></div>
+  startTimer();
 
-      <div class="legend">
+}
 
-        <div><span class="dot done-dot"></span> Sudah Dijawab</div>
-        <div><span class="dot ragu-dot"></span> Ditandai Ragu</div>
-        <div><span class="dot empty-dot"></span> Belum Dijawab</div>
+/* =========================
+RENDER
+========================= */
 
-      </div>
+function render(){
 
-      <button class="submit-btn" onclick="submitExam()">
-        Kumpulkan Jawaban
-      </button>
+  const s = soal[current];
 
-      <hr style="margin:20px 0;border:none;border-top:1px solid #eee;">
+  if(!s){
+    document.getElementById("q").innerHTML = "Soal tidak ditemukan";
+    return;
+  }
 
-      <button class="secondary-btn" onclick="toggleDarkMode()">
-        🌙 Dark Mode
-      </button>
+  document.getElementById("questionLabel").innerText =
+  `Soal ${current + 1}`;
 
-      <button class="secondary-btn" style="margin-top:10px;" onclick="toggleCalculator()">
-        🧮 Kalkulator
-      </button>
+  document.getElementById("q").innerHTML =
+  s.pertanyaan;
 
-    </div>
+  document.getElementById("opt").innerHTML = `
+    <div onclick="pick('A')">A. ${s.a}</div>
+    <div onclick="pick('B')">B. ${s.b}</div>
+    <div onclick="pick('C')">C. ${s.c}</div>
+    <div onclick="pick('D')">D. ${s.d}</div>
+  `;
 
-  </div>
-</div>
+}
 
-<!-- RESULT -->
-<div id="result" style="display:none;">
+/* =========================
+ANSWER
+========================= */
 
-  <div class="result-card">
+function pick(v){
 
-    <h2>Hasil Ujian</h2>
+  answers[current] = v;
 
-    <div class="score-circle">
-      <span id="scoreNumber">0</span>
-    </div>
+  saveState();
 
-    <p id="skor"></p>
+  render();
+  nav();
+  updateStats();
 
-    <h3>Leaderboard</h3>
+}
 
-    <div id="board"></div>
+/* =========================
+NAVIGATION
+========================= */
 
-  </div>
+function nextQuestion(){
 
-</div>
+  if(current < soal.length - 1){
+    current++;
+    saveState();
+    render();
+    nav();
+  }
 
-<!-- CALCULATOR -->
-<div id="calculatorModal" class="calculator-modal">
+}
 
-  <div class="calculator-box">
+function prevQuestion(){
 
-    <div class="calculator-header">
-      <span>🧮 Kalkulator</span>
-      <button class="close-calc" onclick="toggleCalculator()">✕</button>
-    </div>
+  if(current > 0){
+    current--;
+    saveState();
+    render();
+    nav();
+  }
 
-    <input type="text" id="calcDisplay" readonly>
+}
 
-    <div class="calc-grid">
+function nav(){
 
-      <button onclick="calc('7')">7</button>
-      <button onclick="calc('8')">8</button>
-      <button onclick="calc('9')">9</button>
-      <button onclick="calc('/')">÷</button>
+  console.log("Current:", current);
 
-      <button onclick="calc('4')">4</button>
-      <button onclick="calc('5')">5</button>
-      <button onclick="calc('6')">6</button>
-      <button onclick="calc('*')">×</button>
+}
 
-      <button onclick="calc('1')">1</button>
-      <button onclick="calc('2')">2</button>
-      <button onclick="calc('3')">3</button>
-      <button onclick="calc('-')">−</button>
+/* =========================
+TIMER
+========================= */
 
-      <button onclick="calc('0')">0</button>
-      <button onclick="calc('.')">.</button>
-      <button onclick="calculateResult()">=</button>
-      <button onclick="calc('+')">+</button>
+function startTimer(){
 
-      <button class="calc-clear" onclick="clearCalc()">C</button>
+  let t = 3600;
 
-    </div>
+  timer = setInterval(()=>{
 
-  </div>
+    t--;
 
-</div>
+    let m = Math.floor(t / 60);
+    let s = t % 60;
 
-<script src="script.js" defer></script>
+    document.getElementById("timer").innerText =
+    `${m}:${s < 10 ? "0"+s : s}`;
 
-</body>
-</html>
+    if(t <= 0){
+      clearInterval(timer);
+      alert("Waktu habis");
+    }
+
+  }, 1000);
+
+}
+
+/* =========================
+STATS (SIMPLE SAFE)
+========================= */
+
+function updateStats(){
+
+  const answered = Object.keys(answers).length;
+
+  document.getElementById("answeredCount").innerText = answered;
+
+}

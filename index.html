@@ -1,6 +1,10 @@
-const API = "https://script.google.com/macros/s/AKfycbzSsowhQ5mKDzRcB1qAl7i1sJIMo6QLXSntyWS1AN-Y/exec";
+const API = "https://script.google.com/macros/s/AKfycbyo48NoxjaBHGHkRCxgkxOB3Cys2Wa3mBG7AvK_n3TidyCSQcjSf5vSbCJpkI0-QJhk/exec";
 
-let soal = [], i = 0, jawab = {}, token = "", nama = "";
+let soal = [];
+let i = 0;
+let jawab = {};
+let token = "";
+let nama = "";
 let timerInterval;
 let isSubmitted = false;
 
@@ -8,20 +12,25 @@ let isSubmitted = false;
    LOGIN
 ====================== */
 function login(){
-  token = document.getElementById("token").value;
-  nama = document.getElementById("nama").value;
+
+  token = document.getElementById("token").value.trim();
+  nama = document.getElementById("nama").value.trim();
 
   fetch(`${API}?action=validateToken&token=${token}`)
   .then(r => r.json())
   .then(res => {
+
     if(res.valid){
       document.getElementById("login").style.display = "none";
       document.getElementById("app").style.display = "block";
+
       load();
       start();
+
     } else {
       alert("Token salah");
     }
+
   })
   .catch(err => {
     console.error(err);
@@ -33,12 +42,18 @@ function login(){
    LOAD SOAL
 ====================== */
 function load(){
+
   fetch(`${API}?action=getSoal`)
   .then(r => r.json())
   .then(res => {
+
     soal = res.soal || [];
+
+    i = 0;
+
     render();
     nav();
+
   })
   .catch(err => {
     console.error(err);
@@ -76,16 +91,18 @@ function pilih(v){
 }
 
 /* ======================
-   NAVIGASI
+   NAVIGASI SOAL
 ====================== */
 function nav(){
+
   let h = "";
 
   for(let x = 0; x < soal.length; x++){
 
     let cls = "";
-    if(jawab[x]) cls = "done";
-    if(x === i) cls += " active";
+
+    if(jawab[x]) cls += "done ";
+    if(x === i) cls += "active";
 
     h += `<button class="${cls}" onclick="go(${x})">${x + 1}</button>`;
   }
@@ -106,9 +123,11 @@ function go(x){
    TIMER
 ====================== */
 function start(){
+
   let t = 3600;
 
   timerInterval = setInterval(() => {
+
     t--;
 
     let m = Math.floor(t / 60);
@@ -121,6 +140,7 @@ function start(){
       clearInterval(timerInterval);
       submit();
     }
+
   }, 1000);
 }
 
@@ -132,7 +152,7 @@ function submit(){
   if(isSubmitted) return;
   isSubmitted = true;
 
-  clearInterval(timerInterval); // penting
+  clearInterval(timerInterval);
 
   let skor = 0;
 

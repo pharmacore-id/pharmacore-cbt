@@ -1,190 +1,194 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CBT REAL EXAM</title>
 
-<style>
-body{
-  margin:0;
-  font-family:system-ui;
-  background:#f5f3ff;
-}
+<title>PHARMACORE CBT</title>
 
-/* LOGIN */
-#login{
-  max-width:380px;
-  margin:140px auto;
-  background:#fff;
-  padding:28px;
-  border-radius:16px;
-  box-shadow:0 20px 50px rgba(0,0,0,0.08);
-  border:1px solid #eee;
-}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-#login h3{
-  margin:0;
-  color:#6d28d9;
-}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-#login p{
-  margin-top:6px;
-  color:#666;
-  font-size:13px;
-}
-
-input,button{
-  width:100%;
-  padding:12px;
-  margin-top:12px;
-  border-radius:10px;
-  border:1px solid #ddd;
-  font-size:14px;
-}
-
-button{
-  background:#6d28d9;
-  color:#fff;
-  border:none;
-  cursor:pointer;
-  font-weight:600;
-}
-
-/* TOPBAR */
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  padding:12px 18px;
-  background:#fff;
-  border-bottom:1px solid #eee;
-  position:sticky;
-  top:0;
-}
-
-.brand{color:#6d28d9;font-weight:700;}
-.timer{color:#ef4444;font-weight:700;}
-
-/* LAYOUT */
-.wrapper{
-  display:flex;
-  gap:16px;
-  padding:16px;
-  max-width:1100px;
-  margin:auto;
-}
-
-.card{
-  flex:3;
-  background:#fff;
-  padding:20px;
-  border-radius:14px;
-}
-
-.side{
-  flex:1;
-  background:#fff;
-  padding:12px;
-  border-radius:14px;
-}
-
-/* OPTION */
-.opt{
-  padding:12px;
-  border:1px solid #ddd;
-  margin:8px 0;
-  border-radius:10px;
-  cursor:pointer;
-}
-
-.opt.active{
-  background:#ede9fe;
-  border-color:#6d28d9;
-}
-
-/* NAV */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:6px;
-}
-
-.grid button{
-  padding:8px;
-  border:none;
-  border-radius:8px;
-  background:#eee;
-}
-
-.done{background:#22c55e;color:#fff;}
-.ragu{background:#f59e0b;color:#fff;}
-.activeQ{outline:2px solid #6d28d9;}
-
-/* SUBMIT */
-.submit{
-  width:100%;
-  margin-top:10px;
-  padding:12px;
-  background:#6d28d9;
-  color:#fff;
-  border:none;
-  border-radius:12px;
-}
-
-/* RESULT */
-#result{
-  display:none;
-  max-width:420px;
-  margin:120px auto;
-  background:#fff;
-  padding:20px;
-  border-radius:14px;
-}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<!-- LOGIN -->
+<!-- LOGIN PAGE -->
+
 <div id="login">
-  <h3>CBT LOGIN</h3>
-  <p>Masukkan data sebelum mulai ujian</p>
 
-  <input id="nama" placeholder="Nama Peserta">
-  <input id="token" placeholder="Token Ujian">
+  <div class="login-card">
 
-  <button onclick="login()">Mulai Ujian</button>
+    <div class="badge">
+      ✨ TRY OUT UKMPPAI
+    </div>
+
+    <h1>PHARMACORE CBT</h1>
+
+    <p class="subtitle">
+      Simulasi dan Prediksi UKMPPAI untuk Calon Apoteker Indonesia
+    </p>
+
+    <div class="form-group">
+      <label>Nama Peserta</label>
+      <input id="nama" placeholder="Masukkan nama lengkap">
+    </div>
+
+    <div class="form-group">
+      <label>Token Ujian</label>
+      <input id="token" placeholder="Masukkan token ujian">
+    </div>
+
+    <button class="start-btn" onclick="login()">
+      Mulai Ujian
+    </button>
+
+    <div class="exam-info">
+      50 Soal • 60 Menit • CBT Online
+    </div>
+
+  </div>
+
 </div>
 
-<!-- APP -->
+<!-- CBT APP -->
+
 <div id="app" style="display:none;">
 
   <div class="topbar">
-    <div class="brand">CBT REAL EXAM</div>
-    <div class="timer" id="timer">60:00</div>
+
+    <div class="brand">
+      PHARMACORE CBT
+    </div>
+
+    <div class="top-right">
+
+      <div class="progress-text">
+        <span id="answeredCount">0</span>/<span id="totalCount">0</span> dijawab
+      </div>
+
+      <div class="timer" id="timer">
+        60:00
+      </div>
+
+    </div>
+
   </div>
 
   <div class="wrapper">
 
+    <!-- MAIN -->
+
     <div class="card">
+
+      <div class="question-header">
+
+        <div class="question-badge" id="questionLabel">
+          Soal 1
+        </div>
+
+      </div>
+
+      <div class="progress">
+
+        <div
+          class="fill"
+          id="progressFill">
+        </div>
+
+      </div>
+
       <div id="q"></div>
+
       <div id="opt"></div>
 
-      <button class="submit" onclick="submit()">SUBMIT EXAM</button>
+      <div class="action-row">
+
+        <button class="secondary-btn" onclick="prevQuestion()">
+          ← Sebelumnya
+        </button>
+
+        <button class="secondary-btn" onclick="nextQuestion()">
+          Berikutnya →
+        </button>
+
+      </div>
+
     </div>
 
+    <!-- SIDEBAR -->
+
     <div class="side">
+
+      <h3>Navigasi Soal</h3>
+
+      <div class="summary">
+
+        <div class="summary-item">
+          <span>Terjawab</span>
+          <strong id="answeredSummary">0</strong>
+        </div>
+
+        <div class="summary-item">
+          <span>Belum</span>
+          <strong id="unansweredSummary">0</strong>
+        </div>
+
+      </div>
+
       <div id="nav" class="grid"></div>
+
+      <div class="legend">
+
+        <div>
+          <span class="dot done-dot"></span>
+          Sudah Dijawab
+        </div>
+
+        <div>
+          <span class="dot empty-dot"></span>
+          Belum Dijawab
+        </div>
+
+      </div>
+
+      <button
+        class="submit-btn"
+        onclick="submit()">
+
+        Kumpulkan Jawaban
+
+      </button>
+
     </div>
 
   </div>
+
 </div>
 
 <!-- RESULT -->
+
 <div id="result">
-  <h2>Hasil Ujian</h2>
-  <p id="skor"></p>
-  <h3>Leaderboard</h3>
-  <div id="board"></div>
+
+  <div class="result-card">
+
+    <h2>Hasil Ujian</h2>
+
+    <div class="score-circle">
+      <span id="scoreNumber">0</span>
+    </div>
+
+    <p id="skor"></p>
+
+    <h3>Leaderboard</h3>
+
+    <div id="board"></div>
+
+  </div>
+
 </div>
 
 <script src="script.js"></script>

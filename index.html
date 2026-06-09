@@ -2,55 +2,67 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CBT ULTRA PRO</title>
+<title>CBT REAL EXAM</title>
 
 <style>
-:root{
-  --primary:#6d28d9;
-  --bg:#f5f3ff;
-  --card:#fff;
-  --danger:#ef4444;
-  --warning:#f59e0b;
-  --success:#22c55e;
-}
-
 body{
   margin:0;
   font-family:system-ui;
-  background:var(--bg);
+  background:#f5f3ff;
 }
 
 /* LOGIN */
 #login{
-  max-width:360px;
-  margin:120px auto;
+  max-width:380px;
+  margin:140px auto;
   background:#fff;
-  padding:24px;
+  padding:28px;
   border-radius:16px;
   box-shadow:0 20px 50px rgba(0,0,0,0.08);
+  border:1px solid #eee;
+}
+
+#login h3{
+  margin:0;
+  color:#6d28d9;
+}
+
+#login p{
+  margin-top:6px;
+  color:#666;
+  font-size:13px;
 }
 
 input,button{
   width:100%;
   padding:12px;
-  margin-top:10px;
+  margin-top:12px;
   border-radius:10px;
   border:1px solid #ddd;
+  font-size:14px;
+}
+
+button{
+  background:#6d28d9;
+  color:#fff;
+  border:none;
+  cursor:pointer;
+  font-weight:600;
 }
 
 /* TOPBAR */
 .topbar{
   display:flex;
   justify-content:space-between;
-  padding:12px 20px;
+  padding:12px 18px;
   background:#fff;
+  border-bottom:1px solid #eee;
   position:sticky;
   top:0;
-  border-bottom:1px solid #eee;
 }
 
-.brand{color:var(--primary);font-weight:700;}
-.timer{color:var(--danger);font-weight:700;}
+.brand{color:#6d28d9;font-weight:700;}
+.timer{color:#ef4444;font-weight:700;}
 
 /* LAYOUT */
 .wrapper{
@@ -75,18 +87,18 @@ input,button{
   border-radius:14px;
 }
 
-/* OPTIONS */
+/* OPTION */
 .opt{
   padding:12px;
   border:1px solid #ddd;
-  border-radius:10px;
   margin:8px 0;
+  border-radius:10px;
   cursor:pointer;
 }
 
 .opt.active{
   background:#ede9fe;
-  border-color:var(--primary);
+  border-color:#6d28d9;
 }
 
 /* NAV */
@@ -100,53 +112,54 @@ input,button{
   padding:8px;
   border:none;
   border-radius:8px;
-  cursor:pointer;
   background:#eee;
 }
 
-.done{background:var(--success)!important;color:#fff;}
-.ragu{background:var(--warning)!important;color:#fff;}
-.activeQ{outline:2px solid var(--primary);}
+.done{background:#22c55e;color:#fff;}
+.ragu{background:#f59e0b;color:#fff;}
+.activeQ{outline:2px solid #6d28d9;}
 
-/* CONTROL */
-.control{
-  display:flex;
-  gap:6px;
-  margin-top:10px;
-}
-
-.control button{
-  flex:1;
-  padding:10px;
-  border:none;
-  border-radius:10px;
-}
-
+/* SUBMIT */
 .submit{
   width:100%;
   margin-top:10px;
   padding:12px;
-  background:var(--primary);
+  background:#6d28d9;
   color:#fff;
   border:none;
   border-radius:12px;
+}
+
+/* RESULT */
+#result{
+  display:none;
+  max-width:420px;
+  margin:120px auto;
+  background:#fff;
+  padding:20px;
+  border-radius:14px;
 }
 </style>
 </head>
 
 <body>
 
+<!-- LOGIN -->
 <div id="login">
   <h3>CBT LOGIN</h3>
-  <input id="token" placeholder="Token">
-  <input id="nama" placeholder="Nama">
-  <button onclick="login()">Masuk</button>
+  <p>Masukkan data sebelum mulai ujian</p>
+
+  <input id="nama" placeholder="Nama Peserta">
+  <input id="token" placeholder="Token Ujian">
+
+  <button onclick="login()">Mulai Ujian</button>
 </div>
 
+<!-- APP -->
 <div id="app" style="display:none;">
 
   <div class="topbar">
-    <div class="brand">CBT ULTRA PRO</div>
+    <div class="brand">CBT REAL EXAM</div>
     <div class="timer" id="timer">60:00</div>
   </div>
 
@@ -156,15 +169,7 @@ input,button{
       <div id="q"></div>
       <div id="opt"></div>
 
-      <div class="control">
-        <button onclick="prev()">Prev</button>
-        <button onclick="flag()">Ragu</button>
-        <button onclick="next()">Next</button>
-      </div>
-
-      <button class="submit" onclick="submit()">SUBMIT</button>
-
-      <div id="progress" style="margin-top:10px;"></div>
+      <button class="submit" onclick="submit()">SUBMIT EXAM</button>
     </div>
 
     <div class="side">
@@ -172,6 +177,14 @@ input,button{
     </div>
 
   </div>
+</div>
+
+<!-- RESULT -->
+<div id="result">
+  <h2>Hasil Ujian</h2>
+  <p id="skor"></p>
+  <h3>Leaderboard</h3>
+  <div id="board"></div>
 </div>
 
 <script src="script.js"></script>

@@ -1,234 +1,102 @@
-const API = "https://script.google.com/macros/s/AKfycbyo48NoxjaBHGHkRCxgkxOB3Cys2Wa3mBG7AvK_n3TidyCSQcjSf5vSbCJpkI0-QJhk/exec";
-
-/* =========================
-STATE
-========================= */
-
-let soal = [];
-let current = 0;
-
-let answers = {};
-let ragu = {};
-
-let nama = "";
-let timer;
-
-/* =========================
-SAVE STATE
-========================= */
-
-function saveState(){
-
-  localStorage.setItem("cbt_state", JSON.stringify({
-    current,
-    answers,
-    ragu,
-    nama
-  }));
-
-}
-
-/* =========================
-LOAD + RESUME
-========================= */
-
-function loadState(){
-
-  const raw = localStorage.getItem("cbt_state");
-  if(!raw) return;
-
-  try{
-
-    const state = JSON.parse(raw);
-
-    current = state.current || 0;
-    answers = state.answers || {};
-    ragu = state.ragu || {};
-    nama = state.nama || "";
-
-  } catch(e){
-
-    localStorage.removeItem("cbt_state");
-
-  }
-
-}
-
-/* =========================
-LOGIN
-========================= */
-
-function login(){
-
-  const n = document.getElementById("nama").value;
-  if(!n) return alert("Isi nama dulu");
-
-  nama = n;
-
-  localStorage.setItem("cbt_state", JSON.stringify({
-    nama
-  }));
-
-  document.getElementById("login").style.display = "none";
-  document.getElementById("app").style.display = "block";
-
-  loadSoal();
-
-}
-
-/* =========================
-LOAD SOAL
-========================= */
-
-async function loadSoal(){
-
-  try{
-
-    const res = await fetch(`${API}?action=getSoal`);
-    const data = await res.json();
-
-    soal = data.soal || [];
-
-    loadState(); // 🔥 RESUME DI SINI
-
-    init();
-
-  } catch(err){
-
-    console.error("LOAD ERROR:", err);
-
-    document.getElementById("q").innerHTML =
-    "Gagal load soal";
-
-  }
-
-}
-
-/* =========================
-INIT APP
-========================= */
-
-function init(){
-
-  render();
-  nav();
-  updateStats();
-
-  startTimer();
-
-}
-
-/* =========================
-RENDER
-========================= */
-
-function render(){
-
-  const s = soal[current];
-
-  if(!s){
-    document.getElementById("q").innerHTML = "Soal tidak ditemukan";
-    return;
-  }
-
-  document.getElementById("questionLabel").innerText =
-  `Soal ${current + 1}`;
-
-  document.getElementById("q").innerHTML =
-  s.pertanyaan;
-
-  document.getElementById("opt").innerHTML = `
-    <div onclick="pick('A')">A. ${s.a}</div>
-    <div onclick="pick('B')">B. ${s.b}</div>
-    <div onclick="pick('C')">C. ${s.c}</div>
-    <div onclick="pick('D')">D. ${s.d}</div>
-  `;
-
-}
-
-/* =========================
-ANSWER
-========================= */
-
-function pick(v){
-
-  answers[current] = v;
-
-  saveState();
-
-  render();
-  nav();
-  updateStats();
-
-}
-
-/* =========================
-NAVIGATION
-========================= */
-
-function nextQuestion(){
-
-  if(current < soal.length - 1){
-    current++;
-    saveState();
-    render();
-    nav();
-  }
-
-}
-
-function prevQuestion(){
-
-  if(current > 0){
-    current--;
-    saveState();
-    render();
-    nav();
-  }
-
-}
-
-function nav(){
-
-  console.log("Current:", current);
-
-}
-
-/* =========================
-TIMER
-========================= */
-
-function startTimer(){
-
-  let t = 3600;
-
-  timer = setInterval(()=>{
-
-    t--;
-
-    let m = Math.floor(t / 60);
-    let s = t % 60;
-
-    document.getElementById("timer").innerText =
-    `${m}:${s < 10 ? "0"+s : s}`;
-
-    if(t <= 0){
-      clearInterval(timer);
-      alert("Waktu habis");
-    }
-
-  }, 1000);
-
-}
-
-/* =========================
-STATS (SIMPLE SAFE)
-========================= */
-
-function updateStats(){
-
-  const answered = Object.keys(answers).length;
-
-  document.getElementById("answeredCount").innerText = answered;
-
-}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PHARMACORE CBT</title>
+
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="card">
+    <h2>PHARMACORE CBT</h2>
+    <input id="nama" placeholder="Nama">
+    <input id="token" placeholder="Token">
+    <button onclick="login()">Mulai Ujian</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none;">
+
+  <div class="topbar">
+    <div>CBT</div>
+    <div>
+      <span id="answeredCount">0</span>/<span id="totalCount">0</span>
+      <span id="timer">60:00</span>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <div class="main">
+      <h3 id="questionLabel"></h3>
+      <div id="q"></div>
+      <div id="opt"></div>
+
+      <button onclick="toggleRagu()">🚩 Ragu</button>
+      <button onclick="prev()">Prev</button>
+      <button onclick="next()">Next</button>
+    </div>
+
+    <div class="side">
+      <div id="nav" class="grid"></div>
+      <button onclick="submitExam()">Submit</button>
+      <button onclick="toggleDarkMode()">Dark Mode</button>
+      <button onclick="toggleCalculator()">Calculator</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="result" style="display:none;">
+  <h2>Hasil</h2>
+  <div id="score"></div>
+  <div id="board"></div>
+</div>
+
+<!-- CALCULATOR -->
+<div id="calculatorModal" style="display:none;">
+  <div class="calc">
+
+    <input id="calcDisplay" readonly>
+
+    <div>
+      <button onclick="calc('sin(')">sin</button>
+      <button onclick="calc('cos(')">cos</button>
+      <button onclick="calc('tan(')">tan</button>
+      <button onclick="calc('sqrt(')">√</button>
+
+      <button onclick="calc('7')">7</button>
+      <button onclick="calc('8')">8</button>
+      <button onclick="calc('9')">9</button>
+      <button onclick="calc('/')">/</button>
+
+      <button onclick="calc('4')">4</button>
+      <button onclick="calc('5')">5</button>
+      <button onclick="calc('6')">6</button>
+      <button onclick="calc('*')">*</button>
+
+      <button onclick="calc('1')">1</button>
+      <button onclick="calc('2')">2</button>
+      <button onclick="calc('3')">3</button>
+      <button onclick="calc('-')">-</button>
+
+      <button onclick="calc('0')">0</button>
+      <button onclick="calc('.')">.</button>
+      <button onclick="calculateResult()">=</button>
+      <button onclick="calc('+')">+</button>
+    </div>
+
+  </div>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>

@@ -1,139 +1,454 @@
 const API = "https://script.google.com/macros/s/AKfycbyo48NoxjaBHGHkRCxgkxOB3Cys2Wa3mBG7AvK_n3TidyCSQcjSf5vSbCJpkI0-QJhk/exec";
 
-let soal=[],i=0,jawab={},token="",nama="",timer,isDone=false;
+let soal = [];
+let i = 0;
 
-/* LOGIN */
+let jawab = {};
+
+let token = "";
+let nama = "";
+
+let timer;
+let isDone = false;
+
+/* =========================
+LOGIN
+========================= */
+
 function login(){
-  nama=document.getElementById("nama").value.trim();
-  token=document.getElementById("token").value.trim();
 
-  fetch(`${API}?action=validateToken&token=${token}`)
+  nama = document
+  .getElementById("nama")
+  .value
+  .trim();
+
+  token = document
+  .getElementById("token")
+  .value
+  .trim();
+
+  if(!nama || !token){
+    alert("Lengkapi data terlebih dahulu");
+    return;
+  }
+
+  fetch(
+    `${API}?action=validateToken&token=${token}`
+  )
   .then(r=>r.json())
   .then(res=>{
+
     if(res.valid){
-      document.getElementById("login").style.display="none";
-      document.getElementById("app").style.display="block";
+
+      document
+      .getElementById("login")
+      .style.display="none";
+
+      document
+      .getElementById("app")
+      .style.display="block";
+
       load();
-    }else alert("Token salah");
+
+    }else{
+
+      alert("Token tidak valid");
+
+    }
+
   });
 }
 
-/* LOAD SOAL */
+/* =========================
+LOAD SOAL
+========================= */
+
 function load(){
+
   fetch(`${API}?action=getSoal`)
   .then(r=>r.json())
   .then(res=>{
-    soal=res.soal||[];
-    i=0;
+
+    soal = res.soal || [];
+
+    i = 0;
+
+    document.getElementById(
+      "totalCount"
+    ).innerHTML = soal.length;
+
     render();
+
     nav();
+
+    updateStats();
+
     start();
+
   });
+
 }
 
-/* RENDER */
+/* =========================
+RENDER
+========================= */
+
 function render(){
-  let s=soal[i];
+
+  let s = soal[i];
+
   if(!s) return;
 
-  document.getElementById("q").innerHTML=(i+1)+". "+s.pertanyaan;
+  document
+  .getElementById("questionLabel")
+  .innerHTML =
+  `Soal ${i+1}`;
 
-  document.getElementById("opt").innerHTML=`
-    <div class="opt ${jawab[i]=='A'?'active':''}" onclick="pick('A')">A. ${s.a}</div>
-    <div class="opt ${jawab[i]=='B'?'active':''}" onclick="pick('B')">B. ${s.b}</div>
-    <div class="opt ${jawab[i]=='C'?'active':''}" onclick="pick('C')">C. ${s.c}</div>
-    <div class="opt ${jawab[i]=='D'?'active':''}" onclick="pick('D')">D. ${s.d}</div>
+  document
+  .getElementById("q")
+  .innerHTML =
+  s.pertanyaan;
+
+  document
+  .getElementById("opt")
+  .innerHTML =
+
+  `
+  <div class="opt ${jawab[i]=='A'?'active':''}"
+       onclick="pick('A')">
+
+      <div class="letter">A</div>
+
+      <div>${s.a}</div>
+
+  </div>
+
+  <div class="opt ${jawab[i]=='B'?'active':''}"
+       onclick="pick('B')">
+
+      <div class="letter">B</div>
+
+      <div>${s.b}</div>
+
+  </div>
+
+  <div class="opt ${jawab[i]=='C'?'active':''}"
+       onclick="pick('C')">
+
+      <div class="letter">C</div>
+
+      <div>${s.c}</div>
+
+  </div>
+
+  <div class="opt ${jawab[i]=='D'?'active':''}"
+       onclick="pick('D')">
+
+      <div class="letter">D</div>
+
+      <div>${s.d}</div>
+
+  </div>
   `;
+
+  updateProgress();
 }
 
-/* PILIH */
+/* =========================
+PICK
+========================= */
+
 function pick(v){
-  jawab[i]=v;
+
+  jawab[i] = v;
+
   render();
+
   nav();
+
+  updateStats();
+
 }
 
-/* NAV */
+/* =========================
+PROGRESS
+========================= */
+
+function updateProgress(){
+
+  let progress =
+  ((i+1)/soal.length)*100;
+
+  document
+  .getElementById("progressFill")
+  .style.width =
+  progress + "%";
+
+}
+
+/* =========================
+STATISTICS
+========================= */
+
+function updateStats(){
+
+  let answered =
+  Object.keys(jawab).length;
+
+  document
+  .getElementById("answeredCount")
+  .innerHTML =
+  answered;
+
+  document
+  .getElementById("answeredSummary")
+  .innerHTML =
+  answered;
+
+  document
+  .getElementById("unansweredSummary")
+  .innerHTML =
+  soal.length - answered;
+
+}
+
+/* =========================
+NAVIGATION
+========================= */
+
 function nav(){
-  let h="";
+
+  let h = "";
 
   for(let x=0;x<soal.length;x++){
-    let c="";
-    if(jawab[x]) c="done";
-    if(x===i) c="activeQ";
 
-    h+=`<button class="${c}" onclick="go(${x})">${x+1}</button>`;
+    let cls = [];
+
+    if(jawab[x])
+      cls.push("done");
+
+    if(x===i)
+      cls.push("activeQ");
+
+    h +=
+    `
+    <button
+      class="${cls.join(" ")}"
+      onclick="go(${x})">
+
+      ${x+1}
+
+    </button>
+    `;
   }
 
-  document.getElementById("nav").innerHTML=h;
+  document
+  .getElementById("nav")
+  .innerHTML = h;
+
 }
 
-/* GO */
 function go(x){
-  i=x;
+
+  i = x;
+
   render();
+
   nav();
+
 }
 
-/* TIMER */
+function nextQuestion(){
+
+  if(i < soal.length-1){
+
+    i++;
+
+    render();
+
+    nav();
+
+  }
+
+}
+
+function prevQuestion(){
+
+  if(i > 0){
+
+    i--;
+
+    render();
+
+    nav();
+
+  }
+
+}
+
+/* =========================
+TIMER
+========================= */
+
 function start(){
-  let t=3600;
 
-  timer=setInterval(()=>{
+  let t = 3600;
+
+  timer = setInterval(()=>{
+
     t--;
-    let m=Math.floor(t/60);
-    let s=t%60;
 
-    document.getElementById("timer").innerHTML=
-      `${m}:${s<10?'0'+s:s}`;
+    let m =
+    Math.floor(t/60);
 
-    if(t<=0) submit();
+    let s =
+    t%60;
+
+    document
+    .getElementById("timer")
+    .innerHTML =
+    `${m}:${s<10?'0'+s:s}`;
+
+    if(t <= 300){
+
+      document
+      .getElementById("timer")
+      .style.color =
+      "#ef4444";
+
+    }
+
+    if(t <= 0){
+
+      submit();
+
+    }
 
   },1000);
+
 }
 
-/* SUBMIT */
+/* =========================
+SUBMIT
+========================= */
+
 function submit(){
 
   if(isDone) return;
-  isDone=true;
+
+  let confirmSubmit =
+  confirm(
+    "Yakin ingin mengumpulkan jawaban?"
+  );
+
+  if(!confirmSubmit)
+    return;
+
+  isDone = true;
 
   clearInterval(timer);
 
-  let skor=0;
+  let skor = 0;
 
   soal.forEach((s,x)=>{
-    if(jawab[x]==s.kunci) skor++;
+
+    if(jawab[x] == s.kunci){
+
+      skor++;
+
+    }
+
   });
 
   fetch(API,{
+
     method:"POST",
+
     body:JSON.stringify({
+
       action:"submit",
-      nama,token,skor,jawaban:jawab
+
+      nama,
+
+      token,
+
+      skor,
+
+      jawaban:jawab
+
     })
+
   })
-  .then(()=>showResult(skor));
+
+  .then(()=>{
+
+    showResult(skor);
+
+  });
+
 }
 
-/* RESULT + LEADERBOARD */
+/* =========================
+RESULT
+========================= */
+
 function showResult(skor){
 
-  document.getElementById("app").style.display="none";
-  document.getElementById("result").style.display="block";
+  document
+  .getElementById("app")
+  .style.display="none";
 
-  document.getElementById("skor").innerHTML="Skor kamu: "+skor;
+  document
+  .getElementById("result")
+  .style.display="flex";
 
-  fetch(`${API}?action=leaderboard`)
+  document
+  .getElementById("scoreNumber")
+  .innerHTML =
+  skor;
+
+  document
+  .getElementById("skor")
+  .innerHTML =
+  `Kamu menjawab benar ${skor} soal`;
+
+  fetch(
+    `${API}?action=leaderboard`
+  )
   .then(r=>r.json())
   .then(res=>{
 
-    let h="";
+    let h = "";
 
-    res.leaderboard.forEach((u,i)=>{
-      h+=`<p>${i+1}. ${u.nama} - ${u.skor}</p>`;
+    res.leaderboard
+    .forEach((u,index)=>{
+
+      h +=
+      `
+      <div style="
+      display:flex;
+      justify-content:space-between;
+      padding:12px;
+      border-bottom:1px solid #eee;
+      ">
+
+        <span>
+          ${index+1}. ${u.nama}
+        </span>
+
+        <strong>
+          ${u.skor}
+        </strong>
+
+      </div>
+      `;
+
     });
 
-    document.getElementById("board").innerHTML=h;
+    document
+    .getElementById("board")
+    .innerHTML = h;
+
   });
+
 }

@@ -4,6 +4,7 @@ let soal = [];
 let i = 0;
 
 let jawab = {};
+let ragu = {};
 
 let token = "";
 let nama = "";
@@ -87,6 +88,20 @@ function load(){
 
   });
 
+}
+/* =========================
+TOOGLE RAGU
+========================= */
+
+function toggleRagu(){
+
+  if(ragu[i]){
+    delete ragu[i];
+  }else{
+    ragu[i] = true;
+  }
+
+  nav();
 }
 
 /* =========================
@@ -220,32 +235,32 @@ function nav(){
 
   let h = "";
 
-  for(let x=0;x<soal.length;x++){
+  for(let x=0; x<soal.length; x++){
 
     let cls = [];
 
-    if(jawab[x])
+    if(jawab[x]){
       cls.push("done");
+    }
 
-    if(x===i)
+    if(ragu[x]){
+      cls.push("ragu");
+    }
+
+    if(x === i){
       cls.push("activeQ");
+    }
 
-    h +=
-    `
-    <button
-      class="${cls.join(" ")}"
-      onclick="go(${x})">
-
-      ${x+1}
-
-    </button>
+    h += `
+      <button
+        class="${cls.join(" ")}"
+        onclick="go(${x})">
+        ${x+1}
+      </button>
     `;
   }
 
-  document
-  .getElementById("nav")
-  .innerHTML = h;
-
+  document.getElementById("nav").innerHTML = h;
 }
 
 function go(x){

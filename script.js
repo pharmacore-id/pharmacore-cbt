@@ -1,13 +1,62 @@
-const API = "https://script.google.com/macros/s/AKfycbyo48NoxjaBHGHkRCxgkxOB3Cys2Wa3mBG7AvK_n3TidyCSQcjSf5vSbCJpkI0-QJhk/exec";
+/* =========================
+STATE (SOURCE OF TRUTH)
+========================= */
 
 let soal = [];
-let current = 0;
+let currentQuestion = 0;
 
 let answers = {};
 let ragu = {};
 
 let nama = "";
+let token = "";
+
 let timer;
+let isDone = false;
+
+/* =========================
+LOCAL STORAGE HELPERS
+========================= */
+
+function saveState(){
+
+  localStorage.setItem("cbt_state", JSON.stringify({
+    loggedIn: true,
+    currentQuestion,
+    answers,
+    ragu,
+    nama,
+    token
+  }));
+
+}
+
+/* =========================
+LOAD STATE
+========================= */
+
+function loadState(){
+
+  const data = localStorage.getItem("cbt_state");
+  if(!data) return;
+
+  try{
+
+    const state = JSON.parse(data);
+
+    if(state.loggedIn !== true) return;
+
+    currentQuestion = state.currentQuestion || 0;
+    answers = state.answers || {};
+    ragu = state.ragu || {};
+    nama = state.nama || "";
+    token = state.token || "";
+
+  } catch(e){
+    localStorage.removeItem("cbt_state");
+  }
+
+}
 
 /* =========================
 LOGIN
@@ -15,92 +64,142 @@ LOGIN
 
 function login(){
 
-  nama = document.getElementById("nama").value;
-  if(!nama) return alert("Isi nama");
+  const n = document.getElementById("nama").value;
+  if(!n) return alert("Isi nama dulu");
 
-  saveState();
+  nama = n;
+
+  const state = {
+    loggedIn: true,
+    currentQuestion: 0,
+    answers: {},
+    ragu: {},
+    nama,
+    token
+  };
+
+  localStorage.setItem("cbt_state", JSON.stringify(state));
 
   document.getElementById("login").style.display = "none";
   document.getElementById("app").style.display = "block";
 
-  loadSoal();
-}
-
-/* =========================
-LOAD
-========================= */
-
-async function loadSoal(){
-
-  let res = await fetch(API + "?action=getSoal");
-  let data = await res.json();
-
-  soal = data.soal || [];
-
-  loadState();
-
-  init();
-}
-
-/* =========================
-INIT
-========================= */
-
-function init(){
-
   render();
   nav();
-  startTimer();
   updateStats();
+
+  start(); // timer start
+
 }
 
 /* =========================
-SAVE / LOAD
+LOAD SOAL
 ========================= */
 
-function saveState(){
+function load(){
 
-  localStorage.setItem("cbt", JSON.stringify({
-    current,
-    answers,
-    ragu,
-    nama
-  }));
+  fetch(`${API}?action=getSoal`)
+  .then(r => r.json())
+  .then(res => {
 
-}
+    soal = res.soal || [];
 
-function loadState(){
+    document.getElementById("totalCount").innerText = soal.length;
 
-  let d = localStorage.getItem("cbt");
-  if(!d) return;
+    render();
+    nav();
+    updateStats();
 
-  let s = JSON.parse(d);
+  });
 
-  current = s.current || 0;
-  answers = s.answers || {};
-  ragu = s.ragu || {};
-  nama = s.nama || "";
 }
 
 /* =========================
-RENDER
+RENDER QUESTION
 ========================= */
 
 function render(){
 
-  let s = soal[current];
+  let s = soal[currentQuestion];
+  if(!s) return;
 
   document.getElementById("questionLabel").innerText =
-  "Soal " + (current+1);
+  `Soal ${currentQuestion+1}`;
 
   document.getElementById("q").innerHTML = s.pertanyaan;
 
   document.getElementById("opt").innerHTML = `
-    <div class="opt" onclick="pick('A')">A. ${s.a}</div>
-    <div class="opt" onclick="pick('B')">B. ${s.b}</div>
-    <div class="opt" onclick="pick('C')">C. ${s.c}</div>
-    <div class="opt" onclick="pick('D')">D. ${s.d}</div>
+    <div class="opt ${answers[currentQuestion]=='A'?'active':''}" onclick="pick('A')">
+      <div class="letter">A</div><div>${s.a}</div>
+    </div>
+
+    <div class="opt ${answers[currentQuestion]=='B'?'active':''}" onclick="pick('B')">
+      <div class="letter">B</div><div>${s.b}</div>
+    </div>
+
+    <div class="opt ${answers[currentQuestion]=='C'?'active':''}" onclick="pick('C')">
+      <div class="letter">C</div><div>${s.c}</div>
+    </div>
+
+    <div class="opt ${answers[currentQuestion]=='D'?'active':''}" onclick="pick('D')">
+      <div class="letter">D</div><div>${s.d}</div>
+    </div>
   `;
+
+  const btn = document.querySelector(".ragu-btn");
+
+  if(btn){
+    if(ragu[currentQuestion]){
+      btn.classList.add("active");
+      btn.innerText = "🚩 Ditandai Ragu";
+    } else {
+      btn.classList.remove("active");
+      btn.innerText = "🚩 Tandai Ragu";
+    }
+  }
+
+  updateProgress();
+
+}
+
+/* =========================
+NAVIGATION
+========================= */
+
+function nextQuestion(){
+
+  if(currentQuestion < soal.length - 1){
+    currentQuestion++;
+  }
+
+  saveState();
+  render();
+  nav();
+  updateStats();
+
+}
+
+function prevQuestion(){
+
+  if(currentQuestion > 0){
+    currentQuestion--;
+  }
+
+  saveState();
+  render();
+  nav();
+  updateStats();
+
+}
+
+function go(x){
+
+  currentQuestion = x;
+
+  saveState();
+  render();
+  nav();
+  updateStats();
+
 }
 
 /* =========================
@@ -108,15 +207,30 @@ ANSWER
 ========================= */
 
 function pick(v){
-  answers[current] = v;
+
+  answers[currentQuestion] = v;
+
   saveState();
   render();
   nav();
   updateStats();
+
 }
 
 /* =========================
-NAV
+PROGRESS
+========================= */
+
+function updateProgress(){
+
+  let p = ((currentQuestion+1)/soal.length)*100;
+
+  document.getElementById("progressFill").style.width = p + "%";
+
+}
+
+/* =========================
+NAV UI
 ========================= */
 
 function nav(){
@@ -125,105 +239,140 @@ function nav(){
 
   for(let i=0;i<soal.length;i++){
 
-    let c = "";
+    let cls = [];
 
-    if(i === current) c = "active";
-    if(answers[i]) c = "done";
-    if(ragu[i]) c = "ragu";
-    if(i === current) c = "active";
+    if(answers[i]) cls.push("done");
+    if(ragu[i]) cls.push("ragu");
+    if(i === currentQuestion) cls.push("activeQ");
 
-    h += `<button class="${c}" onclick="go(${i})">${i+1}</button>`;
+    h += `<button class="${cls.join(" ")}" onclick="go(${i})">${i+1}</button>`;
+
   }
 
   document.getElementById("nav").innerHTML = h;
-}
 
-function go(i){
-  current = i;
-  saveState();
-  render();
-  nav();
 }
 
 /* =========================
-NEXT PREV
+STATS
 ========================= */
 
-function next(){
-  if(current < soal.length-1){
-    current++;
-    saveState();
-    render();
-    nav();
+function updateStats(){
+
+  let answered = 0;
+  let flagged = 0;
+
+  for(let i=0;i<soal.length;i++){
+
+    if(answers[i]) answered++;
+    if(ragu[i]) flagged++;
+
   }
+
+  let unanswered = soal.length - answered;
+
+  document.getElementById("answeredCount").innerText = answered;
+  document.getElementById("answeredSummary").innerText = answered;
+  document.getElementById("unansweredSummary").innerText = unanswered;
+
+  const el = document.getElementById("raguSummary");
+  if(el) el.innerText = flagged;
+
 }
 
-function prev(){
-  if(current > 0){
-    current--;
-    saveState();
-    render();
-    nav();
+/* =========================
+TIMER (ANTI RESET)
+========================= */
+
+function start(){
+
+  let endTime = localStorage.getItem("cbt_endTime");
+
+  if(!endTime){
+    endTime = Date.now() + 3600*1000;
+    localStorage.setItem("cbt_endTime", endTime);
   }
-}
 
-/* =========================
-RAGU
-========================= */
+  timer = setInterval(()=>{
 
-function toggleRagu(){
-  ragu[current] = !ragu[current];
-  saveState();
-  render();
-  nav();
-}
-
-/* =========================
-TIMER
-========================= */
-
-function startTimer(){
-
-  let t = 3600;
-
-  setInterval(()=>{
-
-    t--;
+    let now = Date.now();
+    let t = Math.max(0, Math.floor((endTime - now)/1000));
 
     let m = Math.floor(t/60);
     let s = t%60;
 
     document.getElementById("timer").innerText =
-    m + ":" + (s<10?"0"+s:s);
+    `${m}:${s<10?'0'+s:s}`;
+
+    if(t <= 300){
+      document.getElementById("timer").style.color = "#ef4444";
+    }
+
+    if(t <= 0){
+      clearInterval(timer);
+      submit();
+    }
 
   },1000);
+
 }
 
 /* =========================
-DARK MODE
+SUBMIT
 ========================= */
 
-function toggleDarkMode(){
-  document.body.classList.toggle("dark");
+function submitExam(){
+
+  if(isDone) return;
+
+  if(!confirm("Yakin ingin submit?")) return;
+
+  isDone = true;
+
+  clearInterval(timer);
+
+  let skor = 0;
+
+  soal.forEach((s,i)=>{
+    if(answers[i] == s.kunci){
+      skor++;
+    }
+  });
+
+  fetch(API,{
+    method:"POST",
+    body:JSON.stringify({
+      action:"submit",
+      nama,
+      token,
+      skor,
+      jawaban: answers
+    })
+  });
+
+  localStorage.removeItem("cbt_state");
+  localStorage.removeItem("cbt_endTime");
+
+  showResult(skor);
+
 }
 
 /* =========================
-CALCULATOR
+INIT AUTO RESTORE
 ========================= */
 
-function calc(v){
-  document.getElementById("calcDisplay").value += v;
-}
+window.addEventListener("DOMContentLoaded",()=>{
 
-function calculateResult(){
+  loadState();
 
-  let expr = document.getElementById("calcDisplay").value;
+  if(localStorage.getItem("cbt_state")){
 
-  expr = expr
-    .replace(/sin\(/g,"Math.sin(")
-    .replace(/cos\(/g,"Math.cos(")
-    .replace(/tan\(/g,"Math.tan(")
-    .replace(/sqrt\(/g,"Math.sqrt(");
+    document.getElementById("login").style.display = "none";
+    document.getElementById("app").style.display = "block";
 
-  document.getElementById("calcDisplay").value = eval(expr);
-}
+    load();
+    start();
+
+  }
+
+});

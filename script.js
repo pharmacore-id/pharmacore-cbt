@@ -93,21 +93,27 @@ INIT / AUTO RESTORE
 
 window.onload = function(){
 
-  const state = loadState();
+  const stateRaw = localStorage.getItem("cbt_state");
 
-  if(state && state.loggedIn){
-
-    document.getElementById("login").style.display = "none";
-    document.getElementById("app").style.display = "block";
-
-    currentQuestion = state.currentQuestion || 0;
-    answers = state.answers || [];
-    ragu = state.ragu || [];
-
-    renderQuestion();
-    updateSidebarSummary();
-
+  if(!stateRaw){
+    return; // tetap di login
   }
+
+  const state = JSON.parse(stateRaw);
+
+  if(state.loggedIn !== true){
+    return; // tetap di login
+  }
+
+  document.getElementById("login").style.display = "none";
+  document.getElementById("app").style.display = "block";
+
+  currentQuestion = state.currentQuestion ?? 0;
+  answers = state.answers ?? [];
+  ragu = state.ragu ?? [];
+
+  renderQuestion();
+  updateSidebarSummary();
 
 };
 
@@ -124,13 +130,32 @@ function login(){
   answers = [];
   ragu = [];
 
-  saveState();
+  localStorage.setItem("cbt_state", JSON.stringify({
+    loggedIn: true,
+    currentQuestion: 0,
+    answers: [],
+    ragu: []
+  }));
 
   document.getElementById("login").style.display = "none";
   document.getElementById("app").style.display = "block";
 
   renderQuestion();
   updateSidebarSummary();
+
+}
+
+function isLoggedIn(){
+
+  const data = localStorage.getItem("cbt_state");
+
+  if(!data) return false;
+
+  try {
+    return JSON.parse(data).loggedIn === true;
+  } catch {
+    return false;
+  }
 
 }
 

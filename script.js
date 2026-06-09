@@ -99,6 +99,8 @@ function load(){
 
     soal = res.soal || [];
 
+    currentQuestion = 0;
+
     document.getElementById("totalCount").innerText = soal.length;
 
     render();
@@ -357,18 +359,35 @@ function submitExam(){
 INIT AUTO RESTORE
 ========================= */
 
-window.addEventListener("DOMContentLoaded",()=>{
+window.addEventListener("DOMContentLoaded", () => {
 
-  loadState();
+  const state = localStorage.getItem("cbt_state");
 
-  if(localStorage.getItem("cbt_state")){
+  if(!state){
+    document.getElementById("login").style.display = "block";
+    document.getElementById("app").style.display = "none";
+    return;
+  }
+
+  try{
+
+    const parsed = JSON.parse(state);
+
+    if(!parsed.loggedIn){
+      localStorage.removeItem("cbt_state");
+      return;
+    }
 
     document.getElementById("login").style.display = "none";
     document.getElementById("app").style.display = "block";
 
-    load();
-    start();
+    load();   // load soal
+    start();  // timer
 
+  } catch(e){
+    localStorage.removeItem("cbt_state");
+    document.getElementById("login").style.display = "block";
+    document.getElementById("app").style.display = "none";
   }
 
 });

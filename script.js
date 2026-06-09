@@ -14,6 +14,11 @@ function login(){
   token = document.getElementById("token").value.trim();
   nama = document.getElementById("nama").value.trim();
 
+  if(!token || !nama){
+    alert("Isi token dan nama");
+    return;
+  }
+
   fetch(`${API}?action=validateToken&token=${token}`)
   .then(r => r.json())
   .then(res => {
@@ -52,7 +57,7 @@ function load(){
 
   })
   .catch(err => {
-    console.error("LOAD SOAL ERROR:", err);
+    console.error("LOAD ERROR:", err);
     alert("Gagal load soal");
   });
 }
@@ -129,7 +134,7 @@ function start(){
   }, 1000);
 }
 
-/* ================= SUBMIT FIXED ================= */
+/* ================= FINAL SUBMIT (ANTI ERROR) ================= */
 function submit(){
 
   if(isSubmitted) return;
@@ -143,27 +148,49 @@ function submit(){
     if(jawab[x] == s.kunci) skor++;
   });
 
-  console.log("SUBMIT DATA:", {
-    nama, token, skor, jawaban: jawab
-  });
+  const payload = {
+    action: "submit",
+    nama,
+    token,
+    skor,
+    jawaban: jawab
+  };
 
+  console.log("SUBMIT:", payload);
+
+  // PRIMARY
   fetch(API, {
     method: "POST",
-    body: JSON.stringify({
-      action: "submit",
-      nama,
-      token,
-      skor,
-      jawaban: jawab
-    })
+    body: JSON.stringify(payload)
   })
   .then(r => r.text())
   .then(res => {
-    console.log("SUBMIT RESPONSE:", res);
+
+    console.log("RESPONSE:", res);
     alert("Skor kamu: " + skor);
+
   })
   .catch(err => {
-    console.error("SUBMIT ERROR:", err);
-    alert("Gagal submit (cek console)");
+
+    console.warn("PRIMARY FAIL, FALLBACK...", err);
+
+    // FALLBACK GET
+    fetch(
+      API +
+      "?action=submit" +
+      "&nama=" + encodeURIComponent(nama) +
+      "&token=" + encodeURIComponent(token) +
+      "&skor=" + skor
+    )
+    .then(r => r.text())
+    .then(res => {
+      console.log("FALLBACK:", res);
+      alert("Skor kamu: " + skor + " (fallback)");
+    })
+    .catch(err2 => {
+      console.error("TOTAL FAIL:", err2);
+      alert("Submit gagal total");
+    });
+
   });
 }

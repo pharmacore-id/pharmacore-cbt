@@ -224,24 +224,33 @@ STATISTICS
 
 function updateStats(){
 
-  let answered =
+  const answered =
   Object.keys(jawab).length;
 
-  document
-  .getElementById("answeredCount")
-  .innerHTML =
-  answered;
+  const flagged =
+  Object.keys(ragu).length;
 
-  document
-  .getElementById("answeredSummary")
-  .innerHTML =
-  answered;
-
-  document
-  .getElementById("unansweredSummary")
-  .innerHTML =
+  const unanswered =
   soal.length - answered;
 
+  document.getElementById(
+    "answeredCount"
+  ).innerHTML = answered;
+
+  document.getElementById(
+    "answeredSummary"
+  ).innerHTML = answered;
+
+  document.getElementById(
+    "unansweredSummary"
+  ).innerHTML = unanswered;
+
+  const flagEl =
+  document.getElementById("flagSummary");
+
+  if(flagEl){
+    flagEl.innerHTML = flagged;
+  }
 }
 
 /* =========================

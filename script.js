@@ -23,46 +23,14 @@ LOGIN
 
 function login(){
 
-  nama = document
-  .getElementById("nama")
-  .value
-  .trim();
+  alert("LOGIN FIRED");
 
-  token = document
-  .getElementById("token")
-  .value
-  .trim();
+  console.log("LOGIN FUNCTION RUNNING");
 
-  if(!nama || !token){
-    alert("Lengkapi data terlebih dahulu");
-    return;
-  }
+  localStorage.setItem("cbt_state", "TEST");
 
-  fetch(
-    `${API}?action=validateToken&token=${token}`
-  )
-  .then(r=>r.json())
-  .then(res=>{
+  console.log(localStorage.getItem("cbt_state"));
 
-    if(res.valid){
-
-      document
-      .getElementById("login")
-      .style.display="none";
-
-      document
-      .getElementById("app")
-      .style.display="block";
-
-      load();
-
-    }else{
-
-      alert("Token tidak valid");
-
-    }
-
-  });
 }
 
 /* =========================

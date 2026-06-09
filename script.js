@@ -321,7 +321,7 @@ function start(){
 SUBMIT
 ========================= */
 
-function submit(){
+function submitExam(){
 
   if(isDone) return;
 

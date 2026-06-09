@@ -1,3 +1,8 @@
+let currentQuestion = 0;
+let answers = [];
+let ragu = [];
+let totalSoal = 50;
+
 const API = "https://script.google.com/macros/s/AKfycbyo48NoxjaBHGHkRCxgkxOB3Cys2Wa3mBG7AvK_n3TidyCSQcjSf5vSbCJpkI0-QJhk/exec";
 
 let soal = [];
@@ -61,55 +66,220 @@ function login(){
 }
 
 /* =========================
-LOAD SOAL
+SAVE & LOAD STATE
+========================= */
+
+function saveState(){
+
+  localStorage.setItem("cbt_state", JSON.stringify({
+    loggedIn: true,
+    currentQuestion,
+    answers,
+    ragu
+  }));
+
+}
+
+function loadState(){
+
+  const data = localStorage.getItem("cbt_state");
+  return data ? JSON.parse(data) : null;
+
+}
+
+/* =========================
+INIT / AUTO RESTORE
+========================= */
+
+window.addEventListener("DOMContentLoaded", function(){
+
+  const raw = localStorage.getItem("cbt_state");
+
+  console.log("CBT STATE RAW:", raw);
+
+  if(!raw){
+    console.log("NO STATE → stay login");
+    return;
+  }
+
+  let state;
+
+  try {
+    state = JSON.parse(raw);
+  } catch (e) {
+    console.log("JSON ERROR → clear storage");
+    localStorage.removeItem("cbt_state");
+    return;
+  }
+
+  console.log("STATE PARSED:", state);
+
+  if(state.loggedIn !== true){
+    console.log("NOT LOGGED IN");
+    return;
+  }
+
+  console.log("RESTORE SUCCESS");
+
+  document.getElementById("login").style.display = "none";
+  document.getElementById("app").style.display = "block";
+
+  currentQuestion = state.currentQuestion || 0;
+  answers = state.answers || [];
+  ragu = state.ragu || [];
+
+  renderQuestion();
+  updateSidebarSummary();
+
+});
+
+/* =========================
+LOGIN
+========================= */
+
+function login(){
+
+  const nama = document.getElementById("nama").value;
+  if(!nama) return alert("Isi nama dulu");
+
+  const state = {
+    loggedIn: true,
+    currentQuestion: 0,
+    answers: [],
+    ragu: []
+  };
+
+  localStorage.setItem("cbt_state", JSON.stringify(state));
+
+  document.getElementById("login").style.display = "none";
+  document.getElementById("app").style.display = "block";
+
+  renderQuestion();
+  updateSidebarSummary();
+
+}
+
+function isLoggedIn(){
+
+  const data = localStorage.getItem("cbt_state");
+
+  if(!data) return false;
+
+  try {
+    return JSON.parse(data).loggedIn === true;
+  } catch {
+    return false;
+  }
+
+}
+
+/* =========================
+QUESTION NAVIGATION
+========================= */
+
+function nextQuestion(){
+
+  if(currentQuestion < soal.length - 1){
+    currentQuestion++;
+  }
+
+  saveState();
+  renderQuestion();
+  updateSidebarSummary();
+
+}
+
+function prevQuestion(){
+
+  if(currentQuestion > 0){
+    currentQuestion--;
+  }
+
+  saveState();
+  renderQuestion();
+  updateSidebarSummary();
+
+}
+
+/* =========================
+ANSWER SYSTEM
+========================= */
+
+function saveAnswer(index, option){
+
+  answers[index] = option;
+
+  saveState();
+  updateSidebarSummary();
+
+}
+
+/* =========================
+RAGU SYSTEM
+========================= */
+
+function toggleRagu(){
+
+  ragu[currentQuestion] = !ragu[currentQuestion];
+
+  saveState();
+  renderQuestion();
+  updateSidebarSummary();
+
+}
+
+/* =========================
+SIDEBAR SUMMARY
+========================= */
+
+function updateSidebarSummary(){
+
+  let answered = 0;
+  let unanswered = 0;
+  let raguCount = 0;
+
+  for(let i = 0; i < soal.length; i++){
+
+    if(ragu[i]) raguCount++;
+
+    if(answers[i] === undefined || answers[i] === null){
+      unanswered++;
+    } else {
+      answered++;
+    }
+
+  }
+
+  const elAnswered = document.getElementById("answeredSummary");
+  const elUnanswered = document.getElementById("unansweredSummary");
+  const elRagu = document.getElementById("raguSummary");
+
+  if(elAnswered) elAnswered.innerText = answered;
+  if(elUnanswered) elUnanswered.innerText = unanswered;
+  if(elRagu) elRagu.innerText = raguCount;
+
+}
+
+/* =========================
+LOAD SOAL (BACKEND OPTIONAL)
 ========================= */
 
 function load(){
 
   fetch(`${API}?action=getSoal`)
-  .then(r=>r.json())
-  .then(res=>{
+  .then(r => r.json())
+  .then(res => {
 
     soal = res.soal || [];
 
-    i = 0;
+    document.getElementById("totalCount").innerText = soal.length;
 
-    document.getElementById(
-      "totalCount"
-    ).innerHTML = soal.length;
-
-    render();
-
-    nav();
-
-    updateStats();
-
-    start();
+    renderQuestion();
+    updateSidebarSummary();
 
   });
 
 }
-/* =========================
-TOOGLE RAGU
-========================= */
-
-function toggleRagu(){
-
-  if(ragu[i]){
-
-    delete ragu[i];
-
-  }else{
-
-    ragu[i] = true;
-
-  }
-
-  render();
-  nav();
-
-}
-
 /* =========================
 RENDER
 ========================= */
@@ -491,5 +661,106 @@ function showResult(skor){
     .innerHTML = h;
 
   });
+
+}
+
+/* =========================
+DARK MODE
+========================= */
+
+function toggleDarkMode(){
+
+  document.body.classList.toggle(
+    "dark-mode"
+  );
+
+}
+
+/* =========================
+CALCULATOR
+========================= */
+
+function toggleCalculator(){
+
+  const modal =
+  document.getElementById(
+    "calculatorModal"
+  );
+
+  if(
+    modal.style.display === "flex"
+  ){
+
+    modal.style.display = "none";
+
+  }else{
+
+    modal.style.display = "flex";
+
+  }
+
+}
+
+function calc(v){
+
+  document
+  .getElementById("calcDisplay")
+  .value += v;
+
+}
+
+function clearCalc(){
+
+  document
+  .getElementById("calcDisplay")
+  .value = "";
+
+}
+
+function calculateResult(){
+
+  try{
+
+    let result =
+    eval(
+      document.getElementById(
+        "calcDisplay"
+      ).value
+    );
+
+    document
+    .getElementById(
+      "calcDisplay"
+    ).value = result;
+
+  }catch{
+
+    alert("Perhitungan tidak valid");
+
+  }
+
+}
+
+function updateSidebarSummary(){
+
+  let answered = 0;
+  let unanswered = 0;
+  let raguCount = 0;
+
+  for(let i = 0; i < totalSoal; i++){
+
+    if(ragu[i]) raguCount++;
+
+    if(answers[i] === undefined || answers[i] === null){
+      unanswered++;
+    } else {
+      answered++;
+    }
+
+  }
+
+  document.getElementById("answeredSummary").innerText = answered;
+  document.getElementById("unansweredSummary").innerText = unanswered;
+  document.getElementById("raguSummary").innerText = raguCount;
 
 }

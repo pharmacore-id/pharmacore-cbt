@@ -7,34 +7,280 @@
 <style>
 body{
   margin:0;
-  font-family:Arial;
-  background:#0f061f;
-  color:white;
+  font-family:system-ui;
+  background:#f4f5f7;
+  color:#111;
 }
 
-/* HEADER */
-.header{
+/* TOP BAR */
+.topbar{
+  background:white;
+  padding:12px 20px;
   display:flex;
   justify-content:space-between;
-  padding:15px 20px;
-  background:#1b0a33;
+  align-items:center;
+  border-bottom:1px solid #ddd;
   position:sticky;
   top:0;
-  z-index:10;
+}
+
+.brand{
+  font-weight:700;
+  color:#6d28d9;
 }
 
 .timer{
-  color:#ffcc00;
-  font-weight:bold;
+  font-weight:600;
+  color:#dc2626;
 }
 
 /* LAYOUT */
-.container{
+.wrapper{
   display:flex;
-  gap:15px;
-  padding:15px;
+  gap:20px;
+  padding:20px;
+  max-width:1100px;
+  margin:auto;
 }
 
+/* SOAL */
+.card{
+  flex:3;
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.05);
+}
+
+.q{
+  font-size:18px;
+  margin-bottom:15px;
+}
+
+.opt{
+  padding:12px;
+  border:1px solid #ddd;
+  border-radius:8px;
+  margin:10px 0;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.opt:hover{
+  border-color:#6d28d9;
+}
+
+.opt.active{
+  border-color:#6d28d9;
+  background:#ede9fe;
+}
+
+/* SIDEBAR */
+.side{
+  flex:1;
+  background:white;
+  padding:15px;
+  border-radius:12px;
+  height:fit-content;
+  box-shadow:0 2px 8px rgba(0,0,0,0.05);
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:6px;
+}
+
+.grid button{
+  padding:8px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  background:#f3f4f6;
+}
+
+.grid button.done{
+  background:#6d28d9;
+  color:white;
+}
+
+.submit{
+  width:100%;
+  margin-top:15px;
+  padding:12px;
+  border:none;
+  background:#6d28d9;
+  color:white;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+/* LOGIN */
+.login{
+  max-width:380px;
+  margin:100px auto;
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border:1px solid #ddd;
+  border-radius:8px;
+}
+
+button{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  background:#6d28d9;
+  color:white;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div id="login" class="login">
+  <h2 style="color:#6d28d9;">PHARMACORE CBT</h2>
+  <input id="token" placeholder="Token">
+  <input id="nama" placeholder="Nama">
+  <button onclick="login()">Masuk</button>
+</div>
+
+<div id="app" style="display:none;">
+
+  <div class="topbar">
+    <div class="brand">PHARMACORE CBT</div>
+    <div class="timer" id="timer">60:00</div>
+  </div>
+
+  <div class="wrapper">
+
+    <div class="card">
+      <div class="q" id="q"></div>
+      <div id="opt"></div>
+    </div>
+
+    <div class="side">
+      <div class="grid" id="nav"></div>
+      <button class="submit" onclick="submit()">Submit</button>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+const API = "https://script.google.com/macros/s/AKfycbzSsowhQ5m---cB1qAl7i1sJIMo6QLXSntyWS1AN-Y/exec";
+
+let soal=[],i=0,jawab={},token="",nama="";
+
+// LOGIN
+function login(){
+  token=document.getElementById("token").value;
+  nama=document.getElementById("nama").value;
+
+  fetch(`${API}?action=validateToken&token=${token}`)
+  .then(r=>r.json())
+  .then(res=>{
+    if(res.valid){
+      document.getElementById("login").style.display="none";
+      document.getElementById("app").style.display="block";
+      load();
+      start();
+    }else alert("Token salah");
+  });
+}
+
+// LOAD
+function load(){
+  fetch(`${API}?action=getSoal`)
+  .then(r=>r.json())
+  .then(res=>{
+    soal=res.soal;
+    render();
+    nav();
+  });
+}
+
+// RENDER
+function render(){
+  let s=soal[i];
+
+  document.getElementById("q").innerHTML=
+  (i+1)+". "+s.pertanyaan;
+
+  document.getElementById("opt").innerHTML=`
+    <div class="opt ${jawab[i]=='A'?'active':''}" onclick="pilih('A')">A. ${s.a}</div>
+    <div class="opt ${jawab[i]=='B'?'active':''}" onclick="pilih('B')">B. ${s.b}</div>
+    <div class="opt ${jawab[i]=='C'?'active':''}" onclick="pilih('C')">C. ${s.c}</div>
+    <div class="opt ${jawab[i]=='D'?'active':''}" onclick="pilih('D')">D. ${s.d}</div>
+  `;
+}
+
+function pilih(v){
+  jawab[i]=v;
+  render();
+}
+
+// NAV
+function nav(){
+  let h="";
+  for(let x=0;x<soal.length;x++){
+    h+=`<button class="${jawab[x]?'done':''}" onclick="go(${x})">${x+1}</button>`;
+  }
+  document.getElementById("nav").innerHTML=h;
+}
+
+function go(x){
+  i=x;
+  render();
+  nav();
+}
+
+// TIMER
+function start(){
+  let t=3600;
+  setInterval(()=>{
+    t--;
+    let m=Math.floor(t/60);
+    let s=t%60;
+    document.getElementById("timer").innerHTML=
+    `${m}:${s<10?'0'+s:s}`;
+    if(t<=0) submit();
+  },1000);
+}
+
+// SUBMIT
+function submit(){
+  let skor=0;
+
+  soal.forEach((s,x)=>{
+    if(jawab[x]==s.kunci)skor++;
+  });
+
+  fetch(API,{
+    method:"POST",
+    body:JSON.stringify({
+      action:"submit",
+      nama,token,skor,jawaban:jawab
+    })
+  }).then(()=>alert("Skor: "+skor));
+}
+
+</script>
+
+</body>
+</html>
 /* SOAL AREA */
 .main{
   flex:3;

@@ -1,193 +1,13 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PHARMACORE CBT</title>
-
-<style>
-body{
-  margin:0;
-  font-family:system-ui;
-  background:#f4f5f7;
-  color:#111;
-}
-
-/* TOP BAR */
-.topbar{
-  background:white;
-  padding:12px 20px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  border-bottom:1px solid #ddd;
-  position:sticky;
-  top:0;
-}
-
-.brand{
-  font-weight:700;
-  color:#6d28d9;
-}
-
-.timer{
-  font-weight:600;
-  color:#dc2626;
-}
-
-/* LAYOUT */
-.wrapper{
-  display:flex;
-  gap:20px;
-  padding:20px;
-  max-width:1100px;
-  margin:auto;
-}
-
-/* SOAL */
-.card{
-  flex:3;
-  background:white;
-  padding:20px;
-  border-radius:12px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.05);
-}
-
-.q{
-  font-size:18px;
-  margin-bottom:15px;
-}
-
-.opt{
-  padding:12px;
-  border:1px solid #ddd;
-  border-radius:8px;
-  margin:10px 0;
-  cursor:pointer;
-  transition:0.2s;
-}
-
-.opt:hover{
-  border-color:#6d28d9;
-}
-
-.opt.active{
-  border-color:#6d28d9;
-  background:#ede9fe;
-}
-
-/* SIDEBAR */
-.side{
-  flex:1;
-  background:white;
-  padding:15px;
-  border-radius:12px;
-  height:fit-content;
-  box-shadow:0 2px 8px rgba(0,0,0,0.05);
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:6px;
-}
-
-.grid button{
-  padding:8px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-  background:#f3f4f6;
-}
-
-.grid button.done{
-  background:#6d28d9;
-  color:white;
-}
-
-.submit{
-  width:100%;
-  margin-top:15px;
-  padding:12px;
-  border:none;
-  background:#6d28d9;
-  color:white;
-  border-radius:8px;
-  cursor:pointer;
-}
-
-/* LOGIN */
-.login{
-  max-width:380px;
-  margin:100px auto;
-  background:white;
-  padding:20px;
-  border-radius:12px;
-  box-shadow:0 2px 10px rgba(0,0,0,0.1);
-}
-
-input{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-  border:1px solid #ddd;
-  border-radius:8px;
-}
-
-button{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-  background:#6d28d9;
-  color:white;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-}
-</style>
-</head>
-
-<body>
-
-<div id="login" class="login">
-  <h2 style="color:#6d28d9;">PHARMACORE CBT</h2>
-  <input id="token" placeholder="Token">
-  <input id="nama" placeholder="Nama">
-  <button onclick="login()">Masuk</button>
-</div>
-
-<div id="app" style="display:none;">
-
-  <div class="topbar">
-    <div class="brand">PHARMACORE CBT</div>
-    <div class="timer" id="timer">60:00</div>
-  </div>
-
-  <div class="wrapper">
-
-    <div class="card">
-      <div class="q" id="q"></div>
-      <div id="opt"></div>
-    </div>
-
-    <div class="side">
-      <div class="grid" id="nav"></div>
-      <button class="submit" onclick="submit()">Submit</button>
-    </div>
-
-  </div>
-
-</div>
-
-<script>
-
 const API = "https://script.google.com/macros/s/AKfycbzSsowhQ5m---cB1qAl7i1sJIMo6QLXSntyWS1AN-Y/exec";
 
-let soal=[],i=0,jawab={},token="",nama="";
+let soal=[], i=0, jawab={}, token="", nama="";
+let timerInterval;
+let isSubmitted = false;
 
 // LOGIN
 function login(){
-  token=document.getElementById("token").value;
-  nama=document.getElementById("nama").value;
+  token = document.getElementById("token").value;
+  nama = document.getElementById("nama").value;
 
   fetch(`${API}?action=validateToken&token=${token}`)
   .then(r=>r.json())
@@ -197,29 +17,31 @@ function login(){
       document.getElementById("app").style.display="block";
       load();
       start();
-    }else alert("Token salah");
+    } else {
+      alert("Token salah");
+    }
   });
 }
 
-// LOAD
+// LOAD SOAL
 function load(){
   fetch(`${API}?action=getSoal`)
   .then(r=>r.json())
   .then(res=>{
-    soal=res.soal;
+    soal = res.soal;
     render();
     nav();
   });
 }
 
-// RENDER
+// RENDER SOAL
 function render(){
-  let s=soal[i];
+  let s = soal[i];
 
-  document.getElementById("q").innerHTML=
-  (i+1)+". "+s.pertanyaan;
+  document.getElementById("q").innerHTML =
+    (i+1) + ". " + s.pertanyaan;
 
-  document.getElementById("opt").innerHTML=`
+  document.getElementById("opt").innerHTML = `
     <div class="opt ${jawab[i]=='A'?'active':''}" onclick="pilih('A')">A. ${s.a}</div>
     <div class="opt ${jawab[i]=='B'?'active':''}" onclick="pilih('B')">B. ${s.b}</div>
     <div class="opt ${jawab[i]=='C'?'active':''}" onclick="pilih('C')">C. ${s.c}</div>
@@ -227,57 +49,79 @@ function render(){
   `;
 }
 
+// PILIH JAWABAN
 function pilih(v){
-  jawab[i]=v;
+  jawab[i] = v;
   render();
+  nav();
 }
 
-// NAV
+// NAVIGASI SOAL
 function nav(){
-  let h="";
-  for(let x=0;x<soal.length;x++){
-    h+=`<button class="${jawab[x]?'done':''}" onclick="go(${x})">${x+1}</button>`;
+  let h = "";
+
+  for(let x=0; x<soal.length; x++){
+
+    let cls = "";
+    if(jawab[x]) cls = "done";
+    if(x === i) cls += " active";
+
+    h += `<button class="${cls}" onclick="go(${x})">${x+1}</button>`;
   }
-  document.getElementById("nav").innerHTML=h;
+
+  document.getElementById("nav").innerHTML = h;
 }
 
+// PINDAH SOAL
 function go(x){
-  i=x;
+  i = x;
   render();
   nav();
 }
 
 // TIMER
 function start(){
-  let t=3600;
-  setInterval(()=>{
+  let t = 3600;
+
+  timerInterval = setInterval(()=>{
     t--;
-    let m=Math.floor(t/60);
-    let s=t%60;
-    document.getElementById("timer").innerHTML=
-    `${m}:${s<10?'0'+s:s}`;
-    if(t<=0) submit();
+
+    let m = Math.floor(t/60);
+    let s = t % 60;
+
+    document.getElementById("timer").innerHTML =
+      `${m}:${s<10?'0'+s:s}`;
+
+    if(t <= 0){
+      clearInterval(timerInterval);
+      submit();
+    }
   },1000);
 }
 
 // SUBMIT
 function submit(){
-  let skor=0;
+
+  if(isSubmitted) return;
+  isSubmitted = true;
+
+  let skor = 0;
 
   soal.forEach((s,x)=>{
-    if(jawab[x]==s.kunci)skor++;
+    if(jawab[x] == s.kunci) skor++;
   });
 
-  fetch(API,{
+  fetch(API, {
     method:"POST",
-    body:JSON.stringify({
+    body: JSON.stringify({
       action:"submit",
-      nama,token,skor,jawaban:jawab
+      nama,
+      token,
+      skor,
+      jawaban: jawab
     })
-  }).then(()=>alert("Skor: "+skor));
+  }).then(()=>{
+    alert("Skor: " + skor);
+  });
+
 }
-
-</script>
-
-</body>
-</html>

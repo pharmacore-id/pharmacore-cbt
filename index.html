@@ -138,6 +138,10 @@
 
       <h3>Navigasi Soal</h3>
 
+     <div class="side">
+
+      <h3>Navigasi Soal</h3>
+
       <div class="summary">
 
         <div class="summary-item">
@@ -182,6 +186,41 @@
 
 </div>
 
+      <div id="nav" class="grid"></div>
+
+   <div class="legend">
+
+  <div>
+    <span class="dot done-dot"></span>
+    Sudah Dijawab
+  </div>
+
+  <div>
+    <span class="dot ragu-dot"></span>
+    Ditandai Ragu
+  </div>
+
+  <div>
+    <span class="dot empty-dot"></span>
+    Belum Dijawab
+  </div>
+
+</div>
+
+      <button
+        class="submit-btn"
+        onclick="submit()">
+
+        Kumpulkan Jawaban
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
 <!-- RESULT -->
 
 <div id="result">
@@ -208,3 +247,11 @@
 
 </body>
 </html>
+
+let raguCount =
+Object.keys(ragu).length;
+
+document
+.getElementById("raguSummary")
+.innerHTML =
+raguCount;

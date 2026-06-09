@@ -1,4 +1,4 @@
-const API = "https://script.google.com/macros/s/AKfycbyo48NoxjaBHGHkRCxgkxOB3Cys2Wa3mBG7AvK_n3TidyCSQcjSf5vSbCJpkI0-QJhk/exec";
+const API = "https://script.google.com/macros/s/AKfycbzSsowhQ5mKDzRcB1qAl7i1sJIMo6QLXSntyWS1AN-Y/exec";
 
 let soal = [], i = 0, jawab = {}, token = "", nama = "";
 let timerInterval;
@@ -36,7 +36,7 @@ function load(){
   fetch(`${API}?action=getSoal`)
   .then(r => r.json())
   .then(res => {
-    soal = res.soal;
+    soal = res.soal || [];
     render();
     nav();
   })
@@ -50,6 +50,9 @@ function load(){
    RENDER SOAL
 ====================== */
 function render(){
+
+  if(!soal[i]) return;
+
   let s = soal[i];
 
   document.getElementById("q").innerHTML =
@@ -73,7 +76,7 @@ function pilih(v){
 }
 
 /* ======================
-   NAVIGASI SOAL
+   NAVIGASI
 ====================== */
 function nav(){
   let h = "";
@@ -129,6 +132,8 @@ function submit(){
   if(isSubmitted) return;
   isSubmitted = true;
 
+  clearInterval(timerInterval); // penting
+
   let skor = 0;
 
   soal.forEach((s, x) => {
@@ -137,6 +142,9 @@ function submit(){
 
   fetch(API, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
     body: JSON.stringify({
       action: "submit",
       nama,

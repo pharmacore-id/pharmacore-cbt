@@ -81,7 +81,7 @@ function login(){
   document.getElementById("login").style.display = "none";
   document.getElementById("app").style.display = "block";
 
-  load(); // ❗ ini yang benar (bukan render dulu)
+  load(); // 🔥 INI YANG WAJIB
 
   start();
 

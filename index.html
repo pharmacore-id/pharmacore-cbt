@@ -1,17 +1,14 @@
-const API = "https://script.google.com/macros/s/AKfycbzSsowhQ5m---cB1qAl7i1sJIMo6QLXSntyWS1AN-Y/exec";
-
-let soal=[], i=0, jawab={}, token="", nama="";
-let timerInterval;
-let isSubmitted = false;
-
-// LOGIN
 function login(){
   token = document.getElementById("token").value;
   nama = document.getElementById("nama").value;
 
   fetch(`${API}?action=validateToken&token=${token}`)
-  .then(r=>r.json())
-  .then(res=>{
+  .then(r => r.text())
+  .then(text => {
+    console.log("RAW RESPONSE:", text);
+
+    let res = JSON.parse(text);
+
     if(res.valid){
       document.getElementById("login").style.display="none";
       document.getElementById("app").style.display="block";
@@ -20,108 +17,9 @@ function login(){
     } else {
       alert("Token salah");
     }
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Gagal konek ke server (API error)");
   });
-}
-
-// LOAD SOAL
-function load(){
-  fetch(`${API}?action=getSoal`)
-  .then(r=>r.json())
-  .then(res=>{
-    soal = res.soal;
-    render();
-    nav();
-  });
-}
-
-// RENDER SOAL
-function render(){
-  let s = soal[i];
-
-  document.getElementById("q").innerHTML =
-    (i+1) + ". " + s.pertanyaan;
-
-  document.getElementById("opt").innerHTML = `
-    <div class="opt ${jawab[i]=='A'?'active':''}" onclick="pilih('A')">A. ${s.a}</div>
-    <div class="opt ${jawab[i]=='B'?'active':''}" onclick="pilih('B')">B. ${s.b}</div>
-    <div class="opt ${jawab[i]=='C'?'active':''}" onclick="pilih('C')">C. ${s.c}</div>
-    <div class="opt ${jawab[i]=='D'?'active':''}" onclick="pilih('D')">D. ${s.d}</div>
-  `;
-}
-
-// PILIH JAWABAN
-function pilih(v){
-  jawab[i] = v;
-  render();
-  nav();
-}
-
-// NAVIGASI SOAL
-function nav(){
-  let h = "";
-
-  for(let x=0; x<soal.length; x++){
-
-    let cls = "";
-    if(jawab[x]) cls = "done";
-    if(x === i) cls += " active";
-
-    h += `<button class="${cls}" onclick="go(${x})">${x+1}</button>`;
-  }
-
-  document.getElementById("nav").innerHTML = h;
-}
-
-// PINDAH SOAL
-function go(x){
-  i = x;
-  render();
-  nav();
-}
-
-// TIMER
-function start(){
-  let t = 3600;
-
-  timerInterval = setInterval(()=>{
-    t--;
-
-    let m = Math.floor(t/60);
-    let s = t % 60;
-
-    document.getElementById("timer").innerHTML =
-      `${m}:${s<10?'0'+s:s}`;
-
-    if(t <= 0){
-      clearInterval(timerInterval);
-      submit();
-    }
-  },1000);
-}
-
-// SUBMIT
-function submit(){
-
-  if(isSubmitted) return;
-  isSubmitted = true;
-
-  let skor = 0;
-
-  soal.forEach((s,x)=>{
-    if(jawab[x] == s.kunci) skor++;
-  });
-
-  fetch(API, {
-    method:"POST",
-    body: JSON.stringify({
-      action:"submit",
-      nama,
-      token,
-      skor,
-      jawaban: jawab
-    })
-  }).then(()=>{
-    alert("Skor: " + skor);
-  });
-
 }

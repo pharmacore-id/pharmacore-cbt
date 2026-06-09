@@ -54,24 +54,24 @@
 <!-- APP -->
 <div id="app" style="display:none;">
 
-  <!-- TOPBAR -->
   <div class="topbar">
 
     <div class="brand">PHARMACORE CBT</div>
 
     <div class="top-right">
+
       <div class="progress-text">
         <span id="answeredCount">0</span>/<span id="totalCount">0</span> dijawab
       </div>
 
       <div class="timer" id="timer">60:00</div>
+
     </div>
 
   </div>
 
   <div class="wrapper">
 
-    <!-- MAIN -->
     <div class="card">
 
       <div class="question-header">
@@ -87,15 +87,15 @@
 
       <div class="action-row">
 
-        <button type="button" class="secondary-btn" onclick="prevQuestion()">
+        <button class="secondary-btn" onclick="prevQuestion()">
           ← Sebelumnya
         </button>
 
-        <button type="button" class="ragu-btn" onclick="toggleRagu()">
+        <button class="ragu-btn" onclick="toggleRagu()">
           🚩 Ragu
         </button>
 
-        <button type="button" class="secondary-btn" onclick="nextQuestion()">
+        <button class="secondary-btn" onclick="nextQuestion()">
           Berikutnya →
         </button>
 
@@ -103,7 +103,6 @@
 
     </div>
 
-    <!-- SIDEBAR (FIXED: only ONE instance) -->
     <div class="side">
 
       <h3>Navigasi Soal</h3>
@@ -132,7 +131,7 @@
 
       </div>
 
-      <button class="submit-btn" onclick="submit()">
+      <button class="submit-btn" onclick="submitExam()">
         Kumpulkan Jawaban
       </button>
 
@@ -152,7 +151,7 @@
 </div>
 
 <!-- RESULT -->
-<div id="result">
+<div id="result" style="display:none;">
 
   <div class="result-card">
 
@@ -179,10 +178,7 @@
 
     <div class="calculator-header">
       <span>🧮 Kalkulator</span>
-
-      <button class="close-calc" onclick="toggleCalculator()">
-        ✕
-      </button>
+      <button class="close-calc" onclick="toggleCalculator()">✕</button>
     </div>
 
     <input type="text" id="calcDisplay" readonly>

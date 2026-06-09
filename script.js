@@ -16,7 +16,7 @@ let timer;
 let isDone = false;
 
 /* =========================
-LOGIN (FIXED: ONLY ONE VERSION)
+LOGIN
 ========================= */
 
 function login(){
@@ -42,7 +42,7 @@ function login(){
     document.getElementById("app").style.display = "block";
 
     load();
-    start(); // FIX: timer sebelumnya tidak pernah dipanggil
+
   });
 }
 
@@ -61,7 +61,7 @@ function saveState(){
 }
 
 /* =========================
-INIT RESTORE (FIXED)
+RESTORE (FIXED SAFE)
 ========================= */
 
 window.addEventListener("DOMContentLoaded", function(){
@@ -83,6 +83,8 @@ window.addEventListener("DOMContentLoaded", function(){
     document.getElementById("login").style.display = "none";
     document.getElementById("app").style.display = "block";
 
+    load(); // FIX: sebelumnya tidak load soal setelah refresh
+
   } catch(e){
     localStorage.removeItem("cbt_state");
   }
@@ -102,14 +104,21 @@ function load(){
 
     document.getElementById("totalCount").innerText = soal.length;
 
+    // FIX: reset kalau index out of range
+    if(currentQuestion >= soal.length){
+      currentQuestion = 0;
+    }
+
     renderQuestion();
     nav();
-    updateSidebarSummary();
+    updateStats();
+
+    start(); // FIX: timer hanya start setelah soal ready
   });
 }
 
 /* =========================
-RENDER (FIXED i -> currentQuestion)
+RENDER
 ========================= */
 
 function renderQuestion(){
@@ -125,35 +134,22 @@ function renderQuestion(){
   document.getElementById("opt").innerHTML = `
 
     <div class="opt ${answers[currentQuestion]=='A'?'active':''}"
-         onclick="pick('A')">
-      <div class="letter">A</div>
-      <div>${s.a}</div>
-    </div>
+         onclick="pick('A')">A. ${s.a}</div>
 
     <div class="opt ${answers[currentQuestion]=='B'?'active':''}"
-         onclick="pick('B')">
-      <div class="letter">B</div>
-      <div>${s.b}</div>
-    </div>
+         onclick="pick('B')">B. ${s.b}</div>
 
     <div class="opt ${answers[currentQuestion]=='C'?'active':''}"
-         onclick="pick('C')">
-      <div class="letter">C</div>
-      <div>${s.c}</div>
-    </div>
+         onclick="pick('C')">C. ${s.c}</div>
 
     <div class="opt ${answers[currentQuestion]=='D'?'active':''}"
-         onclick="pick('D')">
-      <div class="letter">D</div>
-      <div>${s.d}</div>
-    </div>
+         onclick="pick('D')">D. ${s.d}</div>
 
   `;
 
   const raguBtn = document.querySelector(".ragu-btn");
 
   if(raguBtn){
-
     if(ragu[currentQuestion]){
       raguBtn.classList.add("active");
       raguBtn.innerHTML = "🚩 Ditandai Ragu";
@@ -167,7 +163,7 @@ function renderQuestion(){
 }
 
 /* =========================
-PICK (FIXED)
+ANSWER
 ========================= */
 
 function pick(v){
@@ -182,7 +178,7 @@ function pick(v){
 }
 
 /* =========================
-NAV (FIXED)
+NAV
 ========================= */
 
 function nav(){
@@ -217,7 +213,7 @@ function go(x){
 }
 
 /* =========================
-NEXT / PREV (FIXED SINGLE SOURCE)
+NEXT / PREV
 ========================= */
 
 function nextQuestion(){
@@ -241,7 +237,7 @@ function prevQuestion(){
 }
 
 /* =========================
-RAGU (FIXED)
+RAGU
 ========================= */
 
 function toggleRagu(){
@@ -266,13 +262,12 @@ function updateProgress(){
 }
 
 /* =========================
-STATS (FIXED consistency)
+STATS
 ========================= */
 
 function updateStats(){
 
   const answered = Object.keys(answers).length;
-
   const unanswered = soal.length - answered;
 
   document.getElementById("answeredCount").innerText = answered;
@@ -281,10 +276,12 @@ function updateStats(){
 }
 
 /* =========================
-TIMER (FIXED: actually starts)
+TIMER (FIXED DOUBLE START SAFE)
 ========================= */
 
 function start(){
+
+  if(timer) clearInterval(timer); // FIX: prevent double timer
 
   let t = 3600;
 
@@ -306,7 +303,7 @@ function start(){
 }
 
 /* =========================
-SUBMIT (unchanged logic)
+SUBMIT
 ========================= */
 
 function submit(){

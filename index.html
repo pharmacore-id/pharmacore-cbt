@@ -1,40 +1,286 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>PHARMACORE CBT</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PHARMACORE CBT</title>
 
-  <style>
-    body {
-      font-family: Arial;
-      background: #1a0033;
-      color: white;
-      margin: 0;
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0f061f;
+  color:white;
+}
+
+/* HEADER */
+.header{
+  display:flex;
+  justify-content:space-between;
+  padding:15px 20px;
+  background:#1b0a33;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+
+.timer{
+  color:#ffcc00;
+  font-weight:bold;
+}
+
+/* LAYOUT */
+.container{
+  display:flex;
+  gap:15px;
+  padding:15px;
+}
+
+/* SOAL AREA */
+.main{
+  flex:3;
+  background:#1b0a33;
+  padding:20px;
+  border-radius:12px;
+}
+
+.question{
+  font-size:18px;
+  margin-bottom:15px;
+}
+
+/* OPSI */
+.option{
+  display:block;
+  background:#2a1450;
+  padding:12px;
+  margin:10px 0;
+  border-radius:8px;
+  cursor:pointer;
+  border:1px solid transparent;
+}
+
+.option:hover{
+  border:1px solid #7c3aed;
+}
+
+/* SIDEBAR */
+.sidebar{
+  flex:1;
+  background:#1b0a33;
+  padding:15px;
+  border-radius:12px;
+  height:fit-content;
+}
+
+.nav{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:8px;
+}
+
+.nav button{
+  padding:8px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  background:#2a1450;
+  color:white;
+}
+
+.nav button.active{
+  background:#7c3aed;
+}
+
+.btn-submit{
+  width:100%;
+  margin-top:15px;
+  padding:12px;
+  background:#7c3aed;
+  border:none;
+  color:white;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+/* LOGIN */
+.login{
+  max-width:400px;
+  margin:80px auto;
+  background:#1b0a33;
+  padding:20px;
+  border-radius:12px;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border-radius:8px;
+  border:none;
+}
+
+button{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  background:#7c3aed;
+  border:none;
+  color:white;
+  border-radius:8px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div id="loginBox" class="login">
+  <h2>PHARMACORE CBT</h2>
+  <input id="token" placeholder="Token">
+  <input id="nama" placeholder="Nama">
+  <button onclick="login()">Masuk</button>
+</div>
+
+<div id="cbtBox" style="display:none;">
+
+  <div class="header">
+    <div>PHARMACORE CBT</div>
+    <div class="timer" id="timer">60:00</div>
+  </div>
+
+  <div class="container">
+
+    <div class="main">
+      <div class="question" id="question"></div>
+      <div id="options"></div>
+    </div>
+
+    <div class="sidebar">
+      <div class="nav" id="nav"></div>
+      <button class="btn-submit" onclick="submit()">Submit</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+
+const API_URL = "https://script.google.com/macros/s/AKfycbzSsowhQ5m---cB1qAl7i1sJIMo6QLXSntyWS1AN-Y/exec";
+
+let soal = [];
+let index = 0;
+let jawaban = {};
+let token = "";
+let nama = "";
+
+// LOGIN
+function login(){
+  token = document.getElementById("token").value;
+  nama = document.getElementById("nama").value;
+
+  fetch(`${API_URL}?action=validateToken&token=${token}`)
+  .then(r=>r.json())
+  .then(res=>{
+    if(res.valid){
+      document.getElementById("loginBox").style.display="none";
+      document.getElementById("cbtBox").style.display="block";
+      loadSoal();
+      timer();
+    } else {
+      alert("Token salah");
     }
+  });
+}
 
-    .container {
-      max-width: 900px;
-      margin: auto;
-      padding: 20px;
-    }
+// LOAD SOAL
+function loadSoal(){
+  fetch(`${API_URL}?action=getSoal`)
+  .then(r=>r.json())
+  .then(res=>{
+    soal = res.soal;
+    render();
+    nav();
+  });
+}
 
-    .card {
-      background: #2a0055;
-      padding: 20px;
-      border-radius: 12px;
-      margin-top: 20px;
-    }
+// RENDER SOAL
+function render(){
+  let s = soal[index];
 
-    input, button {
-      padding: 10px;
-      width: 100%;
-      margin-top: 10px;
-      border-radius: 8px;
-      border: none;
-    }
+  document.getElementById("question").innerHTML =
+  (index+1)+". "+s.pertanyaan;
 
-    button {
-      background: #7c3aed;
+  document.getElementById("options").innerHTML = `
+    <div class="option" onclick="pilih('A')">A. ${s.a}</div>
+    <div class="option" onclick="pilih('B')">B. ${s.b}</div>
+    <div class="option" onclick="pilih('C')">C. ${s.c}</div>
+    <div class="option" onclick="pilih('D')">D. ${s.d}</div>
+  `;
+}
+
+// PILIH
+function pilih(v){
+  jawaban[index]=v;
+}
+
+// NAV
+function nav(){
+  let html="";
+  for(let i=0;i<soal.length;i++){
+    html+=`<button onclick="go(${i})">${i+1}</button>`;
+  }
+  document.getElementById("nav").innerHTML=html;
+}
+
+function go(i){
+  index=i;
+  render();
+}
+
+// TIMER
+function timer(){
+  let t=3600;
+
+  setInterval(()=>{
+    t--;
+    let m=Math.floor(t/60);
+    let s=t%60;
+    document.getElementById("timer").innerHTML=
+    `${m}:${s<10?"0"+s:s}`;
+
+    if(t<=0) submit();
+  },1000);
+}
+
+// SUBMIT
+function submit(){
+  let skor=0;
+
+  soal.forEach((s,i)=>{
+    if(jawaban[i]==s.kunci) skor++;
+  });
+
+  fetch(API_URL,{
+    method:"POST",
+    body:JSON.stringify({
+      action:"submit",
+      nama,
+      token,
+      skor,
+      jawaban
+    })
+  })
+  .then(r=>r.json())
+  .then(()=>{
+    alert("Skor kamu: "+skor);
+    location.reload();
+  });
+}
+
+</script>
+
+</body>
+</html>      background: #7c3aed;
       color: white;
       cursor: pointer;
     }

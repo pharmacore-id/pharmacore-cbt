@@ -1,6 +1,5 @@
 const API = "https://script.google.com/macros/s/AKfycbyo48NoxjaBHGHkRCxgkxOB3Cys2Wa3mBG7AvK_n3TidyCSQcjSf5vSbCJpkI0-QJhk/exec";
 
-
 let soal = [];
 let i = 0;
 let jawab = {};
@@ -49,7 +48,6 @@ function load(){
   .then(res => {
 
     soal = res.soal || [];
-
     i = 0;
 
     render();

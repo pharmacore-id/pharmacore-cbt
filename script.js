@@ -69,25 +69,21 @@ function login(){
 
   nama = n;
 
-  const state = {
+  localStorage.setItem("cbt_state", JSON.stringify({
     loggedIn: true,
     currentQuestion: 0,
     answers: {},
     ragu: {},
     nama,
     token
-  };
-
-  localStorage.setItem("cbt_state", JSON.stringify(state));
+  }));
 
   document.getElementById("login").style.display = "none";
   document.getElementById("app").style.display = "block";
 
-  render();
-  nav();
-  updateStats();
+  load(); // ❗ ini yang benar (bukan render dulu)
 
-  start(); // timer start
+  start();
 
 }
 

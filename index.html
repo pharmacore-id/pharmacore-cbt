@@ -134,62 +134,71 @@
 
     <!-- SIDEBAR -->
 
-    <div class="side">
+   <!-- SIDEBAR -->
 
-      <h3>Navigasi Soal</h3>
+<div class="side">
 
-     <div class="side">
+  <h3>Navigasi Soal</h3>
 
-      <h3>Navigasi Soal</h3>
+  <div class="summary">
 
-      <div class="summary">
+    <div class="summary-item">
+      <span>Terjawab</span>
+      <strong id="answeredSummary">0</strong>
+    </div>
 
-        <div class="summary-item">
-          <span>Terjawab</span>
-          <strong id="answeredSummary">0</strong>
-        </div>
+    <div class="summary-item">
+      <span>Belum</span>
+      <strong id="unansweredSummary">0</strong>
+    </div>
 
-        <div class="summary-item">
-          <span>Belum</span>
-          <strong id="unansweredSummary">0</strong>
-        </div>
-
-      </div>
-
-      <div id="nav" class="grid"></div>
-
-<div class="legend">
-
-  <div>
-    <span class="dot done-dot"></span>
-    Sudah Dijawab
   </div>
 
-  <div>
-    <span class="dot ragu-dot"></span>
-    Ditandai Ragu
+  <div id="nav" class="grid"></div>
+
+  <div class="legend">
+
+    <div>
+      <span class="dot done-dot"></span>
+      Sudah Dijawab
+    </div>
+
+    <div>
+      <span class="dot ragu-dot"></span>
+      Ditandai Ragu
+    </div>
+
+    <div>
+      <span class="dot empty-dot"></span>
+      Belum Dijawab
+    </div>
+
   </div>
 
-  <div>
-    <span class="dot empty-dot"></span>
-    Belum Dijawab
-  </div>
+  <button
+    class="submit-btn"
+    onclick="submit()">
+    Kumpulkan Jawaban
+  </button>
+
+  <hr style="margin:20px 0;border:none;border-top:1px solid #eee;">
+
+  <button
+    class="secondary-btn"
+    onclick="toggleDarkMode()">
+    🌙 Dark Mode
+  </button>
+
+  <button
+    class="secondary-btn"
+    style="margin-top:10px;"
+    onclick="toggleCalculator()">
+    🧮 Kalkulator
+  </button>
 
 </div>
-
-<button class="submit-btn" onclick="submit()">
-  Kumpulkan Jawaban
-</button>
-
-<hr style="margin:20px 0;border:none;border-top:1px solid #eee;">
-
-<button class="secondary-btn" onclick="toggleDarkMode()">
-  🌙 Dark Mode
-</button>
-
-<button class="secondary-btn" onclick="toggleCalculator()">
-  🧮 Kalkulator
-</button>
+    </div>
+  </div>
        
 <!-- RESULT -->
 
@@ -208,6 +217,61 @@
     <h3>Leaderboard</h3>
 
     <div id="board"></div>
+
+  </div>
+
+</div>
+
+  <!-- CALCULATOR POPUP -->
+
+<div id="calculatorModal" class="calculator-modal">
+
+  <div class="calculator-box">
+
+    <div class="calculator-header">
+      <span>🧮 Kalkulator</span>
+
+      <button
+        class="close-calc"
+        onclick="toggleCalculator()">
+        ✕
+      </button>
+    </div>
+
+    <input
+      type="text"
+      id="calcDisplay"
+      readonly>
+
+    <div class="calc-grid">
+
+      <button onclick="calc('7')">7</button>
+      <button onclick="calc('8')">8</button>
+      <button onclick="calc('9')">9</button>
+      <button onclick="calc('/')">÷</button>
+
+      <button onclick="calc('4')">4</button>
+      <button onclick="calc('5')">5</button>
+      <button onclick="calc('6')">6</button>
+      <button onclick="calc('*')">×</button>
+
+      <button onclick="calc('1')">1</button>
+      <button onclick="calc('2')">2</button>
+      <button onclick="calc('3')">3</button>
+      <button onclick="calc('-')">−</button>
+
+      <button onclick="calc('0')">0</button>
+      <button onclick="calc('.')">.</button>
+      <button onclick="calculateResult()">=</button>
+      <button onclick="calc('+')">+</button>
+
+      <button
+        class="calc-clear"
+        onclick="clearCalc()">
+        C
+      </button>
+
+    </div>
 
   </div>
 

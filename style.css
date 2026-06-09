@@ -700,3 +700,36 @@ MOBILE
     font-size:32px;
   }
 }
+.ragu-btn{
+
+  flex:1;
+
+  border:none;
+
+  padding:14px;
+
+  border-radius:16px;
+
+  background:#fef3c7;
+
+  color:#92400e;
+
+  font-weight:600;
+
+  cursor:pointer;
+
+}
+
+.ragu{
+
+  background:#f59e0b !important;
+
+  color:white !important;
+
+}
+
+.ragu-dot{
+
+  background:#f59e0b;
+
+}

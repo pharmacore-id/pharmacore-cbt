@@ -106,7 +106,7 @@ function login() {
   token = document.getElementById("token").value;
   nama = document.getElementById("nama").value;
 
-  fetch(`YOUR_APPS_SCRIPT_URL?action=validateToken&token=${token}`)
+  fetch(`https://script.google.com/macros/s/AKfycbynWo-x1zFn7rkygSMtG3czSI8MTsbgZUOs8rjkPCy0TB0jAQW6onTYcLKmecXtbyEKRg/exec?action=validateToken&token=${token}`)
     .then(res => res.json())
     .then(data => {
       if (data.valid) {

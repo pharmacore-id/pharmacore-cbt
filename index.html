@@ -1,137 +1,153 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PHARMACORE CBT</title>
+<title>CBT ULTRA PRO</title>
 
 <style>
+:root{
+  --primary:#6d28d9;
+  --bg:#f5f3ff;
+  --card:#fff;
+  --danger:#ef4444;
+  --warning:#f59e0b;
+  --success:#22c55e;
+}
+
 body{
   margin:0;
   font-family:system-ui;
-  background:#f4f5f7;
+  background:var(--bg);
 }
 
 /* LOGIN */
-.login{
+#login{
   max-width:360px;
   margin:120px auto;
-  padding:20px;
-  background:white;
-  border-radius:12px;
-  box-shadow:0 4px 20px rgba(0,0,0,0.1);
+  background:#fff;
+  padding:24px;
+  border-radius:16px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.08);
 }
 
-input{
+input,button{
   width:100%;
-  padding:10px;
+  padding:12px;
   margin-top:10px;
+  border-radius:10px;
   border:1px solid #ddd;
-  border-radius:8px;
 }
 
-button{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-  background:#6d28d9;
-  color:white;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-}
-
-/* APP */
+/* TOPBAR */
 .topbar{
   display:flex;
   justify-content:space-between;
   padding:12px 20px;
-  background:white;
-  border-bottom:1px solid #ddd;
+  background:#fff;
   position:sticky;
   top:0;
+  border-bottom:1px solid #eee;
 }
 
+.brand{color:var(--primary);font-weight:700;}
+.timer{color:var(--danger);font-weight:700;}
+
+/* LAYOUT */
 .wrapper{
   display:flex;
-  gap:20px;
-  padding:20px;
+  gap:16px;
+  padding:16px;
   max-width:1100px;
   margin:auto;
 }
 
 .card{
   flex:3;
-  background:white;
+  background:#fff;
   padding:20px;
-  border-radius:12px;
+  border-radius:14px;
 }
 
 .side{
   flex:1;
-  background:white;
-  padding:15px;
-  border-radius:12px;
+  background:#fff;
+  padding:12px;
+  border-radius:14px;
 }
 
+/* OPTIONS */
 .opt{
-  padding:10px;
+  padding:12px;
   border:1px solid #ddd;
-  border-radius:8px;
+  border-radius:10px;
   margin:8px 0;
   cursor:pointer;
 }
 
-.opt:hover{
-  border-color:#6d28d9;
-}
-
 .opt.active{
   background:#ede9fe;
-  border-color:#6d28d9;
+  border-color:var(--primary);
 }
 
+/* NAV */
 .grid{
   display:grid;
   grid-template-columns:repeat(5,1fr);
-  gap:5px;
+  gap:6px;
 }
 
 .grid button{
   padding:8px;
   border:none;
-  border-radius:6px;
-  background:#eee;
+  border-radius:8px;
   cursor:pointer;
+  background:#eee;
 }
 
-.grid button.done{
-  background:#6d28d9;
-  color:white;
+.done{background:var(--success)!important;color:#fff;}
+.ragu{background:var(--warning)!important;color:#fff;}
+.activeQ{outline:2px solid var(--primary);}
+
+/* CONTROL */
+.control{
+  display:flex;
+  gap:6px;
+  margin-top:10px;
 }
 
-.grid button.active{
-  outline:2px solid black;
+.control button{
+  flex:1;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+}
+
+.submit{
+  width:100%;
+  margin-top:10px;
+  padding:12px;
+  background:var(--primary);
+  color:#fff;
+  border:none;
+  border-radius:12px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div id="login" class="login">
-  <h2>PHARMACORE CBT</h2>
+<div id="login">
+  <h3>CBT LOGIN</h3>
   <input id="token" placeholder="Token">
   <input id="nama" placeholder="Nama">
   <button onclick="login()">Masuk</button>
 </div>
 
-<!-- APP -->
 <div id="app" style="display:none;">
 
   <div class="topbar">
-    <div><b>PHARMACORE CBT</b></div>
-    <div id="timer">60:00</div>
+    <div class="brand">CBT ULTRA PRO</div>
+    <div class="timer" id="timer">60:00</div>
   </div>
 
   <div class="wrapper">
@@ -139,6 +155,16 @@ button{
     <div class="card">
       <div id="q"></div>
       <div id="opt"></div>
+
+      <div class="control">
+        <button onclick="prev()">Prev</button>
+        <button onclick="flag()">Ragu</button>
+        <button onclick="next()">Next</button>
+      </div>
+
+      <button class="submit" onclick="submit()">SUBMIT</button>
+
+      <div id="progress" style="margin-top:10px;"></div>
     </div>
 
     <div class="side">

@@ -96,12 +96,18 @@ TOOGLE RAGU
 function toggleRagu(){
 
   if(ragu[i]){
+
     delete ragu[i];
+
   }else{
+
     ragu[i] = true;
+
   }
 
+  render();
   nav();
+
 }
 
 /* =========================
@@ -114,11 +120,46 @@ function render(){
 
   if(!s) return;
 
+  document.getElementById("questionLabel").innerHTML =
+  `Soal ${i+1}`;
+
   document.getElementById("q").innerHTML =
-  (i+1)+". "+s.pertanyaan;
+  s.pertanyaan;
 
   document.getElementById("opt").innerHTML = `
-    ...
+
+    <div class="opt ${jawab[i]=='A'?'active':''}"
+         onclick="pick('A')">
+
+      <div class="letter">A</div>
+      <div>${s.a}</div>
+
+    </div>
+
+    <div class="opt ${jawab[i]=='B'?'active':''}"
+         onclick="pick('B')">
+
+      <div class="letter">B</div>
+      <div>${s.b}</div>
+
+    </div>
+
+    <div class="opt ${jawab[i]=='C'?'active':''}"
+         onclick="pick('C')">
+
+      <div class="letter">C</div>
+      <div>${s.c}</div>
+
+    </div>
+
+    <div class="opt ${jawab[i]=='D'?'active':''}"
+         onclick="pick('D')">
+
+      <div class="letter">D</div>
+      <div>${s.d}</div>
+
+    </div>
+
   `;
 
   const raguBtn =
@@ -129,56 +170,20 @@ function render(){
     if(ragu[i]){
 
       raguBtn.classList.add("active");
-      raguBtn.innerHTML = "🚩 Ditandai";
+      raguBtn.innerHTML =
+      "🚩 Ditandai Ragu";
 
     }else{
 
       raguBtn.classList.remove("active");
-      raguBtn.innerHTML = "🚩 Tandai";
+      raguBtn.innerHTML =
+      "🚩 Tandai Ragu";
 
     }
   }
-}
-
-  `
-  <div class="opt ${jawab[i]=='A'?'active':''}"
-       onclick="pick('A')">
-
-      <div class="letter">A</div>
-
-      <div>${s.a}</div>
-
-  </div>
-
-  <div class="opt ${jawab[i]=='B'?'active':''}"
-       onclick="pick('B')">
-
-      <div class="letter">B</div>
-
-      <div>${s.b}</div>
-
-  </div>
-
-  <div class="opt ${jawab[i]=='C'?'active':''}"
-       onclick="pick('C')">
-
-      <div class="letter">C</div>
-
-      <div>${s.c}</div>
-
-  </div>
-
-  <div class="opt ${jawab[i]=='D'?'active':''}"
-       onclick="pick('D')">
-
-      <div class="letter">D</div>
-
-      <div>${s.d}</div>
-
-  </div>
-  `;
 
   updateProgress();
+
 }
 
 /* =========================

@@ -1,18 +1,11 @@
 const API = "https://script.google.com/macros/s/AKfycbyo48NoxjaBHGHkRCxgkxOB3Cys2Wa3mBG7AvK_n3TidyCSQcjSf5vSbCJpkI0-QJhk/exec";
 
-let soal = [];
-let i = 0;
-let jawab = {};
-let ragu = {};
-let token = "";
-let nama = "";
-let timer;
-let isSubmit = false;
+let soal=[],i=0,jawab={},token="",nama="",timer,isDone=false;
 
 /* LOGIN */
 function login(){
-  token = document.getElementById("token").value.trim();
-  nama = document.getElementById("nama").value.trim();
+  nama=document.getElementById("nama").value.trim();
+  token=document.getElementById("token").value.trim();
 
   fetch(`${API}?action=validateToken&token=${token}`)
   .then(r=>r.json())
@@ -21,16 +14,16 @@ function login(){
       document.getElementById("login").style.display="none";
       document.getElementById("app").style.display="block";
       load();
-    } else alert("Token salah");
+    }else alert("Token salah");
   });
 }
 
-/* LOAD */
+/* LOAD SOAL */
 function load(){
   fetch(`${API}?action=getSoal`)
   .then(r=>r.json())
   .then(res=>{
-    soal = res.soal || [];
+    soal=res.soal||[];
     i=0;
     render();
     nav();
@@ -40,13 +33,12 @@ function load(){
 
 /* RENDER */
 function render(){
-  let s = soal[i];
+  let s=soal[i];
   if(!s) return;
 
-  document.getElementById("q").innerHTML =
-    (i+1)+". "+s.pertanyaan;
+  document.getElementById("q").innerHTML=(i+1)+". "+s.pertanyaan;
 
-  document.getElementById("opt").innerHTML = `
+  document.getElementById("opt").innerHTML=`
     <div class="opt ${jawab[i]=='A'?'active':''}" onclick="pick('A')">A. ${s.a}</div>
     <div class="opt ${jawab[i]=='B'?'active':''}" onclick="pick('B')">B. ${s.b}</div>
     <div class="opt ${jawab[i]=='C'?'active':''}" onclick="pick('C')">C. ${s.c}</div>
@@ -54,7 +46,7 @@ function render(){
   `;
 }
 
-/* PICK */
+/* PILIH */
 function pick(v){
   jawab[i]=v;
   render();
@@ -64,37 +56,22 @@ function pick(v){
 /* NAV */
 function nav(){
   let h="";
-  let done=0;
 
   for(let x=0;x<soal.length;x++){
     let c="";
-
-    if(jawab[x]){ c+="done "; done++; }
-    if(ragu[x]) c+="ragu ";
-    if(x===i) c+="activeQ";
+    if(jawab[x]) c="done";
+    if(x===i) c="activeQ";
 
     h+=`<button class="${c}" onclick="go(${x})">${x+1}</button>`;
   }
 
   document.getElementById("nav").innerHTML=h;
-
-  document.getElementById("progress").innerHTML =
-    `Progress: ${done}/${soal.length}`;
 }
 
-/* NAV GO */
+/* GO */
 function go(x){
   i=x;
   render();
-  nav();
-}
-
-/* CONTROL */
-function prev(){ if(i>0){i--;render();nav();} }
-function next(){ if(i<soal.length-1){i++;render();nav();} }
-
-function flag(){
-  ragu[i]=!ragu[i];
   nav();
 }
 
@@ -104,7 +81,6 @@ function start(){
 
   timer=setInterval(()=>{
     t--;
-
     let m=Math.floor(t/60);
     let s=t%60;
 
@@ -118,8 +94,9 @@ function start(){
 
 /* SUBMIT */
 function submit(){
-  if(isSubmit) return;
-  isSubmit=true;
+
+  if(isDone) return;
+  isDone=true;
 
   clearInterval(timer);
 
@@ -135,7 +112,28 @@ function submit(){
       action:"submit",
       nama,token,skor,jawaban:jawab
     })
-  });
+  })
+  .then(()=>showResult(skor));
+}
 
-  alert("SELESAI!\nSkor: "+skor);
+/* RESULT + LEADERBOARD */
+function showResult(skor){
+
+  document.getElementById("app").style.display="none";
+  document.getElementById("result").style.display="block";
+
+  document.getElementById("skor").innerHTML="Skor kamu: "+skor;
+
+  fetch(`${API}?action=leaderboard`)
+  .then(r=>r.json())
+  .then(res=>{
+
+    let h="";
+
+    res.leaderboard.forEach((u,i)=>{
+      h+=`<p>${i+1}. ${u.nama} - ${u.skor}</p>`;
+    });
+
+    document.getElementById("board").innerHTML=h;
+  });
 }

@@ -6,11 +6,6 @@
 
 <title>PHARMACORE CBT</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
 <link rel="stylesheet" href="style.css">
 </head>
 
@@ -21,31 +16,14 @@
 
   <div class="login-card">
 
-    <div class="badge">✨ TRY OUT UKMPPAI</div>
+    <h2>PHARMACORE CBT</h2>
 
-    <h1>PHARMACORE CBT</h1>
-
-    <p class="subtitle">
-      Simulasi dan Prediksi UKMPPAI untuk Calon Apoteker Indonesia
-    </p>
-
-    <div class="form-group">
-      <label>Nama Peserta</label>
-      <input id="nama" placeholder="Masukkan nama lengkap">
-    </div>
-
-    <div class="form-group">
-      <label>Token Ujian</label>
-      <input id="token" placeholder="Masukkan token ujian">
-    </div>
+    <input id="nama" placeholder="Nama Peserta">
+    <input id="token" placeholder="Token Ujian">
 
     <button class="start-btn" onclick="login()">
       Mulai Ujian
     </button>
-
-    <div class="exam-info">
-      50 Soal • 60 Menit • CBT Online
-    </div>
 
   </div>
 
@@ -57,14 +35,11 @@
   <!-- TOPBAR -->
   <div class="topbar">
 
-    <div class="brand">PHARMACORE CBT</div>
+    <div>PHARMACORE CBT</div>
 
-    <div class="top-right">
-      <div class="progress-text">
-        <span id="answeredCount">0</span>/<span id="totalCount">0</span> dijawab
-      </div>
-
-      <div class="timer" id="timer">60:00</div>
+    <div>
+      <span id="answeredCount">0</span> / <span id="totalCount">0</span>
+      <span id="timer">60:00</span>
     </div>
 
   </div>
@@ -74,77 +49,35 @@
     <!-- MAIN -->
     <div class="card">
 
-      <div class="question-header">
-        <div class="question-badge" id="questionLabel">Soal 1</div>
-      </div>
+      <div id="questionLabel">Soal</div>
 
       <div class="progress">
-        <div class="fill" id="progressFill"></div>
+        <div id="progressFill"></div>
       </div>
 
       <div id="q"></div>
       <div id="opt"></div>
 
-      <div class="action-row">
+      <button onclick="toggleRagu()" class="ragu-btn">Ragu</button>
 
-        <button type="button" class="secondary-btn" onclick="prevQuestion()">
-          ← Sebelumnya
-        </button>
-
-        <button type="button" class="ragu-btn" onclick="toggleRagu()">
-          🚩 Ragu
-        </button>
-
-        <button type="button" class="secondary-btn" onclick="nextQuestion()">
-          Berikutnya →
-        </button>
-
+      <div style="margin-top:10px;">
+        <button onclick="prevQuestion()">Prev</button>
+        <button onclick="nextQuestion()">Next</button>
       </div>
 
     </div>
 
-    <!-- SIDEBAR (FIXED: only ONE instance) -->
+    <!-- SIDE -->
     <div class="side">
-
-      <h3>Navigasi Soal</h3>
-
-      <div class="summary">
-
-        <div class="summary-item">
-          <span>Terjawab</span>
-          <strong id="answeredSummary">0</strong>
-        </div>
-
-        <div class="summary-item">
-          <span>Belum</span>
-          <strong id="unansweredSummary">0</strong>
-        </div>
-
-      </div>
 
       <div id="nav" class="grid"></div>
 
-      <div class="legend">
-
-        <div><span class="dot done-dot"></span> Sudah Dijawab</div>
-        <div><span class="dot ragu-dot"></span> Ditandai Ragu</div>
-        <div><span class="dot empty-dot"></span> Belum Dijawab</div>
-
+      <div>
+        <p>Terjawab: <span id="answeredSummary">0</span></p>
+        <p>Belum: <span id="unansweredSummary">0</span></p>
       </div>
 
-      <button class="submit-btn" onclick="submit()">
-        Kumpulkan Jawaban
-      </button>
-
-      <hr style="margin:20px 0;border:none;border-top:1px solid #eee;">
-
-      <button class="secondary-btn" onclick="toggleDarkMode()">
-        🌙 Dark Mode
-      </button>
-
-      <button class="secondary-btn" style="margin-top:10px;" onclick="toggleCalculator()">
-        🧮 Kalkulator
-      </button>
+      <button onclick="submit()">Submit</button>
 
     </div>
 
@@ -152,68 +85,11 @@
 </div>
 
 <!-- RESULT -->
-<div id="result">
+<div id="result" style="display:none;">
 
-  <div class="result-card">
+  <h2>Hasil Ujian</h2>
 
-    <h2>Hasil Ujian</h2>
-
-    <div class="score-circle">
-      <span id="scoreNumber">0</span>
-    </div>
-
-    <p id="skor"></p>
-
-    <h3>Leaderboard</h3>
-
-    <div id="board"></div>
-
-  </div>
-
-</div>
-
-<!-- CALCULATOR -->
-<div id="calculatorModal" class="calculator-modal">
-
-  <div class="calculator-box">
-
-    <div class="calculator-header">
-      <span>🧮 Kalkulator</span>
-
-      <button class="close-calc" onclick="toggleCalculator()">
-        ✕
-      </button>
-    </div>
-
-    <input type="text" id="calcDisplay" readonly>
-
-    <div class="calc-grid">
-
-      <button onclick="calc('7')">7</button>
-      <button onclick="calc('8')">8</button>
-      <button onclick="calc('9')">9</button>
-      <button onclick="calc('/')">÷</button>
-
-      <button onclick="calc('4')">4</button>
-      <button onclick="calc('5')">5</button>
-      <button onclick="calc('6')">6</button>
-      <button onclick="calc('*')">×</button>
-
-      <button onclick="calc('1')">1</button>
-      <button onclick="calc('2')">2</button>
-      <button onclick="calc('3')">3</button>
-      <button onclick="calc('-')">−</button>
-
-      <button onclick="calc('0')">0</button>
-      <button onclick="calc('.')">.</button>
-      <button onclick="calculateResult()">=</button>
-      <button onclick="calc('+')">+</button>
-
-      <button class="calc-clear" onclick="clearCalc()">C</button>
-
-    </div>
-
-  </div>
+  <div id="scoreNumber"></div>
 
 </div>
 

@@ -1,723 +1,215 @@
-<!doctype html>
-<html lang="id" class="h-full">
- <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!DOCTYPE html>
+<html>
+<head>
   <title>PHARMACORE CBT</title>
-  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
-  <script src="/_sdk/element_sdk.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { jakarta: ['Plus Jakarta Sans', 'sans-serif'] },
-          colors: {
-            navy: { 50: '#f0f4ff', 100: '#dbe4ff', 200: '#b5c9ff', 300: '#8aa8ff', 400: '#5c7fff', 500: '#1e3a8a', 600: '#1a337a', 700: '#142a66', 800: '#0f2052', 900: '#0a1638' }
-          }
-        }
-      }
-    }
-  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
-    html, body { height: 100%; margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
-    .app-wrapper { height: 100%; overflow: auto; }
-    .fade-in { animation: fadeIn 0.3s ease-in; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-    .q-btn { transition: all 0.15s ease; }
-    .q-btn:hover { transform: scale(1.08); }
+    body {
+      font-family: Arial;
+      background: #1a0033;
+      color: white;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: #2a0055;
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 20px;
+    }
+
+    input, button {
+      padding: 10px;
+      width: 100%;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: none;
+    }
+
+    button {
+      background: #7c3aed;
+      color: white;
+      cursor: pointer;
+    }
+
+    .soal {
+      margin-top: 20px;
+    }
+
+    .nav {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .nav button {
+      width: 40px;
+      height: 40px;
+    }
+
+    .timer {
+      font-size: 20px;
+      color: #ffcc00;
+    }
   </style>
-  <style>body { box-sizing: border-box; }</style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
- <script src="/_sdk/telemetry_sdk.js"></script></head>
- <body class="h-full bg-slate-50">
-  <div class="app-wrapper" id="app">
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>PHARMACORE CBT</h1>
+
+  <!-- LOGIN -->
+  <div id="loginBox" class="card">
+    <h3>Login Token</h3>
+    <input id="token" placeholder="Masukkan token">
+    <input id="nama" placeholder="Nama peserta">
+    <button onclick="login()">Masuk</button>
   </div>
-  <script>
-// Config
-const defaultConfig = {
-  main_title: 'TO NASIONAL UKMPPAI 2025–2026',
-  subtitle: 'Soal Ingatan UKMPPAI & Prediksi Uji Kompetensi',
-  footer_text: 'PHARMACORE CBT © 2026',
-  background_color: '#0f2052',
-  surface_color: '#ffffff',
-  text_color: '#1e293b',
-  primary_action_color: '#1e3a8a',
-  secondary_action_color: '#64748b'
-};
 
-let config = { ...defaultConfig };
+  <!-- CBT -->
+  <div id="cbtBox" style="display:none;">
 
-// State
-let currentPage = 'login';
-let userName = '';
-let userEmail = '';
-let userToken = '';
-let userLoginTime = null;
-let currentQuestion = 0;
-let answers = new Array(50).fill(null);
-let doubts = new Array(50).fill(false);
-let timerSeconds = 3600;
-let timerInterval = null;
-let startTime = null;
-let endTime = null;
-let validTokens = ['PHARMA2025', 'UKMPPAI001', 'TRIAL2026'];
-let leaderboard = [];
+    <div class="timer" id="timer">60:00</div>
 
-// Question Bank with Placeholders
-const questions = createQuestionBank();
+    <div class="card soal">
+      <h3 id="pertanyaan"></h3>
+      <div id="opsi"></div>
+    </div>
 
-function createQuestionBank() {
-  // Replace the following placeholder data with your actual questions
-  // Format: { q: "Question text", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation" }
-  // where 'a' is the index (0-4) of the correct answer
-  
-  const questionBank = [
-    { q: "Question 1", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 1" },
-    { q: "Question 2", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 2" },
-    { q: "Question 3", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 3" },
-    { q: "Question 4", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 4" },
-    { q: "Question 5", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 5" },
-    { q: "Question 6", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 6" },
-    { q: "Question 7", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 7" },
-    { q: "Question 8", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 8" },
-    { q: "Question 9", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 9" },
-    { q: "Question 10", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 10" },
-    { q: "Question 11", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 11" },
-    { q: "Question 12", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 12" },
-    { q: "Question 13", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 13" },
-    { q: "Question 14", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 14" },
-    { q: "Question 15", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 15" },
-    { q: "Question 16", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 16" },
-    { q: "Question 17", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 17" },
-    { q: "Question 18", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 18" },
-    { q: "Question 19", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 19" },
-    { q: "Question 20", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 20" },
-    { q: "Question 21", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 21" },
-    { q: "Question 22", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 22" },
-    { q: "Question 23", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 23" },
-    { q: "Question 24", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 24" },
-    { q: "Question 25", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 25" },
-    { q: "Question 26", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 26" },
-    { q: "Question 27", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 27" },
-    { q: "Question 28", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 28" },
-    { q: "Question 29", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 29" },
-    { q: "Question 30", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 30" },
-    { q: "Question 31", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 31" },
-    { q: "Question 32", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 32" },
-    { q: "Question 33", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 33" },
-    { q: "Question 34", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 34" },
-    { q: "Question 35", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 35" },
-    { q: "Question 36", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 36" },
-    { q: "Question 37", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 37" },
-    { q: "Question 38", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 38" },
-    { q: "Question 39", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 39" },
-    { q: "Question 40", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 40" },
-    { q: "Question 41", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 41" },
-    { q: "Question 42", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 42" },
-    { q: "Question 43", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 43" },
-    { q: "Question 44", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 44" },
-    { q: "Question 45", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 45" },
-    { q: "Question 46", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 46" },
-    { q: "Question 47", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 47" },
-    { q: "Question 48", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 48" },
-    { q: "Question 49", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 49" },
-    { q: "Question 50", o: ["Option A", "Option B", "Option C", "Option D", "Option E"], a: 0, e: "Explanation for question 50" }
-  ];
-  
-  return questionBank;
+    <div class="nav" id="nav"></div>
+
+    <button onclick="submit()">Submit Ujian</button>
+  </div>
+
+</div>
+
+<script>
+
+let soal = [];
+let index = 0;
+let jawaban = {};
+let token = "";
+let nama = "";
+
+// ================= LOGIN =================
+function login() {
+  token = document.getElementById("token").value;
+  nama = document.getElementById("nama").value;
+
+  fetch(`YOUR_APPS_SCRIPT_URL?action=validateToken&token=${token}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.valid) {
+        document.getElementById("loginBox").style.display = "none";
+        document.getElementById("cbtBox").style.display = "block";
+        loadSoal();
+        startTimer();
+      } else {
+        alert("Token tidak valid!");
+      }
+    });
 }
 
-// Save/Load
-function saveState() {
-  localStorage.setItem('pharmacore_answers', JSON.stringify(answers));
-  localStorage.setItem('pharmacore_doubts', JSON.stringify(doubts));
-  localStorage.setItem('pharmacore_current', currentQuestion);
-  localStorage.setItem('pharmacore_timer', timerSeconds);
-  localStorage.setItem('pharmacore_user', userName);
-  localStorage.setItem('pharmacore_email', userEmail);
-  localStorage.setItem('pharmacore_token', userToken);
-  localStorage.setItem('pharmacore_login_time', userLoginTime);
-  localStorage.setItem('pharmacore_start', startTime);
-  localStorage.setItem('pharmacore_page', currentPage);
+// ================= LOAD SOAL =================
+function loadSoal() {
+  fetch("YOUR_APPS_SCRIPT_URL?action=getSoal")
+    .then(res => res.json())
+    .then(data => {
+      soal = data.soal;
+      renderSoal();
+      renderNav();
+    });
 }
 
-function loadState() {
-  const saved = localStorage.getItem('pharmacore_answers');
-  if (saved && localStorage.getItem('pharmacore_page') === 'exam') {
-    answers = JSON.parse(saved);
-    doubts = JSON.parse(localStorage.getItem('pharmacore_doubts') || '[]');
-    currentQuestion = parseInt(localStorage.getItem('pharmacore_current') || '0');
-    timerSeconds = parseInt(localStorage.getItem('pharmacore_timer') || '3600');
-    userName = localStorage.getItem('pharmacore_user') || '';
-    userEmail = localStorage.getItem('pharmacore_email') || '';
-    userToken = localStorage.getItem('pharmacore_token') || '';
-    userLoginTime = localStorage.getItem('pharmacore_login_time');
-    startTime = localStorage.getItem('pharmacore_start');
-    currentPage = 'exam';
-    return true;
+// ================= RENDER SOAL =================
+function renderSoal() {
+  let s = soal[index];
+
+  document.getElementById("pertanyaan").innerHTML =
+    (index + 1) + ". " + s.pertanyaan;
+
+  document.getElementById("opsi").innerHTML = `
+    <button onclick="pilih('A')">A. ${s.a}</button>
+    <button onclick="pilih('B')">B. ${s.b}</button>
+    <button onclick="pilih('C')">C. ${s.c}</button>
+    <button onclick="pilih('D')">D. ${s.d}</button>
+  `;
+}
+
+// ================= PILIH JAWABAN =================
+function pilih(val) {
+  jawaban[index] = val;
+}
+
+// ================= NAV =================
+function renderNav() {
+  let nav = "";
+  for (let i = 0; i < soal.length; i++) {
+    nav += `<button onclick="go(${i})">${i+1}</button>`;
   }
-  loadLeaderboard();
-  return false;
+  document.getElementById("nav").innerHTML = nav;
 }
 
-function clearState() {
-  localStorage.removeItem('pharmacore_answers');
-  localStorage.removeItem('pharmacore_doubts');
-  localStorage.removeItem('pharmacore_current');
-  localStorage.removeItem('pharmacore_timer');
-  localStorage.removeItem('pharmacore_user');
-  localStorage.removeItem('pharmacore_email');
-  localStorage.removeItem('pharmacore_start');
-  localStorage.removeItem('pharmacore_page');
+function go(i) {
+  index = i;
+  renderSoal();
 }
 
-function loadLeaderboard() {
-  const saved = localStorage.getItem('pharmacore_leaderboard');
-  leaderboard = saved ? JSON.parse(saved) : [];
-}
-
-function saveLeaderboard() {
-  localStorage.setItem('pharmacore_leaderboard', JSON.stringify(leaderboard));
-}
-
-// Timer
+// ================= TIMER =================
 function startTimer() {
-  timerInterval = setInterval(() => {
-    timerSeconds--;
-    updateTimerDisplay();
-    if (timerSeconds % 10 === 0) saveState();
-    if (timerSeconds <= 0) {
-      clearInterval(timerInterval);
-      submitExam();
+  let time = 60 * 60;
+
+  setInterval(() => {
+    time--;
+
+    let m = Math.floor(time / 60);
+    let s = time % 60;
+
+    document.getElementById("timer").innerHTML =
+      `${m}:${s < 10 ? "0"+s : s}`;
+
+    if (time <= 0) {
+      submit();
     }
   }, 1000);
 }
 
-function updateTimerDisplay() {
-  const el = document.getElementById('timer-display');
-  if (!el) return;
-  const m = Math.floor(timerSeconds / 60);
-  const s = timerSeconds % 60;
-  el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  if (timerSeconds < 300) el.classList.add('text-red-500');
+// ================= SUBMIT =================
+function submit() {
+  let skor = 0;
+
+  soal.forEach((s, i) => {
+    if (jawaban[i] == s.kunci) skor++;
+  });
+
+  fetch("YOUR_APPS_SCRIPT_URL", {
+    method: "POST",
+    body: JSON.stringify({
+      action: "submit",
+      nama: nama,
+      token: token,
+      skor: skor,
+      jawaban: jawaban
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert("Ujian selesai! Skor kamu: " + skor);
+    location.reload();
+  });
 }
 
-function submitExam() {
-  clearInterval(timerInterval);
-  endTime = Date.now();
-  currentPage = 'result';
-  clearState();
-  render();
-}
-
-// Render
-function render() {
-  const app = document.getElementById('app');
-  if (currentPage === 'login') renderLogin(app);
-  else if (currentPage === 'exam') renderExam(app);
-  else if (currentPage === 'result') renderResult(app);
-  else if (currentPage === 'leaderboard') renderLeaderboard(app);
-  else if (currentPage === 'review') renderReview(app);
-  lucide.createIcons();
-}
-
-function renderLogin(app) {
-  app.innerHTML = `
-    <div class="h-full flex flex-col" style="background: linear-gradient(135deg, ${config.background_color} 0%, #1a237e 100%);">
-      <div class="flex-1 flex items-center justify-center p-4">
-        <div class="w-full max-w-md fade-in">
-          <div class="text-center mb-8">
-            <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur px-4 py-2 rounded-full mb-6">
-              <i data-lucide="shield-check" class="w-5 h-5 text-cyan-300"></i>
-              <span class="text-cyan-300 font-semibold text-sm tracking-wide">SECURE ACCESS</span>
-            </div>
-            <h1 class="text-3xl md:text-4xl font-800 text-white mb-2 tracking-tight" id="brand-title">PHARMACORE CBT</h1>
-            <p class="text-cyan-200 font-600 text-lg" id="main-title-el">${config.main_title}</p>
-            <p class="text-slate-300 text-sm mt-1" id="subtitle-el">${config.subtitle}</p>
-          </div>
-          <div class="bg-white rounded-2xl shadow-2xl p-8">
-            <h2 class="text-xl font-700 text-slate-800 mb-1 text-center">Selamat Datang</h2>
-            <p class="text-slate-500 text-sm text-center mb-6">Masukkan data diri dan token akses untuk memulai ujian</p>
-            
-            <!-- Error Message -->
-            <div id="error-message" class="hidden mb-4 bg-red-50 border border-red-200 rounded-lg p-3.5">
-              <div class="flex items-start gap-2.5">
-                <i data-lucide="alert-circle" class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"></i>
-                <div>
-                  <p class="text-sm font-600 text-red-700" id="error-text"></p>
-                  <p class="text-xs text-red-600 mt-1" id="error-subtext"></p>
-                </div>
-              </div>
-            </div>
-
-            <form id="login-form" onsubmit="handleLogin(event)">
-              <label for="nama" class="block text-sm font-600 text-slate-700 mb-1">Nama Lengkap</label>
-              <input id="nama" type="text" required class="w-full px-4 py-3 border border-slate-200 rounded-xl mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" placeholder="Masukkan nama lengkap">
-              
-              <label for="email" class="block text-sm font-600 text-slate-700 mb-1">Email</label>
-              <input id="email" type="email" required class="w-full px-4 py-3 border border-slate-200 rounded-xl mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" placeholder="contoh@email.com">
-              
-              <label for="token" class="block text-sm font-600 text-slate-700 mb-1">
-                <div class="flex items-center gap-1.5">
-                  Token Akses
-                  <i data-lucide="lock" class="w-4 h-4 text-amber-600"></i>
-                </div>
-              </label>
-              <input id="token" type="password" required class="w-full px-4 py-3 border border-slate-200 rounded-xl mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" placeholder="Masukkan token akses Anda">
-              
-              <button type="submit" id="submit-btn" class="w-full py-3.5 rounded-xl font-700 text-white transition hover:opacity-90 flex items-center justify-center gap-2" style="background:${config.primary_action_color}">
-                <i data-lucide="play-circle" class="w-5 h-5"></i>
-                Mulai Try Out
-              </button>
-            </form>
-            <p class="text-xs text-slate-400 text-center mt-4">50 soal • 60 menit • Pilihan Ganda • Akses Terbatas</p>
-          </div>
-          <div class="mt-6 bg-blue-50 rounded-lg p-4 border border-blue-200">
-            <p class="text-xs text-blue-700"><strong>Demo Token:</strong> PHARMA2025, UKMPPAI001, atau TRIAL2026</p>
-          </div>
-        </div>
-      </div>
-      <footer class="text-center py-4 text-slate-400 text-xs" id="footer-el">${config.footer_text}</footer>
-    </div>`;
-}
-
-function handleLogin(e) {
-  e.preventDefault();
-  const nameInput = document.getElementById('nama').value.trim();
-  const emailInput = document.getElementById('email').value.trim();
-  const tokenInput = document.getElementById('token').value.trim();
-  const errorMsg = document.getElementById('error-message');
-  const submitBtn = document.getElementById('submit-btn');
-
-  if (!nameInput || !emailInput || !tokenInput) {
-    showError('Semua field harus diisi', '');
-    return;
-  }
-
-  const tokenList = validTokens.map(t => t.trim().toUpperCase());
-  if (!tokenList.includes(tokenInput.toUpperCase())) {
-    showError('Token akses tidak valid', 'Silakan hubungi Pharmacore untuk mendapatkan akses.');
-    document.getElementById('token').value = '';
-    return;
-  }
-
-  userName = nameInput;
-  userEmail = emailInput;
-  userToken = tokenInput.toUpperCase();
-  userLoginTime = new Date();
-  startTime = Date.now();
-  currentPage = 'exam';
-  saveState();
-  render();
-  startTimer();
-}
-
-function showError(text, subtext) {
-  const errorMsg = document.getElementById('error-message');
-  const errorText = document.getElementById('error-text');
-  const errorSubtext = document.getElementById('error-subtext');
-  errorText.textContent = text;
-  errorSubtext.textContent = subtext;
-  errorMsg.classList.remove('hidden');
-  lucide.createIcons();
-}
-
-function renderExam(app) {
-  const q = questions[currentQuestion];
-  const answered = answers.filter(a => a !== null).length;
-  const loginTimeStr = userLoginTime ? new Date(userLoginTime).toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'}) : '';
-
-  app.innerHTML = `
-    <div class="h-full flex flex-col bg-slate-50">
-      <!-- Header -->
-      <header class="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm">
-        <div class="flex items-center gap-3 flex-wrap">
-          <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:${config.primary_action_color}">
-            <i data-lucide="shield-check" class="w-4 h-4 text-white"></i>
-          </div>
-          <div class="hidden sm:block">
-            <p class="text-sm font-700 text-slate-800">${userName}</p>
-            <p class="text-xs text-slate-400">${userEmail} • Login: ${loginTimeStr}</p>
-          </div>
-        </div>
-        <div class="flex items-center gap-4">
-          <div class="text-sm text-slate-500"><span class="font-600">${answered}</span>/50 dijawab</div>
-          <div class="flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-lg">
-            <i data-lucide="clock" class="w-4 h-4 text-slate-500"></i>
-            <span id="timer-display" class="font-mono font-700 text-slate-700">${String(Math.floor(timerSeconds/60)).padStart(2,'0')}:${String(timerSeconds%60).padStart(2,'0')}</span>
-          </div>
-        </div>
-      </header>
-
-      <div class="flex-1 flex flex-col lg:flex-row overflow-auto">
-        <!-- Question Area -->
-        <div class="flex-1 p-4 md:p-8 overflow-auto">
-          <div class="max-w-3xl mx-auto fade-in">
-            <!-- Progress -->
-            <div class="mb-4">
-              <div class="flex justify-between text-xs text-slate-500 mb-1">
-                <span>Progress</span><span>${Math.round((answered/50)*100)}%</span>
-              </div>
-              <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
-                <div class="h-full rounded-full transition-all" style="width:${(answered/50)*100}%; background:${config.primary_action_color}"></div>
-              </div>
-            </div>
-
-            <!-- Question Card -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8 mb-4">
-              <div class="flex items-center gap-2 mb-4">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-600 text-white" style="background:${config.primary_action_color}">Soal ${currentQuestion + 1}</span>
-                ${doubts[currentQuestion] ? '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-600 bg-amber-100 text-amber-700">Ragu-ragu</span>' : ''}
-              </div>
-              <p class="text-lg font-500 text-slate-800 leading-relaxed mb-6">${q.q}</p>
-              <div class="space-y-3">
-                ${q.o.map((opt, i) => `
-                  <button onclick="selectAnswer(${i})" class="w-full text-left p-4 rounded-xl border-2 transition flex items-center gap-3 ${answers[currentQuestion] === i ? 'border-blue-500 bg-blue-50' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'}">
-                    <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-700 flex-shrink-0 ${answers[currentQuestion] === i ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-600'}">${String.fromCharCode(65+i)}</span>
-                    <span class="text-slate-700">${opt}</span>
-                  </button>
-                `).join('')}
-              </div>
-            </div>
-
-            <!-- Navigation Buttons -->
-            <div class="flex flex-wrap gap-2 justify-between">
-              <button onclick="prevQuestion()" ${currentQuestion === 0 ? 'disabled' : ''} class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-600 text-sm flex items-center gap-1.5 hover:bg-slate-100 transition disabled:opacity-40">
-                <i data-lucide="chevron-left" class="w-4 h-4"></i> Sebelumnya
-              </button>
-              <button onclick="toggleDoubt()" class="px-4 py-2.5 rounded-xl border text-sm font-600 flex items-center gap-1.5 transition ${doubts[currentQuestion] ? 'border-amber-300 bg-amber-50 text-amber-700' : 'border-slate-200 text-slate-600 hover:bg-slate-100'}">
-                <i data-lucide="flag" class="w-4 h-4"></i> Ragu-ragu
-              </button>
-              ${currentQuestion < 49 ? `
-                <button onclick="nextQuestion()" class="px-4 py-2.5 rounded-xl text-white font-600 text-sm flex items-center gap-1.5 hover:opacity-90 transition" style="background:${config.primary_action_color}">
-                  Berikutnya <i data-lucide="chevron-right" class="w-4 h-4"></i>
-                </button>
-              ` : `
-                <button onclick="showConfirm()" class="px-4 py-2.5 rounded-xl bg-emerald-600 text-white font-600 text-sm flex items-center gap-1.5 hover:bg-emerald-700 transition">
-                  <i data-lucide="check-circle" class="w-4 h-4"></i> Selesai & Kumpulkan
-                </button>
-              `}
-            </div>
-          </div>
-        </div>
-
-        <!-- Navigation Panel -->
-        <aside class="lg:w-72 bg-white border-t lg:border-t-0 lg:border-l border-slate-200 p-4 overflow-auto">
-          <h3 class="text-sm font-700 text-slate-700 mb-3">Navigasi Soal</h3>
-          <div class="grid grid-cols-10 lg:grid-cols-5 gap-1.5 mb-4">
-            ${Array.from({length:50}, (_,i) => {
-              let cls = 'bg-slate-100 text-slate-500';
-              if (answers[i] !== null && doubts[i]) cls = 'bg-amber-400 text-white';
-              else if (answers[i] !== null) cls = 'bg-emerald-500 text-white';
-              else if (doubts[i]) cls = 'bg-amber-400 text-white';
-              if (i === currentQuestion) cls += ' ring-2 ring-blue-500 ring-offset-1';
-              return `<button onclick="goToQuestion(${i})" class="q-btn w-8 h-8 rounded-lg text-xs font-700 ${cls}">${i+1}</button>`;
-            }).join('')}
-          </div>
-          <div class="space-y-1.5 text-xs">
-            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-emerald-500"></span>Sudah Dijawab</div>
-            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-amber-400"></span>Ragu-ragu</div>
-            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-slate-100 border border-slate-300"></span>Belum Dijawab</div>
-          </div>
-          <button onclick="showConfirm()" class="w-full mt-4 py-2.5 rounded-xl bg-emerald-600 text-white font-600 text-sm hover:bg-emerald-700 transition flex items-center justify-center gap-1.5">
-            <i data-lucide="send" class="w-4 h-4"></i> Kumpulkan Jawaban
-          </button>
-        </aside>
-      </div>
-
-      <!-- Confirm Modal -->
-      <div id="confirm-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl fade-in">
-          <div class="text-center">
-            <div class="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
-              <i data-lucide="alert-triangle" class="w-7 h-7 text-amber-600"></i>
-            </div>
-            <h3 class="text-lg font-700 text-slate-800 mb-2">Konfirmasi Pengumpulan</h3>
-            <p class="text-slate-500 text-sm mb-1">Apakah Anda yakin ingin mengakhiri ujian?</p>
-            <p class="text-slate-400 text-xs mb-6">Dijawab: ${answered}/50 | Ragu: ${doubts.filter(Boolean).length}</p>
-            <div class="flex gap-3">
-              <button onclick="hideConfirm()" class="flex-1 py-2.5 rounded-xl border border-slate-200 font-600 text-sm text-slate-600 hover:bg-slate-50 transition">Kembali</button>
-              <button onclick="submitExam()" class="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white font-600 text-sm hover:bg-emerald-700 transition">Ya, Kumpulkan</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>`;
-  if (!timerInterval) startTimer();
-}
-
-function selectAnswer(i) { answers[currentQuestion] = i; saveState(); render(); }
-function prevQuestion() { if (currentQuestion > 0) { currentQuestion--; saveState(); render(); } }
-function nextQuestion() { if (currentQuestion < 49) { currentQuestion++; saveState(); render(); } }
-function goToQuestion(i) { currentQuestion = i; saveState(); render(); }
-function toggleDoubt() { doubts[currentQuestion] = !doubts[currentQuestion]; saveState(); render(); }
-function showConfirm() { document.getElementById('confirm-modal').classList.remove('hidden'); lucide.createIcons(); }
-function hideConfirm() { document.getElementById('confirm-modal').classList.add('hidden'); }
-
-function renderResult(app) {
-  const correct = answers.reduce((c, a, i) => a === questions[i].a ? c+1 : c, 0);
-  const wrong = answers.filter(a => a !== null).length - correct;
-  const score = Math.round((correct / 50) * 100);
-  const elapsed = endTime - startTime;
-  const mins = Math.floor(elapsed / 60000);
-  const secs = Math.floor((elapsed % 60000) / 1000);
-
-  // Add to leaderboard
-  const entry = { name: userName, email: userEmail, score, elapsed };
-  leaderboard.push(entry);
-  leaderboard.sort((a, b) => b.score !== a.score ? b.score - a.score : a.elapsed - b.elapsed);
-  saveLeaderboard();
-
-  let category, catColor, catBg;
-  if (score >= 80) { category = 'Sangat Baik'; catColor = 'text-emerald-700'; catBg = 'bg-emerald-100'; }
-  else if (score >= 70) { category = 'Baik'; catColor = 'text-blue-700'; catBg = 'bg-blue-100'; }
-  else if (score >= 60) { category = 'Cukup'; catColor = 'text-amber-700'; catBg = 'bg-amber-100'; }
-  else { category = 'Perlu Belajar Lebih Lanjut'; catColor = 'text-red-700'; catBg = 'bg-red-100'; }
-
-  app.innerHTML = `
-    <div class="h-full overflow-auto" style="background: linear-gradient(135deg, ${config.background_color} 0%, #1a237e 100%);">
-      <div class="max-w-2xl mx-auto p-4 md:p-8 fade-in">
-        <div class="text-center mb-6">
-          <h1 class="text-2xl font-800 text-white mb-1">Hasil Ujian</h1>
-          <p class="text-cyan-200 text-sm">PHARMACORE CBT - Try Out UKMPPAI</p>
-        </div>
-        <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8">
-          <div class="text-center mb-6">
-            <div class="w-28 h-28 rounded-full mx-auto flex items-center justify-center mb-3" style="background: conic-gradient(${config.primary_action_color} ${score}%, #e2e8f0 0);">
-              <div class="w-22 h-22 bg-white rounded-full flex items-center justify-center" style="width:88px;height:88px;">
-                <span class="text-3xl font-800" style="color:${config.primary_action_color}">${score}</span>
-              </div>
-            </div>
-            <span class="inline-block px-4 py-1.5 rounded-full text-sm font-700 ${catColor} ${catBg}">${category}</span>
-          </div>
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-            <div class="bg-slate-50 rounded-xl p-3 text-center">
-              <p class="text-xs text-slate-500">Nama</p>
-              <p class="font-700 text-slate-800 text-sm truncate">${userName}</p>
-            </div>
-            <div class="bg-emerald-50 rounded-xl p-3 text-center">
-              <p class="text-xs text-slate-500">Benar</p>
-              <p class="font-700 text-emerald-600 text-lg">${correct}</p>
-            </div>
-            <div class="bg-red-50 rounded-xl p-3 text-center">
-              <p class="text-xs text-slate-500">Salah</p>
-              <p class="font-700 text-red-600 text-lg">${wrong}</p>
-            </div>
-            <div class="bg-blue-50 rounded-xl p-3 text-center">
-              <p class="text-xs text-slate-500">Waktu</p>
-              <p class="font-700 text-blue-600 text-sm">${mins}m ${secs}s</p>
-            </div>
-          </div>
-          <div class="flex flex-col sm:flex-row gap-3">
-            <button onclick="currentPage='leaderboard';render();" class="flex-1 py-3 rounded-xl font-600 text-sm flex items-center justify-center gap-2 text-white hover:opacity-90 transition" style="background:${config.primary_action_color}">
-              <i data-lucide="trophy" class="w-4 h-4"></i> Lihat Leaderboard
-            </button>
-            <button onclick="currentPage='review';render();" class="flex-1 py-3 rounded-xl border border-slate-200 font-600 text-sm flex items-center justify-center gap-2 text-slate-600 hover:bg-slate-50 transition">
-              <i data-lucide="eye" class="w-4 h-4"></i> Review Jawaban
-            </button>
-          </div>
-        </div>
-        <p class="text-center text-slate-400 text-xs mt-6" id="footer-result">${config.footer_text}</p>
-      </div>
-    </div>`;
-}
-
-function renderReview(app) {
-  app.innerHTML = `
-    <div class="h-full flex flex-col bg-slate-50">
-      <header class="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between sticky top-0 z-10">
-        <div class="flex items-center gap-3">
-          <button onclick="currentPage='result';render();" class="p-2 rounded-lg hover:bg-slate-100 transition">
-            <i data-lucide="arrow-left" class="w-5 h-5 text-slate-600"></i>
-          </button>
-          <h2 class="font-700 text-slate-800">Review Jawaban</h2>
-        </div>
-        <span class="text-sm text-slate-500">50 Soal</span>
-      </header>
-      <div class="flex-1 overflow-auto p-4 md:p-8">
-        <div class="max-w-3xl mx-auto space-y-4">
-          ${questions.map((q, i) => {
-            const isCorrect = answers[i] === q.a;
-            return `
-              <div class="bg-white rounded-xl border ${isCorrect ? 'border-emerald-200' : 'border-red-200'} p-5 fade-in">
-                <div class="flex items-start gap-3 mb-3">
-                  <span class="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-700 text-white ${isCorrect ? 'bg-emerald-500' : 'bg-red-500'}">${i+1}</span>
-                  <p class="text-sm font-500 text-slate-800">${q.q}</p>
-                </div>
-                <div class="ml-10 space-y-1.5 text-sm mb-3">
-                  ${q.o.map((opt, j) => {
-                    let cls = 'text-slate-600';
-                    if (j === q.a) cls = 'text-emerald-700 font-600';
-                    else if (j === answers[i] && answers[i] !== q.a) cls = 'text-red-600 line-through';
-                    return `<div class="${cls}">${String.fromCharCode(65+j)}. ${opt} ${j === q.a ? '✓' : ''}</div>`;
-                  }).join('')}
-                </div>
-                <div class="ml-10 bg-blue-50 rounded-lg p-3 text-xs text-blue-800">
-                  <strong>Pembahasan:</strong> ${q.e}
-                </div>
-              </div>`;
-          }).join('')}
-        </div>
-      </div>
-    </div>`;
-}
-
-function renderLeaderboard(app) {
-  const top3 = leaderboard.slice(0, 3);
-  const top10 = leaderboard.slice(0, 10);
-  const userRank = leaderboard.findIndex(e => e.name === userName && e.email === userEmail) + 1;
-  
-  const formatTime = (ms) => {
-    const mins = Math.floor(ms / 60000);
-    const secs = Math.floor((ms % 60000) / 1000);
-    return `${mins}m ${secs}s`;
-  };
-
-  const medals = ['🥇', '🥈', '🥉'];
-
-  app.innerHTML = `
-    <div class="h-full overflow-auto" style="background: linear-gradient(135deg, ${config.background_color} 0%, #1a237e 100%);">
-      <div class="max-w-4xl mx-auto p-4 md:p-8 fade-in">
-        <!-- Header -->
-        <div class="text-center mb-8">
-          <h1 class="text-3xl font-800 text-white mb-1 flex items-center justify-center gap-2">
-            <i data-lucide="trophy" class="w-8 h-8"></i> Leaderboard Nasional
-          </h1>
-          <p class="text-cyan-200 text-sm">PHARMACORE CBT - TO UKMPPAI 2025–2026</p>
-        </div>
-
-        <!-- Podium Section -->
-        <div class="mb-8">
-          <div class="grid grid-cols-3 gap-3 mb-6">
-            ${top3.map((entry, idx) => `
-              <div class="flex flex-col">
-                <div class="flex-1 rounded-t-2xl p-4 text-center text-white flex flex-col items-center justify-end" style="background: linear-gradient(135deg, ${['#FFD700', '#C0C0C0', '#CD7F32'][idx]} 0%, ${['#FFA500', '#A8A8A8', '#8B4513'][idx]} 100%); min-height: ${[280, 200, 150][idx]}px;">
-                  <div class="text-4xl mb-2">${medals[idx]}</div>
-                  <p class="font-800 text-lg leading-tight">${entry.name.split(' ')[0]}</p>
-                  <p class="text-2xl font-800 mt-2">${entry.score}</p>
-                </div>
-                <div class="bg-white rounded-b-2xl p-3 text-center border-t-2" style="border-color: ${['#FFD700', '#C0C0C0', '#CD7F32'][idx]}">
-                  <p class="text-xs text-slate-500 font-600">Rank ${idx + 1}</p>
-                  <p class="text-sm font-700 text-slate-800">${formatTime(entry.elapsed)}</p>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-
-        <!-- Your Rank Card -->
-        ${userRank > 0 ? `
-          <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-6 text-white mb-8 border-2 border-blue-400">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm font-600 opacity-90">Peringkat Anda</p>
-                <p class="text-4xl font-800">#${userRank}</p>
-              </div>
-              <div class="text-right">
-                <p class="text-lg font-700">${leaderboard[userRank - 1].score} Poin</p>
-                <p class="text-sm opacity-90">${formatTime(leaderboard[userRank - 1].elapsed)}</p>
-              </div>
-            </div>
-          </div>
-        ` : ''}
-
-        <!-- Top 10 Table -->
-        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
-          <div class="px-6 py-4 border-b border-slate-200">
-            <h3 class="font-700 text-lg text-slate-800">Top 10 Peserta</h3>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-              <thead class="bg-slate-100">
-                <tr>
-                  <th class="px-6 py-3 text-left font-600 text-slate-600">Rank</th>
-                  <th class="px-6 py-3 text-left font-600 text-slate-600">Nama</th>
-                  <th class="px-6 py-3 text-center font-600 text-slate-600">Skor</th>
-                  <th class="px-6 py-3 text-center font-600 text-slate-600">Waktu</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${top10.map((entry, idx) => `
-                  <tr class="border-t border-slate-100 hover:bg-slate-50 transition ${entry.name === userName ? 'bg-blue-50' : ''}">
-                    <td class="px-6 py-3 font-700 text-slate-800">
-                      ${idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}.`}
-                    </td>
-                    <td class="px-6 py-3 text-slate-700">${entry.name}</td>
-                    <td class="px-6 py-3 text-center font-700" style="color:${config.primary_action_color}">${entry.score}</td>
-                    <td class="px-6 py-3 text-center text-slate-600">${formatTime(entry.elapsed)}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="flex flex-col sm:flex-row gap-3 mt-8">
-          <button onclick="currentPage='review';render();" class="flex-1 py-3 rounded-xl border border-white text-white font-600 text-sm flex items-center justify-center gap-2 hover:bg-white/10 transition">
-            <i data-lucide="eye" class="w-4 h-4"></i> Review Jawaban
-          </button>
-          <button onclick="resetAll()" class="flex-1 py-3 rounded-xl bg-white text-slate-800 font-600 text-sm flex items-center justify-center gap-2 hover:bg-slate-100 transition">
-            <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Ulangi Try Out
-          </button>
-        </div>
-
-        <p class="text-center text-slate-400 text-xs mt-6" id="footer-leader">${config.footer_text}</p>
-      </div>
-    </div>`;
-}
-
-function resetAll() {
-  answers = new Array(50).fill(null);
-  doubts = new Array(50).fill(false);
-  currentQuestion = 0;
-  timerSeconds = 3600;
-  userToken = '';
-  userLoginTime = null;
-  currentPage = 'login';
-  clearState();
-  render();
-}
-
-// Init
-if (loadState()) {
-  render();
-  startTimer();
-} else {
-  render();
-}
-
-// Element SDK
-window.elementSdk.init({
-  defaultConfig,
-  onConfigChange: async (cfg) => {
-    config = { ...defaultConfig, ...cfg };
-    if (cfg.valid_tokens) {
-      validTokens = cfg.valid_tokens.split(',').map(t => t.trim()).filter(t => t.length > 0);
-    }
-    render();
-  },
-  mapToCapabilities: (cfg) => ({
-    recolorables: [
-      { get: () => cfg.background_color || defaultConfig.background_color, set: (v) => { cfg.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
-      { get: () => cfg.surface_color || defaultConfig.surface_color, set: (v) => { cfg.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
-      { get: () => cfg.text_color || defaultConfig.text_color, set: (v) => { cfg.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
-      { get: () => cfg.primary_action_color || defaultConfig.primary_action_color, set: (v) => { cfg.primary_action_color = v; window.elementSdk.setConfig({ primary_action_color: v }); } },
-      { get: () => cfg.secondary_action_color || defaultConfig.secondary_action_color, set: (v) => { cfg.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); } }
-    ],
-    borderables: [],
-    fontEditable: { get: () => cfg.font_family || 'Plus Jakarta Sans', set: (v) => { cfg.font_family = v; window.elementSdk.setConfig({ font_family: v }); } },
-    fontSizeable: { get: () => cfg.font_size || 16, set: (v) => { cfg.font_size = v; window.elementSdk.setConfig({ font_size: v }); } }
-  }),
-  mapToEditPanelValues: (cfg) => new Map([
-    ['main_title', cfg.main_title || defaultConfig.main_title],
-    ['subtitle', cfg.subtitle || defaultConfig.subtitle],
-    ['footer_text', cfg.footer_text || defaultConfig.footer_text],
-    ['valid_tokens', cfg.valid_tokens || 'PHARMA2025,UKMPPAI001,TRIAL2026']
-  ])
-});
 </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a091621dcb985c2e',t:'MTc4MTAyMTE4Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+
+</body>
 </html>

@@ -612,17 +612,106 @@ hr {
 .result-summary strong {
   font-size: 18px;
 }
+/* ========== LEADERBOARD PODIUM & TOP 10 ========== */
 #board {
   margin-top: 24px;
-  max-height: 400px;
+  max-height: 600px;
   overflow-y: auto;
-  padding: 0 8px;
+  padding: 0;
 }
-.leaderboard-card {
-  border-radius: 28px;
-  padding: 20px;
-  margin-bottom: 20px;
+
+/* Podium */
+.podium-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 20px;
+  margin-bottom: 40px;
+  padding: 20px 0;
+  flex-wrap: wrap;
 }
+
+.podium-item {
+  text-align: center;
+  flex: 1;
+  min-width: 100px;
+  max-width: 150px;
+  transition: transform 0.2s;
+}
+
+.podium-item:hover {
+  transform: translateY(-5px);
+}
+
+.podium-rank {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.podium-score {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 8px 0;
+}
+
+.podium-name {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 4px;
+}
+
+.podium-time {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.podium-block {
+  border-radius: 20px 20px 12px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  margin-bottom: 12px;
+}
+
+.podium-1 .podium-block {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  height: 130px;
+}
+.podium-2 .podium-block {
+  background: linear-gradient(135deg, #9ca3af, #6b7280);
+  height: 100px;
+}
+.podium-3 .podium-block {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  height: 80px;
+}
+
+.podium-block .medal {
+  font-size: 52px;
+}
+
+/* Dark mode podium */
+body.dark-mode .podium-1 .podium-block {
+  background: linear-gradient(135deg, #b45309, #92400e);
+}
+body.dark-mode .podium-2 .podium-block {
+  background: linear-gradient(135deg, #4b5563, #374151);
+}
+body.dark-mode .podium-3 .podium-block {
+  background: linear-gradient(135deg, #78350f, #451a03);
+}
+
+/* Top 10 list */
+.leaderboard-list {
+  margin-top: 20px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 20px;
+}
+
 .leaderboard-header {
   display: flex;
   align-items: center;
@@ -637,14 +726,17 @@ hr {
   background: #ede9fe;
   color: #4c1d95;
 }
+
 body.dark-mode .leaderboard-header {
   background: #2a2a3a;
   color: #a78bfa;
 }
+
 .leaderboard-header .rank { width: 60px; text-align: center; }
 .leaderboard-header .name { flex: 2; text-align: left; padding-left: 10px; }
 .leaderboard-header .score { width: 80px; text-align: center; }
 .leaderboard-header .time { width: 110px; text-align: center; }
+
 .leaderboard-item {
   display: flex;
   align-items: center;
@@ -656,20 +748,26 @@ body.dark-mode .leaderboard-header {
   transition: all 0.2s;
   font-size: 14px;
 }
+
 body.dark-mode .leaderboard-item {
   background: #1e1e2e;
 }
+
 .leaderboard-item:hover {
   transform: translateX(4px);
   background: #f3f4f6;
 }
+
 .leaderboard-item .rank { width: 60px; text-align: center; font-weight: 700; font-size: 16px; }
 .rank-1 { color: #fbbf24; }
 .rank-2 { color: #9ca3af; }
 .rank-3 { color: #d97706; }
+
 .leaderboard-item .name { flex: 2; text-align: left; padding-left: 10px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .leaderboard-item .score { width: 80px; text-align: center; font-weight: 700; color: #10b981; }
 .leaderboard-item .time { width: 110px; text-align: center; font-family: monospace; font-weight: 500; }
+
+/* Highlight untuk peringkat user */
 .my-rank {
   border: 2px solid #8b5cf6;
   background: #ede9fe;
@@ -678,72 +776,22 @@ body.dark-mode .my-rank {
   background: #2d2a5e;
   border-color: #a78bfa;
 }
-.footer-copyright {
-  margin-top: 32px;
-  font-size: 11px;
+
+/* Peringkat Anda (panggilan khusus) */
+.your-rank-card {
+  margin-top: 24px;
+  padding: 16px;
+  background: linear-gradient(135deg, #ede9fe, #e0e7ff);
+  border-radius: 28px;
   text-align: center;
+  font-weight: bold;
+  color: #4c1d95;
 }
-
-/* kalkulator */
-.calculator-box {
-  width: 420px;
-  padding: 24px;
+body.dark-mode .your-rank-card {
+  background: linear-gradient(135deg, #2d2a5e, #1e1e2e);
+  color: #a78bfa;
 }
-.calc-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
-  margin-top: 16px;
-}
-.calc-grid button {
-  padding: 12px;
-  border-radius: 16px;
-  font-size: 13px;
-}
-#calcDisplay {
-  width: 100%;
-  padding: 14px;
-  font-size: 22px;
-  text-align: right;
-  border-radius: 24px;
-  margin-bottom: 16px;
-}
-
-/* ========== MOBILE RESPONSIF ========== */
-@media (max-width: 860px) {
-  .wrapper {
-    flex-direction: column;
-    padding: 0 12px;
-  }
-  .side {
-    position: static;
-  }
-  .brand {
-    white-space: normal;
-    font-size: 16px;
-    text-align: center;
-  }
-  .top-right {
-    gap: 8px;
-  }
-  .timer {
-    font-size: 12px;
-    padding: 2px 8px;
-  }
-  .progress-text {
-    font-size: 10px;
-  }
-  .home-btn {
-    font-size: 18px;
-  }
-  .grid button {
-    font-size: 11px;
-  }
-  .review-stats {
-    flex-direction: column;
-  }
-  .leaderboard-header .rank, .leaderboard-item .rank { width: 45px; }
-  .leaderboard-header .score, .leaderboard-item .score { width: 65px; }
-  .leaderboard-header .time, .leaderboard-item .time { width: 80px; font-size: 11px; }
-  .leaderboard-header .name, .leaderboard-item .name { font-size: 12px; }
+.your-rank-card span {
+  font-size: 24px;
+  margin-right: 8px;
 }

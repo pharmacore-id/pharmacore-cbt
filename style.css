@@ -24,7 +24,7 @@ body {
   background: #f8f6ff;
 }
 
-/* ========== DARK MODE TOTAL – SEMUA TEKS PUTIH ========== */
+/* ========== DARK MODE TOTAL ========== */
 body.dark-mode,
 body.dark-mode .login-card,
 body.dark-mode .card,
@@ -78,7 +78,6 @@ body.dark-mode * {
   color: #ffffff !important;
 }
 
-/* Elemen interaktif tetap gelap tapi sedikit lebih terang */
 body.dark-mode .secondary-btn,
 body.dark-mode .ragu-btn,
 body.dark-mode .submit-btn,
@@ -111,7 +110,6 @@ body.dark-mode .grid button.ragu {
   color: #1e1e2e !important;
 }
 
-/* Warna khusus untuk opsi di modal pembahasan (hijau, merah, kuning) tetap terlihat */
 body.dark-mode .discussion-question div[style*="background: #d1fae5"] {
   background: #064e3b !important;
   color: #a7f3d0 !important;
@@ -125,9 +123,8 @@ body.dark-mode .discussion-question div[style*="background: #fef9c3"] {
   color: #fef08a !important;
 }
 
-/* ========== PRINT – SEMUA SOAL TERCETAK (MULTI PAGE) ========== */
+/* ========== PRINT ========== */
 @media print {
-  /* Sembunyikan semua elemen kecuali modal pembahasan */
   body * {
     visibility: hidden;
   }
@@ -163,8 +160,6 @@ body.dark-mode .discussion-question div[style*="background: #fef9c3"] {
     break-inside: avoid;
     margin-bottom: 30px;
   }
-  /* Opsional: jika ingin setiap soal di halaman baru, gunakan page-break-after: always */
-  /* .discussion-question { page-break-after: always; } */
   .close-modal, .secondary-btn, .modal-header button {
     display: none !important;
   }
@@ -172,7 +167,6 @@ body.dark-mode .discussion-question div[style*="background: #fef9c3"] {
     border-bottom: 1px solid #ddd;
     margin-bottom: 20px;
   }
-  /* Warna cetak untuk jawaban benar/salah/kunci */
   .discussion-question div[style*="background: #d1fae5"] {
     background: #d1fae5 !important;
     color: #065f46 !important;
@@ -193,7 +187,7 @@ body.dark-mode .discussion-question div[style*="background: #fef9c3"] {
   }
 }
 
-/* ========== LAYOUT (tidak berubah, hanya contoh gaya) ========== */
+/* ========== LAYOUT UMUM ========== */
 #login {
   min-height: 100vh;
   display: flex;
@@ -572,12 +566,45 @@ hr {
   border-top: 1px solid #eee;
 }
 
-/* hasil ujian */
+/* ========== HASIL UJIAN (LANDSCAPE) ========== */
 .result-card {
-  max-width: 600px;
+  max-width: 1100px;
   margin: 30px auto;
   padding: 32px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  text-align: left;
+  position: relative;
+}
+.result-left {
+  flex: 1.2;
+  min-width: 280px;
   text-align: center;
+  position: relative;
+}
+.result-left .home-btn {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: none !important;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+.result-right {
+  flex: 2;
+  min-width: 280px;
+}
+.result-right h3 {
+  margin-top: 0;
+  text-align: center;
+}
+/* Jarak antara tombol "Ujian Baru" dan judul Leaderboard saat mobile */
+@media (max-width: 860px) {
+  .result-right {
+    margin-top: 32px;
+  }
 }
 .score-circle {
   width: 140px;
@@ -595,6 +622,7 @@ hr {
   display: flex;
   gap: 16px;
   justify-content: space-between;
+  background: #f8f6ff;
   border-radius: 28px;
   padding: 20px;
   margin: 20px 0;
@@ -612,6 +640,16 @@ hr {
 .result-summary strong {
   font-size: 18px;
 }
+.result-right #board {
+  margin-top: 0;
+}
+.footer-copyright {
+  width: 100%;
+  margin-top: 32px;
+  font-size: 11px;
+  text-align: center;
+}
+
 /* ========== LEADERBOARD PODIUM & TOP 10 ========== */
 #board {
   margin-top: 24px;
@@ -620,7 +658,6 @@ hr {
   padding: 0;
 }
 
-/* Podium */
 .podium-container {
   display: flex;
   justify-content: center;
@@ -630,7 +667,6 @@ hr {
   padding: 20px 0;
   flex-wrap: wrap;
 }
-
 .podium-item {
   text-align: center;
   flex: 1;
@@ -638,23 +674,19 @@ hr {
   max-width: 150px;
   transition: transform 0.2s;
 }
-
 .podium-item:hover {
   transform: translateY(-5px);
 }
-
 .podium-rank {
   font-size: 28px;
   font-weight: 800;
   margin-bottom: 8px;
 }
-
 .podium-score {
   font-size: 20px;
   font-weight: 700;
   margin: 8px 0;
 }
-
 .podium-name {
   font-weight: 600;
   white-space: nowrap;
@@ -662,12 +694,10 @@ hr {
   text-overflow: ellipsis;
   padding: 0 4px;
 }
-
 .podium-time {
   font-size: 12px;
   opacity: 0.8;
 }
-
 .podium-block {
   border-radius: 20px 20px 12px 12px;
   display: flex;
@@ -676,7 +706,6 @@ hr {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   margin-bottom: 12px;
 }
-
 .podium-1 .podium-block {
   background: linear-gradient(135deg, #fbbf24, #f59e0b);
   height: 130px;
@@ -689,12 +718,9 @@ hr {
   background: linear-gradient(135deg, #d97706, #b45309);
   height: 80px;
 }
-
 .podium-block .medal {
   font-size: 52px;
 }
-
-/* Dark mode podium */
 body.dark-mode .podium-1 .podium-block {
   background: linear-gradient(135deg, #b45309, #92400e);
 }
@@ -705,13 +731,11 @@ body.dark-mode .podium-3 .podium-block {
   background: linear-gradient(135deg, #78350f, #451a03);
 }
 
-/* Top 10 list */
 .leaderboard-list {
   margin-top: 20px;
   border-top: 1px solid #e5e7eb;
   padding-top: 20px;
 }
-
 .leaderboard-header {
   display: flex;
   align-items: center;
@@ -726,17 +750,14 @@ body.dark-mode .podium-3 .podium-block {
   background: #ede9fe;
   color: #4c1d95;
 }
-
 body.dark-mode .leaderboard-header {
   background: #2a2a3a;
   color: #a78bfa;
 }
-
 .leaderboard-header .rank { width: 60px; text-align: center; }
 .leaderboard-header .name { flex: 2; text-align: left; padding-left: 10px; }
 .leaderboard-header .score { width: 80px; text-align: center; }
 .leaderboard-header .time { width: 110px; text-align: center; }
-
 .leaderboard-item {
   display: flex;
   align-items: center;
@@ -748,26 +769,20 @@ body.dark-mode .leaderboard-header {
   transition: all 0.2s;
   font-size: 14px;
 }
-
 body.dark-mode .leaderboard-item {
   background: #1e1e2e;
 }
-
 .leaderboard-item:hover {
   transform: translateX(4px);
   background: #f3f4f6;
 }
-
 .leaderboard-item .rank { width: 60px; text-align: center; font-weight: 700; font-size: 16px; }
 .rank-1 { color: #fbbf24; }
 .rank-2 { color: #9ca3af; }
 .rank-3 { color: #d97706; }
-
 .leaderboard-item .name { flex: 2; text-align: left; padding-left: 10px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .leaderboard-item .score { width: 80px; text-align: center; font-weight: 700; color: #10b981; }
 .leaderboard-item .time { width: 110px; text-align: center; font-family: monospace; font-weight: 500; }
-
-/* Highlight untuk peringkat user */
 .my-rank {
   border: 2px solid #8b5cf6;
   background: #ede9fe;
@@ -776,8 +791,6 @@ body.dark-mode .my-rank {
   background: #2d2a5e;
   border-color: #a78bfa;
 }
-
-/* Peringkat Anda (panggilan khusus) */
 .your-rank-card {
   margin-top: 24px;
   padding: 16px;
@@ -794,4 +807,75 @@ body.dark-mode .your-rank-card {
 .your-rank-card span {
   font-size: 24px;
   margin-right: 8px;
+}
+
+/* kalkulator */
+.calculator-box {
+  width: 420px;
+  padding: 24px;
+}
+.calc-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-top: 16px;
+}
+.calc-grid button {
+  padding: 12px;
+  border-radius: 16px;
+  font-size: 13px;
+}
+#calcDisplay {
+  width: 100%;
+  padding: 14px;
+  font-size: 22px;
+  text-align: right;
+  border-radius: 24px;
+  margin-bottom: 16px;
+}
+
+/* mobile */
+@media (max-width: 860px) {
+  .wrapper {
+    flex-direction: column;
+    padding: 0 12px;
+  }
+  .side {
+    position: static;
+  }
+  .brand {
+    white-space: normal;
+    font-size: 16px;
+    text-align: center;
+  }
+  .top-right {
+    gap: 8px;
+  }
+  .timer {
+    font-size: 12px;
+    padding: 2px 8px;
+  }
+  .progress-text {
+    font-size: 10px;
+  }
+  .home-btn {
+    font-size: 18px;
+  }
+  .grid button {
+    font-size: 11px;
+  }
+  .review-stats {
+    flex-direction: column;
+  }
+  .result-card {
+    flex-direction: column;
+  }
+  .result-left .home-btn {
+    position: static;
+    float: right;
+  }
+  .leaderboard-header .rank, .leaderboard-item .rank { width: 45px; }
+  .leaderboard-header .score, .leaderboard-item .score { width: 65px; }
+  .leaderboard-header .time, .leaderboard-item .time { width: 80px; font-size: 11px; }
+  .leaderboard-header .name, .leaderboard-item .name { font-size: 12px; }
 }

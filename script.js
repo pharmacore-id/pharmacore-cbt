@@ -257,7 +257,7 @@ function showResult(score) {
     loadLeaderboard();
 }
 
-// ========== MODAL PEMBAHASAN & EXPORT PDF (dengan warna hijau, merah, kuning) ==========
+// ========== MODAL PEMBAHASAN & EXPORT PDF ==========
 function openDiscussionModal() {
     let results = JSON.parse(localStorage.getItem("cbt_results") || "[]");
     let soalData = JSON.parse(localStorage.getItem("cbt_soal") || "[]");
@@ -284,7 +284,7 @@ function openDiscussionModal() {
                 bgColor = "#fee2e2";   // merah muda
                 indicator = " ✗ (jawaban Anda salah)";
             } else if (!isUser && isCorrectKey) {
-                bgColor = "#fef9c3";   // kuning muda (kunci jawaban)
+                bgColor = "#fef9c3";   // kuning muda
                 indicator = " ★ (kunci jawaban)";
             }
             html += `<div style="padding: 8px 12px; margin: 6px 0; border-radius: 12px; background: ${bgColor}; border: 1px solid #e5e7eb;">
@@ -303,28 +303,39 @@ function exportDiscussionPDF() { window.print(); }
 function loadLeaderboard() {
     const board = document.getElementById("board");
     if (!board) return;
-    board.innerHTML = '<div>Memuat leaderboard...</div>';
+    board.innerHTML = '<div style="text-align:center; padding:20px;">Memuat leaderboard...</div>';
     fetch(API + "?action=leaderboard&token=" + token)
         .then(r => r.json())
         .then(res => {
             if (res.leaderboard && res.leaderboard.length) {
                 let data = res.leaderboard.map(item => ({ nama: item.nama, skor: item.skor, total: soal.length, waktu: item.waktu || "00:00" }));
                 data.sort((a, b) => b.skor - a.skor);
-                let html = `<div class="leaderboard-card"><div class="leaderboard-header"><div class="rank">#</div><div class="name">Peserta</div><div class="score">Skor</div><div class="time">Waktu</div></div>`;
+                let html = `<div class="leaderboard-card">
+                    <div class="leaderboard-header">
+                        <div class="rank">#</div>
+                        <div class="name">Peserta</div>
+                        <div class="score">Skor</div>
+                        <div class="time">Waktu</div>
+                    </div>`;
                 data.forEach((item, idx) => {
                     let rank = idx + 1;
                     let medal = rank === 1 ? "🥇" : (rank === 2 ? "🥈" : (rank === 3 ? "🥉" : ""));
                     let myClass = (item.nama === nama) ? "my-rank" : "";
                     let persen = Math.round((item.skor / item.total) * 100);
-                    html += `<div class="leaderboard-item ${myClass}"><div class="rank">${medal || rank}</div><div class="name">${item.nama}</div><div class="score">${persen}%</div><div class="time">${item.waktu}</div></div>`;
+                    html += `<div class="leaderboard-item ${myClass}">
+                        <div class="rank">${medal || rank}</div>
+                        <div class="name">${item.nama}</div>
+                        <div class="score">${persen}%</div>
+                        <div class="time">${item.waktu}</div>
+                    </div>`;
                 });
                 html += `</div>`;
                 board.innerHTML = html;
             } else {
-                board.innerHTML = '<div>🏆 Belum ada data leaderboard.</div>';
+                board.innerHTML = '<div style="text-align:center; padding:20px;">🏆 Belum ada data leaderboard.</div>';
             }
         })
-        .catch(() => board.innerHTML = '<div>Gagal memuat leaderboard.</div>');
+        .catch(() => board.innerHTML = '<div style="text-align:center; padding:20px;">⚠️ Gagal memuat leaderboard.</div>');
 }
 function restartExam() {
     if (confirm("Ujian baru akan menghapus semua jawaban. Lanjutkan?")) {

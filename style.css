@@ -751,3 +751,8 @@ MOBILE RESPONSIVE
     grid-template-columns:1fr;
   }
 }
+
+/* Tambahkan ini di style.css untuk legend review dot */
+.review-dot {
+    background: #fbbf24;
+}

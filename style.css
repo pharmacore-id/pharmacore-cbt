@@ -17,31 +17,181 @@ body {
   color: var(--text);
   transition: background 0.3s, color 0.3s;
 }
+/* DARK MODE - SEMUA TEKS PUTIH */
 body.dark-mode {
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  color: #e2e8f0;
+  color: #ffffff !important;
 }
-body.dark-mode .login-card, body.dark-mode .card, body.dark-mode .side, body.dark-mode .result-card, body.dark-mode .modal-content, body.dark-mode .calculator-box {
+body.dark-mode .login-card,
+body.dark-mode .card,
+body.dark-mode .side,
+body.dark-mode .result-card,
+body.dark-mode .modal-content,
+body.dark-mode .calculator-box {
   background: #1e1e2e;
   border-color: #334155;
 }
-body.dark-mode .secondary-btn { background: #2d2d3a; color: #a78bfa; }
-body.dark-mode .summary-item, body.dark-mode .grid button, body.dark-mode .leaderboard-item { background: #2d2d3a; }
-body.dark-mode .timer { background: #2d2d3a; color: #facc15; }
-body.dark-mode .opt { background: #2d2d3a; border-color: #334155; color: #e2e8f0; }
-body.dark-mode .opt.active { background: #4c1d95; border-color: #a78bfa; color: white; }
-body.dark-mode .opt:hover { background: #3d3d4a; }
-body.dark-mode .letter { background: #4c1d95; color: white; }
-body.dark-mode .legend div, body.dark-mode .legend span { color: #cbd5e1; }
-body.dark-mode .grid button { background: #2d2d3a; color: #a78bfa; }
-body.dark-mode .grid button.done { background: #10b981 !important; color: white !important; }
-body.dark-mode .grid button.ragu { background: #f59e0b !important; color: #1e293b !important; }
-body.dark-mode .discussion-question { background: #2d2d3a; border-left-color: #a78bfa; }
-body.dark-mode .option-item { background: #1e1e2e; border-color: #334155; color: #cbd5e1; }
-body.dark-mode .correct-option { background: #064e3b; border-color: #10b981; color: #a7f3d0; }
-body.dark-mode .wrong-option { background: #7f1d1d; border-color: #ef4444; color: #fecaca; }
-body.dark-mode .discussion-pembahasan { background: #0f172a; color: #cbd5e1; }
-body.dark-mode .home-btn, body.dark-mode .close-modal, body.dark-mode .close-calc { color: #cbd5e1; }
+body.dark-mode .secondary-btn {
+  background: #2d2d3a;
+  color: #ffffff;
+}
+body.dark-mode .summary-item,
+body.dark-mode .grid button,
+body.dark-mode .leaderboard-item {
+  background: #2d2d3a;
+  color: #ffffff;
+}
+body.dark-mode .timer {
+  background: #2d2d3a;
+  color: #ffffff;
+}
+body.dark-mode .opt {
+  background: #2d2d3a;
+  border-color: #334155;
+  color: #ffffff;
+}
+body.dark-mode .opt.active {
+  background: #4c1d95;
+  border-color: #a78bfa;
+  color: #ffffff;
+}
+body.dark-mode .opt:hover {
+  background: #3d3d4a;
+}
+body.dark-mode .letter {
+  background: #4c1d95;
+  color: #ffffff;
+}
+body.dark-mode .legend div,
+body.dark-mode .legend span {
+  color: #ffffff;
+}
+body.dark-mode .grid button {
+  background: #2d2d3a;
+  color: #ffffff;
+}
+body.dark-mode .grid button.done {
+  background: #10b981 !important;
+  color: #ffffff !important;
+}
+body.dark-mode .grid button.ragu {
+  background: #f59e0b !important;
+  color: #ffffff !important;
+}
+/* DISCUSSION MODAL */
+body.dark-mode .discussion-question {
+  background: #2d2d3a;
+  border-left-color: #a78bfa;
+  color: #ffffff;
+}
+body.dark-mode .option-item {
+  background: #1e1e2e;
+  border-color: #334155;
+  color: #ffffff;
+}
+body.dark-mode .correct-option {
+  background: #064e3b;
+  border-color: #10b981;
+  color: #ffffff;
+}
+body.dark-mode .wrong-option {
+  background: #7f1d1d;
+  border-color: #ef4444;
+  color: #ffffff;
+}
+body.dark-mode .discussion-pembahasan {
+  background: #0f172a;
+  color: #ffffff;
+}
+body.dark-mode .home-btn,
+body.dark-mode .close-modal,
+body.dark-mode .close-calc {
+  color: #ffffff;
+}
+/* REVIEW MODAL (sebelum submit) */
+body.dark-mode .review-stats .review-stat {
+  background: #2d2d3a;
+  color: #ffffff;
+}
+body.dark-mode .review-stats .review-stat-value {
+  color: #ffffff;
+}
+body.dark-mode .review-stats .review-stat-label {
+  color: #cccccc;
+}
+body.dark-mode .review-question-item {
+  background: #2d2d3a;
+  color: #ffffff;
+}
+body.dark-mode .review-question-item.answered {
+  border-left-color: #10b981;
+}
+body.dark-mode .review-question-item.ragu {
+  border-left-color: #f59e0b;
+}
+body.dark-mode .review-question-item.unanswered {
+  border-left-color: #ef4444;
+}
+body.dark-mode .review-warning {
+  background: #7f1d1d;
+  color: #ffffff;
+}
+/* LEADERBOARD */
+body.dark-mode .leaderboard-card {
+  background: #2d2d3a;
+}
+body.dark-mode .leaderboard-header {
+  color: #cccccc;
+}
+body.dark-mode .leaderboard-item {
+  background: #1e1e2e;
+  color: #ffffff;
+}
+body.dark-mode .leaderboard-item .rank,
+body.dark-mode .leaderboard-item .name,
+body.dark-mode .leaderboard-item .score,
+body.dark-mode .leaderboard-item .time {
+  color: #ffffff;
+}
+body.dark-mode .my-rank {
+  border-color: #a78bfa;
+  background: #3d2a7a;
+}
+/* PRINT - SELALU LIGHT MODE (untuk export PDF) */
+@media print {
+  body, body.dark-mode, body.dark-mode * {
+    background: white !important;
+    color: black !important;
+    border-color: #ccc !important;
+    box-shadow: none !important;
+  }
+  #discussionModal, #discussionModal * {
+    background: white !important;
+    color: black !important;
+  }
+  .modal-content, .discussion-question, .option-item {
+    background: white !important;
+    color: black !important;
+    border: 1px solid #ddd !important;
+  }
+  .correct-option {
+    background: #d1fae5 !important;
+    color: #065f46 !important;
+  }
+  .wrong-option {
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+  }
+  .close-modal, .secondary-btn, .modal-header button {
+    display: none !important;
+  }
+  .discussion-question {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    margin-bottom: 20px;
+  }
+}
+/* REST OF CSS (sama seperti sebelumnya, tidak berubah) */
 #login { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 30px; }
 .login-card { width:100%; max-width:500px; background: rgba(255,255,255,.85); backdrop-filter: blur(20px); border-radius: 32px; padding: 42px; box-shadow: 0 30px 60px rgba(139,92,246,.10); text-align:center; }
 .badge { background:#ede9fe; color:#7c3aed; display:inline-block; padding:10px 18px; border-radius:999px; font-weight:600; margin-bottom:20px; }
@@ -149,15 +299,6 @@ input:focus { outline:none; border-color:#8b5cf6; box-shadow:0 0 0 4px rgba(139,
 .leaderboard-item .score { width:70px; text-align:center; font-weight:700; color:#10b981; }
 .leaderboard-item .time { width:80px; text-align:center; font-size:13px; font-family:monospace; }
 .my-rank { border:2px solid #8b5cf6; background:#ede9fe; }
-@media print {
-  body * { visibility: hidden; }
-  #discussionModal, #discussionModal * { visibility: visible; }
-  #discussionModal { position:absolute; top:0; left:0; width:100%; margin:0; padding:20px; background:white; z-index:99999; overflow:visible !important; height:auto !important; max-height:none !important; }
-  .modal-content { box-shadow:none; padding:0; overflow:visible !important; max-height:none !important; }
-  .modal-body { overflow:visible !important; max-height:none !important; }
-  .discussion-question { page-break-inside:avoid; break-inside:avoid; margin-bottom:30px; }
-  .close-modal, .secondary-btn, .modal-header button { display:none !important; }
-}
 @media (max-width: 900px) {
   .wrapper { flex-direction:column; padding:15px; }
   .side { position:static; }

@@ -864,3 +864,162 @@ body.dark-mode .answer-review-table .wrong {
     padding: 10px 0;
   }
 }
+
+/* ==================================
+   LEADERBOARD STYLE UPDATE
+   ================================== */
+
+/* Container leaderboard */
+#board {
+    margin-top: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+    border-radius: 20px;
+}
+
+/* Card utama leaderboard */
+.leaderboard-card {
+    background: linear-gradient(135deg, #ffffff 0%, #faf9ff 100%);
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+}
+
+body.dark-mode .leaderboard-card {
+    background: linear-gradient(135deg, #1e1e2e 0%, #2a2a3a 100%);
+    border: 1px solid #3d3d4a;
+}
+
+/* Header leaderboard */
+.leaderboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #e5e7eb;
+    margin-bottom: 16px;
+    font-weight: 700;
+    color: #6b7280;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+body.dark-mode .leaderboard-header {
+    border-bottom-color: #3d3d4a;
+    color: #9ca3af;
+}
+
+.leaderboard-header .rank { width: 50px; text-align: center; }
+.leaderboard-header .name { flex: 1; text-align: left; padding-left: 8px; }
+.leaderboard-header .score { width: 80px; text-align: center; }
+.leaderboard-header .time { width: 100px; text-align: center; }
+
+/* List item leaderboard */
+.leaderboard-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.leaderboard-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #f9fafb;
+    border-radius: 16px;
+    transition: all 0.2s ease;
+}
+
+body.dark-mode .leaderboard-item {
+    background: #2d2d3a;
+}
+
+.leaderboard-item:hover {
+    transform: translateX(4px);
+    background: #f3f4f6;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+body.dark-mode .leaderboard-item:hover {
+    background: #3d3d4a;
+}
+
+/* Rank styling */
+.rank {
+    width: 50px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 18px;
+    color: #9ca3af;
+}
+
+.rank-1 { color: #fbbf24; }  /* Emas */
+.rank-2 { color: #9ca3af; }  /* Perak */
+.rank-3 { color: #d97706; }  /* Perunggu */
+
+/* Nama peserta */
+.name {
+    flex: 1;
+    text-align: left;
+    padding-left: 8px;
+    font-weight: 600;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+body.dark-mode .name {
+    color: #f3f4f6;
+}
+
+/* Badge untuk top 3 */
+.medal-icon {
+    font-size: 20px;
+}
+
+/* Skor */
+.score {
+    width: 80px;
+    text-align: center;
+    font-weight: 700;
+    color: #10b981;
+    font-size: 16px;
+}
+
+/* Waktu pengerjaan */
+.time {
+    width: 100px;
+    text-align: center;
+    font-size: 14px;
+    color: #6b7280;
+    font-family: monospace;
+    font-weight: 600;
+}
+
+body.dark-mode .time {
+    color: #a78bfa;
+}
+
+/* Peringkat saya sendiri */
+.my-rank {
+    background: linear-gradient(135deg, #ede9fe 0%, #e0e7ff 100%);
+    border: 2px solid #8b5cf6;
+}
+
+body.dark-mode .my-rank {
+    background: linear-gradient(135deg, #3d2a7a 0%, #2e1a5e 100%);
+    border-color: #a78bfa;
+}
+
+/* Loading & empty state */
+.leaderboard-loading,
+.leaderboard-empty {
+    text-align: center;
+    padding: 40px;
+    color: #6b7280;
+    font-size: 14px;
+}

@@ -12,7 +12,7 @@ let isDone = false;
 let timeLeft = 3600;
 let isLoggedIn = false;
 let calcMemory = 0;
-let lastAnswer = 0;
+let completionTimeSeconds = 0;
 const API = "https://script.google.com/macros/s/AKfycbyo48NoxjaBHGHkRCxgkxOB3Cys2Wa3mBG7AvK_n3TidyCSQcjSf5vSbCJpkI0-QJhk/exec";
 
 // ==========================================
@@ -28,7 +28,6 @@ function saveState() {
     localStorage.setItem("cbt_token", token);
     if (soal && soal.length) localStorage.setItem("cbt_soal", JSON.stringify(soal));
 }
-
 function loadSavedState() {
     const savedAnswers = localStorage.getItem("cbt_answers");
     const savedRagu = localStorage.getItem("cbt_ragu");
@@ -45,7 +44,6 @@ function loadSavedState() {
     if (savedLoggedIn === "true") { isLoggedIn = true; nama = savedNama || ""; token = savedToken || ""; }
     if (savedSoal) soal = JSON.parse(savedSoal);
 }
-
 function clearSession() {
     localStorage.clear();
     answers = {}; ragu = {}; currentQuestion = 0; isDone = false; timeLeft = 3600; isLoggedIn = false; soal = []; nama = ""; token = "";
@@ -60,7 +58,6 @@ function updateProgress() {
     let fillEl = document.getElementById("progressFill");
     if (fillEl) fillEl.style.width = progress + "%";
 }
-
 function updateStats() {
     if (!soal.length) return;
     const answered = Object.keys(answers).length;
@@ -96,7 +93,6 @@ function renderQuestion() {
     }
     updateProgress();
 }
-
 function pick(ans) {
     answers[currentQuestion] = ans;
     if (ragu[currentQuestion]) delete ragu[currentQuestion];
@@ -105,7 +101,6 @@ function pick(ans) {
     updateNavGrid();
     updateStats();
 }
-
 function updateNavGrid() {
     if (!soal.length) return;
     let html = "";
@@ -118,7 +113,6 @@ function updateNavGrid() {
     }
     document.getElementById("nav").innerHTML = html;
 }
-
 function goToQuestion(idx) {
     currentQuestion = idx;
     renderQuestion();
@@ -127,7 +121,6 @@ function goToQuestion(idx) {
     updateProgress();
     saveState();
 }
-
 function nextQuestion() {
     if (currentQuestion < soal.length - 1) {
         currentQuestion++;
@@ -140,7 +133,6 @@ function nextQuestion() {
         if (confirm("Anda sudah di soal terakhir. Apakah ingin mengumpulkan jawaban?")) showReviewModal();
     }
 }
-
 function prevQuestion() {
     if (currentQuestion > 0) {
         currentQuestion--;
@@ -151,7 +143,6 @@ function prevQuestion() {
         saveState();
     }
 }
-
 function toggleRagu() {
     if (ragu[currentQuestion]) delete ragu[currentQuestion];
     else ragu[currentQuestion] = true;
@@ -180,14 +171,14 @@ function startTimer() {
             let s = timeLeft % 60;
             let timerEl = document.getElementById("timer");
             if (timerEl) timerEl.innerHTML = `${m}:${s < 10 ? '0' + s : s}`;
-            if (timeLeft === 300) { alert("⏰ 5 menit lagi!"); timerEl.style.color = "#f59e0b"; }
-            if (timeLeft === 60) { alert("⏰ 1 menit lagi!"); timerEl.style.color = "#ef4444"; timerEl.style.fontWeight = "bold"; }
+            if (timeLeft === 300) { alert("⏰ 5 menit lagi!"); }
+            if (timeLeft === 60) { alert("⏰ 1 menit lagi!"); }
         }
     }, 1000);
 }
 
 // ==========================================
-// REVIEW MODAL (SEBELUM SUBMIT)
+// REVIEW MODAL SEBELUM SUBMIT
 // ==========================================
 function showReviewModal() {
     if (!soal.length) return;
@@ -212,30 +203,25 @@ function showReviewModal() {
     document.getElementById("reviewQuestionList").innerHTML = listHtml;
     document.getElementById("reviewModal").style.display = "flex";
 }
-
 function goToQuestionFromReview(idx) { closeReviewModal(); goToQuestion(idx); }
 function closeReviewModal() { document.getElementById("reviewModal").style.display = "none"; }
 function confirmSubmit() { closeReviewModal(); submit(); }
 
 // ==========================================
-// SUBMIT & REVIEW JAWABAN SETELAH SUBMIT
+// SUBMIT & REVIEW JAWABAN SETELAH SUBMIT (seperti gambar)
 // ==========================================
-function formatTime(seconds) {
+function formatTimeDisplay(seconds) {
     let mins = Math.floor(seconds / 60);
     let secs = seconds % 60;
-    return `${mins}:${secs < 10 ? '0' + secs : secs}`;
+    return `${mins} menit ${secs} detik`;
 }
-
 function submit() {
     if (isDone) return;
     let unanswered = soal.length - Object.keys(answers).length;
     if (!confirm(`Yakin kumpul? ${Object.keys(answers).length}/${soal.length} terjawab, ${unanswered} belum. Lanjutkan?`)) return;
     isDone = true;
     clearInterval(timer);
-    
-    let completionTime = (3600 - timeLeft);
-    let formattedTime = formatTime(completionTime);
-    
+    completionTimeSeconds = 3600 - timeLeft;
     let score = 0;
     let results = [];
     for (let i = 0; i < soal.length; i++) {
@@ -247,154 +233,84 @@ function submit() {
             jawabanUser: answers[i] || "(Tidak dijawab)",
             kunci: soal[i].kunci,
             benar: isCorrect,
-            pembahasan: soal[i].pembahasan || "Tidak ada pembahasan"
+            pembahasan: soal[i].pembahasan || "Tidak ada pembahasan",
+            options: { A: soal[i].a, B: soal[i].b, C: soal[i].c, D: soal[i].d }
         });
     }
     localStorage.setItem("cbt_submitted", "true");
     localStorage.setItem("cbt_score", score);
     localStorage.setItem("cbt_results", JSON.stringify(results));
-    localStorage.setItem("cbt_completion_time", formattedTime);
-    
-    fetch(API, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            action: "submit",
-            nama: nama,
-            token: token,
-            skor: score,
-            jawaban: answers,
-            total: soal.length,
-            waktu: formattedTime
-        })
-    }).catch(e => console.log);
-    
+    localStorage.setItem("cbt_completion_time", completionTimeSeconds);
+    fetch(API, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "submit", nama, token, skor: score, jawaban: answers, total: soal.length, waktu: formatTimeDisplay(completionTimeSeconds) }) }).catch(e => console.log);
     showResult(score);
 }
-
 function showResult(score) {
     document.getElementById("app").style.display = "none";
     document.getElementById("result").style.display = "flex";
     document.getElementById("scoreNumber").innerHTML = score;
     let persen = Math.round((score / soal.length) * 100);
-    let grade = persen >= 90 ? "🏆 Luar Biasa!" : persen >= 75 ? "✅ Sangat Baik" : persen >= 60 ? "📚 Cukup" : "📖 Perbanyak latihan";
-    document.getElementById("skor").innerHTML = `Anda menjawab ${score} dari ${soal.length} benar (${persen}%)<br><strong>${grade}</strong>`;
+    let grade = persen >= 90 ? "🏆 Luar Biasa!" : persen >= 75 ? "✅ Sangat Baik" : persen >= 60 ? "📚 Cukup" : "📖 Perlu Belajar Lebih Lanjut";
+    document.getElementById("skor").innerHTML = `<strong>${grade}</strong><br>${score} dari ${soal.length} benar (${persen}%)`;
+    document.getElementById("resultNama").innerText = nama;
+    document.getElementById("resultBenar").innerText = score;
+    document.getElementById("resultSalah").innerText = soal.length - score;
+    let waktuStr = formatTimeDisplay(completionTimeSeconds);
+    document.getElementById("resultWaktu").innerText = waktuStr;
     loadLeaderboard();
 }
-
-// Toggle review jawaban setelah submit
 function toggleAnswerReview() {
     let panel = document.getElementById("answerReviewPanel");
     if (panel.style.display === "none") {
         let results = JSON.parse(localStorage.getItem("cbt_results") || "[]");
-        if (!results.length) {
-            panel.innerHTML = "<p>Tidak ada data jawaban.</p>";
-        } else {
-            let html = `<table class="answer-review-table">
-                <thead><tr><th>No</th><th>Soal</th><th>Jawaban Anda</th><th>Kunci</th><th>Status</th><th>Pembahasan</th></tr></thead><tbody>`;
+        if (!results.length) { panel.innerHTML = "<p>Tidak ada data jawaban.</p>"; }
+        else {
+            let html = "";
             results.forEach(r => {
-                let statusClass = r.benar ? "correct" : "wrong";
-                let statusText = r.benar ? "✅ Benar" : "❌ Salah";
-                html += `<tr>
-                    <td>${r.nomor}</td>
-                    <td>${r.pertanyaan}</td>
-                    <td>${r.jawabanUser}</td>
-                    <td>${r.kunci}</td>
-                    <td class="${statusClass}">${statusText}</td>
-                    <td>${r.pembahasan}</td>
-                <tr>`;
+                let optionsHtml = "";
+                for (let [opt, text] of Object.entries(r.options)) {
+                    let isUser = (r.jawabanUser === opt);
+                    let isCorrectAns = (r.kunci === opt);
+                    let checkMark = (isUser && r.benar) ? " ✓" : (isUser && !r.benar) ? " ✗" : "";
+                    let className = (isUser && r.benar) ? "correct" : "";
+                    optionsHtml += `<div class="review-option ${className}">${opt}. ${text} ${checkMark}</div>`;
+                }
+                html += `
+                    <div class="answer-review-item">
+                        <div class="review-question-text">Soal ${r.nomor}. ${r.pertanyaan}</div>
+                        <div class="review-options-list">${optionsHtml}</div>
+                        <div class="review-pembahasan"><strong>Pembahasan:</strong> ${r.pembahasan}</div>
+                    </div>
+                `;
             });
-            html += `</tbody></table>`;
             panel.innerHTML = html;
         }
         panel.style.display = "block";
-    } else {
-        panel.style.display = "none";
-    }
+    } else { panel.style.display = "none"; }
 }
-
-// ==========================================
-// LEADERBOARD DENGAN DESAIN MODERN
-// ==========================================
 function loadLeaderboard() {
     const board = document.getElementById("board");
     if (!board) return;
-    
     board.innerHTML = '<div class="leaderboard-loading">📊 Memuat leaderboard...</div>';
-    
-    fetch(API + "?action=leaderboard&token=" + token)
-        .then(function(r) { return r.json(); })
-        .then(function(res) {
-            if (res.leaderboard && res.leaderboard.length > 0) {
-                let leaderboardData = res.leaderboard.map(item => ({
-                    nama: item.nama,
-                    skor: item.skor,
-                    total: soal.length,
-                    waktu: item.waktu || generateRandomTime()
-                }));
-                
-                leaderboardData.sort((a, b) => b.skor - a.skor);
-                
-                let html = `
-                    <div class="leaderboard-card">
-                        <div class="leaderboard-header">
-                            <div class="rank">#</div>
-                            <div class="name">Peserta</div>
-                            <div class="score">Skor</div>
-                            <div class="time">Waktu</div>
-                        </div>
-                        <div class="leaderboard-list">
-                `;
-                
-                leaderboardData.forEach(function(item, idx) {
-                    let rank = idx + 1;
-                    let rankClass = "";
-                    let medalIcon = "";
-                    let myRankClass = (item.nama === nama) ? "my-rank" : "";
-                    let percentage = Math.round((item.skor / item.total) * 100);
-                    let scoreColor = percentage >= 80 ? "#10b981" : (percentage >= 60 ? "#f59e0b" : "#ef4444");
-                    
-                    if (rank === 1) { medalIcon = "🥇"; rankClass = "rank-1"; }
-                    else if (rank === 2) { medalIcon = "🥈"; rankClass = "rank-2"; }
-                    else if (rank === 3) { medalIcon = "🥉"; rankClass = "rank-3"; }
-                    
-                    html += `
-                        <div class="leaderboard-item ${myRankClass}">
-                            <div class="rank ${rankClass}">${medalIcon ? medalIcon : rank}</div>
-                            <div class="name">${escapeHtml(item.nama)}</div>
-                            <div class="score" style="color: ${scoreColor}">${percentage}%</div>
-                            <div class="time">${item.waktu}</div>
-                        </div>
-                    `;
-                });
-                
-                html += `</div></div>`;
-                board.innerHTML = html;
-            } else {
-                board.innerHTML = '<div class="leaderboard-empty">🏆 Belum ada data leaderboard. Jadilah yang pertama!</div>';
-            }
-        })
-        .catch(function(err) {
-            console.error("Leaderboard error:", err);
-            board.innerHTML = '<div class="leaderboard-empty">⚠️ Gagal memuat leaderboard. Silakan coba lagi.</div>';
-        });
+    fetch(API + "?action=leaderboard&token=" + token).then(r => r.json()).then(res => {
+        if (res.leaderboard && res.leaderboard.length) {
+            let data = res.leaderboard.map(item => ({ nama: item.nama, skor: item.skor, total: soal.length, waktu: item.waktu || "00:00" }));
+            data.sort((a,b) => b.skor - a.skor);
+            let html = `<div class="leaderboard-card"><div class="leaderboard-header"><div class="rank">#</div><div class="name">Peserta</div><div class="score">Skor</div><div class="time">Waktu</div></div><div class="leaderboard-list">`;
+            data.forEach((item, idx) => {
+                let rank = idx+1;
+                let rankClass = rank===1?"rank-1":(rank===2?"rank-2":(rank===3?"rank-3":""));
+                let medal = rank===1?"🥇":(rank===2?"🥈":(rank===3?"🥉":""));
+                let myClass = (item.nama === nama) ? "my-rank" : "";
+                let persen = Math.round((item.skor / item.total) * 100);
+                html += `<div class="leaderboard-item ${myClass}"><div class="rank ${rankClass}">${medal || rank}</div><div class="name">${item.nama}</div><div class="score">${persen}%</div><div class="time">${item.waktu}</div></div>`;
+            });
+            html += `</div></div>`;
+            board.innerHTML = html;
+        } else { board.innerHTML = '<div class="leaderboard-empty">🏆 Belum ada data leaderboard.</div>'; }
+    }).catch(() => { board.innerHTML = '<div class="leaderboard-empty">⚠️ Gagal memuat leaderboard.</div>'; });
 }
-
-function generateRandomTime() {
-    let minutes = Math.floor(Math.random() * 60) + 10;
-    let seconds = Math.floor(Math.random() * 60);
-    return `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
-}
-
-function escapeHtml(str) {
-    if (!str) return "";
-    return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
-    });
+function restartExam() {
+    if (confirm("Ujian baru akan menghapus semua jawaban. Lanjutkan?")) { clearSession(); location.reload(); }
 }
 
 // ==========================================
@@ -413,7 +329,6 @@ function login() {
         loadQuestions();
     }).catch(() => alert("Gagal validasi token"));
 }
-
 function loadQuestions() {
     if (soal.length) { startFromSaved(); return; }
     fetch(API + "?action=getSoal").then(r => r.json()).then(res => {
@@ -424,19 +339,8 @@ function loadQuestions() {
         saveState();
     }).catch(() => alert("Gagal load soal"));
 }
-
 function startFromSaved() {
     renderQuestion(); updateNavGrid(); updateStats(); startTimer();
-}
-
-// ==========================================
-// RESTART EXAM
-// ==========================================
-function restartExam() {
-    if (confirm("Ujian baru akan menghapus semua jawaban. Lanjutkan?")) {
-        clearSession();
-        location.reload();
-    }
 }
 
 // ==========================================
@@ -453,14 +357,8 @@ function loadDarkMode() { if (localStorage.getItem("darkMode") === "true") docum
 // ==========================================
 function toggleCalculator() {
     let modal = document.getElementById("calculatorModal");
-    if (modal.style.display === "flex") {
-        modal.style.display = "none";
-        document.removeEventListener("keydown", handleKeyboard);
-    } else {
-        modal.style.display = "flex";
-        document.addEventListener("keydown", handleKeyboard);
-        document.getElementById("calcDisplay").focus();
-    }
+    if (modal.style.display === "flex") { modal.style.display = "none"; document.removeEventListener("keydown", handleKeyboard); }
+    else { modal.style.display = "flex"; document.addEventListener("keydown", handleKeyboard); document.getElementById("calcDisplay").focus(); }
 }
 function handleKeyboard(e) {
     let d = document.getElementById("calcDisplay");
@@ -468,27 +366,19 @@ function handleKeyboard(e) {
     let key = e.key;
     if (key >= '0' && key <= '9') appendToDisplay(key);
     else if (key === '.') appendToDisplay('.');
-    else if (key === '+' || key === '-' || key === '*' || key === '/') {
-        let op = key === '*' ? '×' : (key === '/' ? '÷' : key);
-        appendToDisplay(op);
-    } else if (key === 'Enter' || key === '=') calculateResult();
+    else if (key === '+' || key === '-' || key === '*' || key === '/') { let op = key === '*' ? '×' : (key === '/' ? '÷' : key); appendToDisplay(op); }
+    else if (key === 'Enter' || key === '=') calculateResult();
     else if (key === 'Escape') toggleCalculator();
     else if (key === 'Backspace') deleteLastCalc();
     else if (key === 'c' || key === 'C') clearCalc();
 }
-function appendToDisplay(v) {
-    let d = document.getElementById("calcDisplay");
-    if (d) { if (d.value === "Error") d.value = ""; d.value += v; }
-}
+function appendToDisplay(v) { let d = document.getElementById("calcDisplay"); if (d) { if (d.value === "Error") d.value = ""; d.value += v; } }
 function clearCalc() { document.getElementById("calcDisplay").value = ""; }
 function deleteLastCalc() { let d = document.getElementById("calcDisplay"); d.value = d.value.slice(0, -1); }
 function calculateResult() {
     let d = document.getElementById("calcDisplay");
-    try {
-        let expr = d.value.replace(/×/g, '*').replace(/÷/g, '/');
-        let r = Function('"use strict"; return (' + expr + ')')();
-        d.value = r;
-    } catch(e) { d.value = "Error"; }
+    try { let expr = d.value.replace(/×/g, '*').replace(/÷/g, '/'); let r = Function('"use strict"; return (' + expr + ')')(); d.value = r; }
+    catch(e) { d.value = "Error"; }
 }
 function calcFunction(action) {
     let d = document.getElementById("calcDisplay");
@@ -533,16 +423,15 @@ function checkExistingSession() {
             const savedScore = localStorage.getItem("cbt_score");
             if (savedScore) {
                 document.getElementById("login").style.display = "none";
+                completionTimeSeconds = parseInt(localStorage.getItem("cbt_completion_time") || "0");
                 if (soal.length) showResult(parseInt(savedScore));
                 else fetch(API+"?action=getSoal").then(r=>r.json()).then(res=>{ soal = res.soal; showResult(parseInt(savedScore)); });
             }
         } else {
             document.getElementById("login").style.display = "none";
             document.getElementById("app").style.display = "block";
-            if (soal.length) {
-                document.getElementById("totalCount").innerText = soal.length;
-                renderQuestion(); updateNavGrid(); updateStats(); startTimer();
-            } else loadQuestions();
+            if (soal.length) { document.getElementById("totalCount").innerText = soal.length; renderQuestion(); updateNavGrid(); updateStats(); startTimer(); }
+            else loadQuestions();
         }
     }
 }

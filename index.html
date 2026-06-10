@@ -47,7 +47,7 @@
     </button>
 
     <div class="exam-info">
-      50 Soal • 60 Menit • CBT Online
+      Soal • 60 Menit • CBT Online
     </div>
 
   </div>
@@ -114,7 +114,7 @@
 
     </div>
 
-    <!-- SIDEBAR - LENGKAP DENGAN SEMUA FITUR -->
+    <!-- SIDEBAR -->
     <div class="side">
 
       <h3>📊 Navigasi Soal</h3>
@@ -124,6 +124,11 @@
         <div class="summary-item">
           <span>✅ Terjawab</span>
           <strong id="answeredSummary">0</strong>
+        </div>
+
+        <div class="summary-item">
+          <span>🚩 Ragu</span>
+          <strong id="raguSummary">0</strong>
         </div>
 
         <div class="summary-item">
@@ -148,64 +153,75 @@
         </div>
 
         <div>
-          <span class="dot review-dot"></span>
-          Tandai Review
-        </div>
-
-        <div>
           <span class="dot empty-dot"></span>
           Belum Dijawab
         </div>
 
       </div>
 
-      <!-- MENU FITUR CBT LENGKAP -->
-      <div style="margin-top: 20px;">
-        <button class="submit-btn" onclick="showReviewPanel()" style="background: linear-gradient(135deg, #f59e0b, #f97316);">
-          📋 Review & Submit
-        </button>
-      </div>
+      <button class="submit-btn" onclick="showReviewModal()">
+        📋 Kumpulkan Jawaban
+      </button>
 
       <hr style="margin:20px 0;border:none;border-top:1px solid #eee;">
 
-      <div style="display: flex; flex-direction: column; gap: 10px;">
-        <button class="secondary-btn" onclick="toggleRandomize()">
-          🎲 Acak Soal
-        </button>
+      <button class="secondary-btn" onclick="toggleDarkMode()">
+        🌙 Dark Mode
+      </button>
 
-        <button class="secondary-btn" id="reviewBtn" onclick="toggleReview()">
-          🏷️ Tandai Review
-        </button>
-
-        <button class="secondary-btn" onclick="showUnansweredOnly()">
-          🔍 Soal Belum Dijawab
-        </button>
-
-        <button class="secondary-btn" onclick="showFlaggedOnly()">
-          🚩 Soal Ditandai
-        </button>
-
-        <button class="secondary-btn" onclick="resetNavigation()">
-          🔄 Reset Navigasi
-        </button>
-      </div>
-
-      <hr style="margin:20px 0;border:none;border-top:1px solid #eee;">
-
-      <div style="display: flex; flex-direction: column; gap: 10px;">
-        <button class="secondary-btn" onclick="toggleDarkMode()">
-          🌙 Dark Mode
-        </button>
-
-        <button class="secondary-btn" onclick="toggleCalculator()">
-          🧮 Kalkulator
-        </button>
-      </div>
+      <button class="secondary-btn" style="margin-top:10px;" onclick="toggleCalculator()">
+        🧮 Kalkulator
+      </button>
 
     </div>
 
   </div>
 
+</div>
+
+<!-- MODAL REVIEW SEBELUM SUBMIT -->
+<div id="reviewModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>📋 Review Jawaban</h2>
+      <button class="close-modal" onclick="closeReviewModal()">✕</button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="review-stats">
+        <div class="review-stat">
+          <div class="review-stat-value" id="reviewTotal">0</div>
+          <div class="review-stat-label">Total Soal</div>
+        </div>
+        <div class="review-stat answered">
+          <div class="review-stat-value" id="reviewAnswered">0</div>
+          <div class="review-stat-label">✅ Terjawab</div>
+        </div>
+        <div class="review-stat ragu">
+          <div class="review-stat-value" id="reviewRagu">0</div>
+          <div class="review-stat-label">🚩 Ditandai Ragu</div>
+        </div>
+        <div class="review-stat unanswered">
+          <div class="review-stat-value" id="reviewUnanswered">0</div>
+          <div class="review-stat-label">❌ Belum Dijawab</div>
+        </div>
+      </div>
+
+      <div class="review-questions">
+        <h3>Daftar Soal</h3>
+        <div id="reviewQuestionList"></div>
+      </div>
+
+      <div class="review-warning" id="reviewWarning">
+        ⚠️ Perhatian: Soal yang tidak dijawab akan dianggap salah!
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="secondary-btn" onclick="closeReviewModal()">Kembali ke Ujian</button>
+      <button class="submit-btn" onclick="confirmSubmit()">✅ Ya, Kumpulkan Jawaban</button>
+    </div>
+  </div>
 </div>
 
 <!-- RESULT -->
@@ -221,14 +237,9 @@
 
     <p id="skor"></p>
 
-    <div style="display: flex; gap: 10px; margin-top: 20px;">
-      <button class="submit-btn" onclick="showDiscussion()" style="flex:1; background: linear-gradient(135deg, #8b5cf6, #a78bfa);">
-        📖 Pembahasan
-      </button>
-      <button class="submit-btn" onclick="restartExam()" style="flex:1; background: linear-gradient(135deg, #10b981, #34d399);">
-        🔄 Ujian Baru
-      </button>
-    </div>
+    <button class="submit-btn" onclick="restartExam()" style="margin-top:20px;">
+      🔄 Ujian Baru
+    </button>
 
     <h3>🏆 Leaderboard</h3>
 
@@ -240,9 +251,7 @@
 
 <!-- CALCULATOR MODAL -->
 <div id="calculatorModal" class="calculator-modal" style="display:none;">
-
   <div class="calculator-box">
-
     <div class="calculator-header">
       <span>🧮 Kalkulator</span>
       <button class="close-calc" onclick="toggleCalculator()">✕</button>
@@ -251,33 +260,30 @@
     <input type="text" id="calcDisplay" readonly placeholder="0">
 
     <div class="calc-grid">
+      <button onclick="appendToDisplay('7')">7</button>
+      <button onclick="appendToDisplay('8')">8</button>
+      <button onclick="appendToDisplay('9')">9</button>
+      <button class="calc-operator" onclick="appendToDisplay('/')">÷</button>
 
-      <button onclick="calc('7')">7</button>
-      <button onclick="calc('8')">8</button>
-      <button onclick="calc('9')">9</button>
-      <button onclick="calc('/')">÷</button>
+      <button onclick="appendToDisplay('4')">4</button>
+      <button onclick="appendToDisplay('5')">5</button>
+      <button onclick="appendToDisplay('6')">6</button>
+      <button class="calc-operator" onclick="appendToDisplay('*')">×</button>
 
-      <button onclick="calc('4')">4</button>
-      <button onclick="calc('5')">5</button>
-      <button onclick="calc('6')">6</button>
-      <button onclick="calc('*')">×</button>
+      <button onclick="appendToDisplay('1')">1</button>
+      <button onclick="appendToDisplay('2')">2</button>
+      <button onclick="appendToDisplay('3')">3</button>
+      <button class="calc-operator" onclick="appendToDisplay('-')">-</button>
 
-      <button onclick="calc('1')">1</button>
-      <button onclick="calc('2')">2</button>
-      <button onclick="calc('3')">3</button>
-      <button onclick="calc('-')">−</button>
-
-      <button onclick="calc('0')">0</button>
-      <button onclick="calc('.')">.</button>
-      <button onclick="calculateResult()">=</button>
-      <button onclick="calc('+')">+</button>
+      <button onclick="appendToDisplay('0')">0</button>
+      <button onclick="appendToDisplay('.')">.</button>
+      <button class="calc-equals" onclick="calculateResult()">=</button>
+      <button class="calc-operator" onclick="appendToDisplay('+')">+</button>
 
       <button class="calc-clear" onclick="clearCalc()">C</button>
-
+      <button class="calc-clear" onclick="deleteLastCalc()">⌫</button>
     </div>
-
   </div>
-
 </div>
 
 <script src="script.js"></script>

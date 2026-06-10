@@ -6,41 +6,75 @@
 
 <title>PHARMACORE CBT</title>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
 <link rel="stylesheet" href="style.css">
+
+<!-- FIX: defer supaya DOM aman -->
 <script src="script.js" defer></script>
 
 </head>
 
 <body>
 
-<!-- ================= LOGIN ================= -->
+<!-- =========================
+LOGIN
+========================= -->
 <div id="login">
 
   <div class="login-card">
 
+    <div class="badge">✨ TRY OUT UKMPPAI</div>
+
     <h1>PHARMACORE CBT</h1>
 
-    <input id="nama" placeholder="Nama">
-    <input id="token" placeholder="Token">
+    <p class="subtitle">
+      Simulasi dan Prediksi UKMPPAI untuk Calon Apoteker Indonesia
+    </p>
 
-    <button onclick="login()">Mulai</button>
+    <div class="form-group">
+      <label>Nama Peserta</label>
+      <input id="nama" placeholder="Masukkan nama lengkap">
+    </div>
+
+    <div class="form-group">
+      <label>Token Ujian</label>
+      <input id="token" placeholder="Masukkan token ujian">
+    </div>
+
+    <button class="start-btn" onclick="login()">
+      Mulai Ujian
+    </button>
+
+    <div class="exam-info">
+      50 Soal • 60 Menit • CBT Online
+    </div>
 
   </div>
 
 </div>
 
-<!-- ================= APP ================= -->
+<!-- =========================
+APP
+========================= -->
 <div id="app" style="display:none;">
 
   <div class="topbar">
 
-    <div>PHARMACORE CBT</div>
+    <div class="brand">PHARMACORE CBT</div>
 
-    <div>
-      <span id="answeredCount">0</span>/<span id="totalCount">0</span>
-      <span id="timer">60:00</span>
+    <div class="top-right">
+
+      <div class="progress-text">
+        <span id="answeredCount">0</span>/<span id="totalCount">0</span> dijawab
+      </div>
+
+      <div class="timer" id="timer">60:00</div>
+
     </div>
-
   </div>
 
   <div class="wrapper">
@@ -48,10 +82,12 @@
     <!-- MAIN -->
     <div class="card">
 
-      <div id="questionLabel">Soal 1</div>
+      <div class="question-header">
+        <div class="question-badge" id="questionLabel">Soal 1</div>
+      </div>
 
       <div class="progress">
-        <div id="progressFill"></div>
+        <div class="fill" id="progressFill"></div>
       </div>
 
       <div id="q"></div>
@@ -59,9 +95,17 @@
 
       <div class="action-row">
 
-        <button onclick="prevQuestion()">Prev</button>
-        <button onclick="toggleRagu()" class="ragu-btn">Ragu</button>
-        <button onclick="nextQuestion()">Next</button>
+        <button class="secondary-btn" onclick="prevQuestion()">
+          ← Sebelumnya
+        </button>
+
+        <button class="ragu-btn" onclick="toggleRagu()">
+          🚩 Ragu
+        </button>
+
+        <button class="secondary-btn" onclick="nextQuestion()">
+          Berikutnya →
+        </button>
 
       </div>
 
@@ -70,65 +114,124 @@
     <!-- SIDEBAR -->
     <div class="side">
 
-      <div>
-        Terjawab: <span id="answeredSummary">0</span>
+      <h3>Navigasi Soal</h3>
+
+      <div class="summary">
+
+        <div class="summary-item">
+          <span>Terjawab</span>
+          <strong id="answeredSummary">0</strong>
+        </div>
+
+        <div class="summary-item">
+          <span>Belum</span>
+          <strong id="unansweredSummary">0</strong>
+        </div>
+
       </div>
 
-      <div>
-        Belum: <span id="unansweredSummary">0</span>
+      <div id="nav" class="grid"></div>
+
+      <div class="legend">
+        <div><span class="dot done-dot"></span>Sudah Dijawab</div>
+        <div><span class="dot ragu-dot"></span>Ditandai Ragu</div>
+        <div><span class="dot empty-dot"></span>Belum Dijawab</div>
       </div>
 
-      <div id="nav"></div>
+      <button class="submit-btn" onclick="submit()">
+        Kumpulkan Jawaban
+      </button>
 
-      <button onclick="submit()">Submit</button>
+      <hr style="margin:20px 0;border:none;border-top:1px solid #eee;">
 
-      <hr>
+      <!-- FIXED TOGGLE (NO DUPLICATE, NO CONFLICT) -->
+      <button class="secondary-btn" onclick="calc('toggle')">
+        🧮 Kalkulator
+      </button>
 
-      <button onclick="toggleDarkMode()">Dark Mode</button>
-
-      <button onclick="calc('toggle')">Calculator</button>
+      <button class="secondary-btn" style="margin-top:10px;" onclick="toggleDarkMode()">
+        🌙 Dark Mode
+      </button>
 
     </div>
 
   </div>
 </div>
 
-<!-- ================= RESULT ================= -->
-<div id="result" style="display:none;">
-  <h1>Skor: <span id="scoreNumber"></span></h1>
+<!-- =========================
+RESULT
+========================= -->
+<div id="result">
+
+  <div class="result-card">
+
+    <h2>Hasil Ujian</h2>
+
+    <div class="score-circle">
+      <span id="scoreNumber">0</span>
+    </div>
+
+    <p id="skor"></p>
+
+    <h3>Leaderboard</h3>
+
+    <div id="board"></div>
+
+  </div>
+
 </div>
 
-<!-- ================= CALCULATOR ================= -->
-<div id="calculatorModal" style="display:none;">
+<!-- =========================
+CALCULATOR
+========================= -->
+<div id="calculatorModal" class="calculator-modal">
 
-  <div>
+  <div class="calculator-box">
 
-    <input id="calcDisplay" readonly>
+    <div class="calculator-header">
+      <span>🧮 Kalkulator</span>
 
-    <div>
+      <button onclick="calc('toggle')">✕</button>
+    </div>
+
+    <input type="text" id="calcDisplay" readonly>
+
+    <div class="calc-grid">
 
       <button onclick="calc('7')">7</button>
       <button onclick="calc('8')">8</button>
       <button onclick="calc('9')">9</button>
-      <button onclick="calc('/')">/</button>
+      <button onclick="calc('/')">÷</button>
 
       <button onclick="calc('4')">4</button>
       <button onclick="calc('5')">5</button>
       <button onclick="calc('6')">6</button>
-      <button onclick="calc('*')">*</button>
+      <button onclick="calc('*')">×</button>
 
       <button onclick="calc('1')">1</button>
       <button onclick="calc('2')">2</button>
       <button onclick="calc('3')">3</button>
-      <button onclick="calc('-')">-</button>
+      <button onclick="calc('-')">−</button>
 
       <button onclick="calc('0')">0</button>
       <button onclick="calc('.')">.</button>
       <button onclick="calc('equal')">=</button>
       <button onclick="calc('+')">+</button>
 
-      <button onclick="calc('clear')">C</button>
+      <!-- SCIENTIFIC -->
+      <button onclick="calc('Math.sin(')">sin</button>
+      <button onclick="calc('Math.cos(')">cos</button>
+      <button onclick="calc('Math.tan(')">tan</button>
+      <button onclick="calc('Math.sqrt(')">√</button>
+
+      <button onclick="calc('Math.log10(')">log</button>
+      <button onclick="calc('Math.log(')">ln</button>
+      <button onclick="calc('**')">^</button>
+      <button onclick="calc('(')">(</button>
+
+      <button onclick="calc(')')">)</button>
       <button onclick="calc('back')">⌫</button>
+      <button onclick="calc('clear')">C</button>
 
     </div>
 

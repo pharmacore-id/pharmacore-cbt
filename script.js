@@ -32,7 +32,6 @@ function saveState() {
     if (soal && soal.length > 0) {
         localStorage.setItem("cbt_soal", JSON.stringify(soal));
     }
-    console.log("State saved: isLoggedIn=", isLoggedIn, "soal length=", soal.length);
 }
 
 function loadSavedState() {
@@ -61,7 +60,6 @@ function loadSavedState() {
     if (savedSoal) {
         soal = JSON.parse(savedSoal);
     }
-    console.log("State loaded: isLoggedIn=", isLoggedIn, "soal length=", soal.length);
 }
 
 function clearSession() {
@@ -78,7 +76,7 @@ function clearSession() {
 }
 
 // ==========================================
-// FUNGSI UPDATE UI (TERMASUK RAGU SUMMARY)
+// FUNGSI UPDATE UI
 // ==========================================
 function updateProgress() {
     if (!soal || soal.length === 0) return;
@@ -340,10 +338,9 @@ function login() {
                 return;
             }
             isLoggedIn = true;
+            saveState();
             document.getElementById("login").style.display = "none";
             document.getElementById("app").style.display = "block";
-            // Simpan state sebelum load soal
-            saveState();
             loadQuestions();
         })
         .catch(function(err) {
@@ -353,9 +350,8 @@ function login() {
 }
 
 function loadQuestions() {
-    // Jika soal sudah ada di memori (misal dari localStorage), langsung gunakan
+    // Cek apakah soal sudah tersimpan di localStorage
     if (soal && soal.length > 0) {
-        document.getElementById("totalCount").innerText = soal.length;
         renderQuestion();
         updateNavGrid();
         updateStats();
@@ -364,7 +360,6 @@ function loadQuestions() {
         return;
     }
     
-    // Jika belum, ambil dari API
     fetch(API + "?action=getSoal")
         .then(function(r) { return r.json(); })
         .then(function(res) {
@@ -379,7 +374,7 @@ function loadQuestions() {
             updateStats();
             updateProgress();
             startTimer();
-            saveState(); // simpan soal ke localStorage
+            saveState();
         })
         .catch(function(err) {
             console.error(err);

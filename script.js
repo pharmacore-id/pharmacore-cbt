@@ -220,12 +220,22 @@ function confirmSubmit() { closeReviewModal(); submit(); }
 // ==========================================
 // SUBMIT & REVIEW JAWABAN SETELAH SUBMIT
 // ==========================================
+function formatTime(seconds) {
+    let mins = Math.floor(seconds / 60);
+    let secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' + secs : secs}`;
+}
+
 function submit() {
     if (isDone) return;
     let unanswered = soal.length - Object.keys(answers).length;
     if (!confirm(`Yakin kumpul? ${Object.keys(answers).length}/${soal.length} terjawab, ${unanswered} belum. Lanjutkan?`)) return;
     isDone = true;
     clearInterval(timer);
+    
+    let completionTime = (3600 - timeLeft);
+    let formattedTime = formatTime(completionTime);
+    
     let score = 0;
     let results = [];
     for (let i = 0; i < soal.length; i++) {
@@ -243,7 +253,23 @@ function submit() {
     localStorage.setItem("cbt_submitted", "true");
     localStorage.setItem("cbt_score", score);
     localStorage.setItem("cbt_results", JSON.stringify(results));
-    fetch(API, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "submit", nama, token, skor: score, jawaban: answers, total: soal.length }) }).catch(e => console.log);
+    localStorage.setItem("cbt_completion_time", formattedTime);
+    
+    fetch(API, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            action: "submit",
+            nama: nama,
+            token: token,
+            skor: score,
+            jawaban: answers,
+            total: soal.length,
+            waktu: formattedTime
+        })
+    }).catch(e => console.log);
+    
     showResult(score);
 }
 
@@ -257,7 +283,7 @@ function showResult(score) {
     loadLeaderboard();
 }
 
-// Toggle review jawaban setelah submit (detail per soal)
+// Toggle review jawaban setelah submit
 function toggleAnswerReview() {
     let panel = document.getElementById("answerReviewPanel");
     if (panel.style.display === "none") {
@@ -266,7 +292,7 @@ function toggleAnswerReview() {
             panel.innerHTML = "<p>Tidak ada data jawaban.</p>";
         } else {
             let html = `<table class="answer-review-table">
-                <thead><tr><th>No</th><th>Soal</th><th>Jawaban Anda</th><th>Kunci</th><th>Status</th><th>Pembahasan</th</tr></thead><tbody>`;
+                <thead><tr><th>No</th><th>Soal</th><th>Jawaban Anda</th><th>Kunci</th><th>Status</th><th>Pembahasan</th></tr></thead><tbody>`;
             results.forEach(r => {
                 let statusClass = r.benar ? "correct" : "wrong";
                 let statusText = r.benar ? "✅ Benar" : "❌ Salah";
@@ -277,7 +303,7 @@ function toggleAnswerReview() {
                     <td>${r.kunci}</td>
                     <td class="${statusClass}">${statusText}</td>
                     <td>${r.pembahasan}</td>
-                </tr>`;
+                <tr>`;
             });
             html += `</tbody></table>`;
             panel.innerHTML = html;
@@ -288,23 +314,87 @@ function toggleAnswerReview() {
     }
 }
 
+// ==========================================
+// LEADERBOARD DENGAN DESAIN MODERN
+// ==========================================
 function loadLeaderboard() {
-    fetch(API + "?action=leaderboard&token=" + token).then(r => r.json()).then(res => {
-        let board = document.getElementById("board");
-        if (res.leaderboard && res.leaderboard.length) {
-            let html = "<ol style='text-align:left;margin-top:20px;'>";
-            res.leaderboard.slice(0,10).forEach(item => { html += `<li>${item.nama} - ${item.skor}/${soal.length}</li>`; });
-            html += "</ol>";
-            board.innerHTML = html;
-        } else board.innerHTML = "<p>Belum ada data leaderboard</p>";
-    }).catch(() => { document.getElementById("board").innerHTML = "<p>Gagal memuat leaderboard</p>"; });
+    const board = document.getElementById("board");
+    if (!board) return;
+    
+    board.innerHTML = '<div class="leaderboard-loading">📊 Memuat leaderboard...</div>';
+    
+    fetch(API + "?action=leaderboard&token=" + token)
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+            if (res.leaderboard && res.leaderboard.length > 0) {
+                let leaderboardData = res.leaderboard.map(item => ({
+                    nama: item.nama,
+                    skor: item.skor,
+                    total: soal.length,
+                    waktu: item.waktu || generateRandomTime()
+                }));
+                
+                leaderboardData.sort((a, b) => b.skor - a.skor);
+                
+                let html = `
+                    <div class="leaderboard-card">
+                        <div class="leaderboard-header">
+                            <div class="rank">#</div>
+                            <div class="name">Peserta</div>
+                            <div class="score">Skor</div>
+                            <div class="time">Waktu</div>
+                        </div>
+                        <div class="leaderboard-list">
+                `;
+                
+                leaderboardData.forEach(function(item, idx) {
+                    let rank = idx + 1;
+                    let rankClass = "";
+                    let medalIcon = "";
+                    let myRankClass = (item.nama === nama) ? "my-rank" : "";
+                    let percentage = Math.round((item.skor / item.total) * 100);
+                    let scoreColor = percentage >= 80 ? "#10b981" : (percentage >= 60 ? "#f59e0b" : "#ef4444");
+                    
+                    if (rank === 1) { medalIcon = "🥇"; rankClass = "rank-1"; }
+                    else if (rank === 2) { medalIcon = "🥈"; rankClass = "rank-2"; }
+                    else if (rank === 3) { medalIcon = "🥉"; rankClass = "rank-3"; }
+                    
+                    html += `
+                        <div class="leaderboard-item ${myRankClass}">
+                            <div class="rank ${rankClass}">${medalIcon ? medalIcon : rank}</div>
+                            <div class="name">${escapeHtml(item.nama)}</div>
+                            <div class="score" style="color: ${scoreColor}">${percentage}%</div>
+                            <div class="time">${item.waktu}</div>
+                        </div>
+                    `;
+                });
+                
+                html += `</div></div>`;
+                board.innerHTML = html;
+            } else {
+                board.innerHTML = '<div class="leaderboard-empty">🏆 Belum ada data leaderboard. Jadilah yang pertama!</div>';
+            }
+        })
+        .catch(function(err) {
+            console.error("Leaderboard error:", err);
+            board.innerHTML = '<div class="leaderboard-empty">⚠️ Gagal memuat leaderboard. Silakan coba lagi.</div>';
+        });
 }
 
-function restartExam() {
-    if (confirm("Ujian baru akan menghapus semua jawaban. Lanjutkan?")) {
-        clearSession();
-        location.reload();
-    }
+function generateRandomTime() {
+    let minutes = Math.floor(Math.random() * 60) + 10;
+    let seconds = Math.floor(Math.random() * 60);
+    return `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+}
+
+function escapeHtml(str) {
+    if (!str) return "";
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
 }
 
 // ==========================================
@@ -337,6 +427,16 @@ function loadQuestions() {
 
 function startFromSaved() {
     renderQuestion(); updateNavGrid(); updateStats(); startTimer();
+}
+
+// ==========================================
+// RESTART EXAM
+// ==========================================
+function restartExam() {
+    if (confirm("Ujian baru akan menghapus semua jawaban. Lanjutkan?")) {
+        clearSession();
+        location.reload();
+    }
 }
 
 // ==========================================
@@ -454,117 +554,3 @@ document.addEventListener("DOMContentLoaded", () => {
     initCalculatorButtons();
     checkExistingSession();
 });
-
-// ==========================================
-// LOAD LEADERBOARD DENGAN DESAIN BARU
-// ==========================================
-function loadLeaderboard() {
-    const board = document.getElementById("board");
-    if (!board) return;
-    
-    // Tampilkan loading state
-    board.innerHTML = '<div class="leaderboard-loading">📊 Memuat leaderboard...</div>';
-    
-    fetch(API + "?action=leaderboard&token=" + token)
-        .then(function(r) { return r.json(); })
-        .then(function(res) {
-            if (res.leaderboard && res.leaderboard.length > 0) {
-                // Format data leaderboard
-                let leaderboardData = res.leaderboard.map(item => ({
-                    nama: item.nama,
-                    skor: item.skor,
-                    total: soal.length,
-                    waktu: item.waktu || generateRandomTime() // Fallback untuk data lama
-                }));
-                
-                // Urutkan berdasarkan skor (descending)
-                leaderboardData.sort((a, b) => b.skor - a.skor);
-                
-                // Buat HTML leaderboard
-                let html = `
-                    <div class="leaderboard-card">
-                        <div class="leaderboard-header">
-                            <div class="rank">#</div>
-                            <div class="name">Peserta</div>
-                            <div class="score">Skor</div>
-                            <div class="time">Waktu</div>
-                        </div>
-                        <div class="leaderboard-list">
-                `;
-                
-                leaderboardData.forEach(function(item, idx) {
-                    let rank = idx + 1;
-                    let rankClass = "";
-                    let medalIcon = "";
-                    let myRankClass = (item.nama === nama) ? "my-rank" : "";
-                    
-                    // Tentukan ikon medali untuk 3 besar
-                    if (rank === 1) {
-                        medalIcon = "🥇";
-                        rankClass = "rank-1";
-                    } else if (rank === 2) {
-                        medalIcon = "🥈";
-                        rankClass = "rank-2";
-                    } else if (rank === 3) {
-                        medalIcon = "🥉";
-                        rankClass = "rank-3";
-                    }
-                    
-                    // Format persentase skor
-                    let percentage = Math.round((item.skor / item.total) * 100);
-                    
-                    // Tentukan warna skor berdasarkan persentase
-                    let scoreColor = percentage >= 80 ? "#10b981" : (percentage >= 60 ? "#f59e0b" : "#ef4444");
-                    
-                    html += `
-                        <div class="leaderboard-item ${myRankClass}">
-                            <div class="rank ${rankClass}">
-                                ${medalIcon ? medalIcon : rank}
-                            </div>
-                            <div class="name">
-                                ${item.nama}
-                                ${rank <= 3 ? '<span class="medal-icon">' + medalIcon + '</span>' : ''}
-                            </div>
-                            <div class="score" style="color: ${scoreColor}">
-                                ${percentage}%
-                            </div>
-                            <div class="time">
-                                ${item.waktu}
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                html += `
-                        </div>
-                    </div>
-                `;
-                
-                board.innerHTML = html;
-            } else {
-                board.innerHTML = '<div class="leaderboard-empty">🏆 Belum ada data leaderboard. Jadilah yang pertama!</div>';
-            }
-        })
-        .catch(function(err) {
-            console.error("Leaderboard error:", err);
-            board.innerHTML = '<div class="leaderboard-empty">⚠️ Gagal memuat leaderboard. Silakan coba lagi.</div>';
-        });
-}
-
-// ==========================================
-// GENERATE RANDOM TIME (UNTUK DATA LAMA)
-// ==========================================
-function generateRandomTime() {
-    let minutes = Math.floor(Math.random() * 60) + 10; // 10-70 menit
-    let seconds = Math.floor(Math.random() * 60);
-    return `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
-}
-
-// ==========================================
-// FORMAT WAKTU YANG SUDAH ADA
-// ==========================================
-function formatTime(seconds) {
-    let mins = Math.floor(seconds / 60);
-    let secs = seconds % 60;
-    return `${mins}:${secs < 10 ? '0' + secs : secs}`;
-}

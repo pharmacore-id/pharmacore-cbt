@@ -32,6 +32,7 @@ function saveState() {
     if (soal && soal.length > 0) {
         localStorage.setItem("cbt_soal", JSON.stringify(soal));
     }
+    console.log("State saved: isLoggedIn=", isLoggedIn, "soal length=", soal.length);
 }
 
 function loadSavedState() {
@@ -60,6 +61,7 @@ function loadSavedState() {
     if (savedSoal) {
         soal = JSON.parse(savedSoal);
     }
+    console.log("State loaded: isLoggedIn=", isLoggedIn, "soal length=", soal.length);
 }
 
 function clearSession() {
@@ -149,7 +151,6 @@ function renderQuestion() {
 
 function pick(answer) {
     answers[currentQuestion] = answer;
-    // Jika dijawab, hapus tanda ragu jika ada
     if (ragu[currentQuestion]) {
         delete ragu[currentQuestion];
     }
@@ -219,7 +220,7 @@ function toggleRagu() {
     saveState();
     renderQuestion();
     updateNavGrid();
-    updateStats();  // <-- penting: update jumlah ragu di sidebar
+    updateStats();
 }
 
 // ==========================================
@@ -339,9 +340,10 @@ function login() {
                 return;
             }
             isLoggedIn = true;
-            saveState();
             document.getElementById("login").style.display = "none";
             document.getElementById("app").style.display = "block";
+            // Simpan state sebelum load soal
+            saveState();
             loadQuestions();
         })
         .catch(function(err) {
@@ -351,7 +353,9 @@ function login() {
 }
 
 function loadQuestions() {
+    // Jika soal sudah ada di memori (misal dari localStorage), langsung gunakan
     if (soal && soal.length > 0) {
+        document.getElementById("totalCount").innerText = soal.length;
         renderQuestion();
         updateNavGrid();
         updateStats();
@@ -360,6 +364,7 @@ function loadQuestions() {
         return;
     }
     
+    // Jika belum, ambil dari API
     fetch(API + "?action=getSoal")
         .then(function(r) { return r.json(); })
         .then(function(res) {
@@ -374,7 +379,7 @@ function loadQuestions() {
             updateStats();
             updateProgress();
             startTimer();
-            saveState();
+            saveState(); // simpan soal ke localStorage
         })
         .catch(function(err) {
             console.error(err);
@@ -590,7 +595,6 @@ function calculateResult() {
     }
 }
 
-// Fungsi scientific
 function calcFunction(action) {
     let display = document.getElementById("calcDisplay");
     if (!display) return;
@@ -620,9 +624,7 @@ function calcFunction(action) {
     }
 }
 
-// Inisialisasi event listener untuk tombol kalkulator
 function initCalculatorButtons() {
-    // Tombol angka dan operator
     document.querySelectorAll('.calc-num').forEach(btn => {
         btn.onclick = () => appendToDisplay(btn.getAttribute('data-num'));
     });
@@ -641,23 +643,45 @@ function checkExistingSession() {
     loadSavedState();
     loadDarkMode();
     
-    if (isLoggedIn && soal && soal.length > 0) {
+    // Jika sudah login dan belum submit
+    if (isLoggedIn) {
         const submitted = localStorage.getItem("cbt_submitted");
         if (submitted === "true") {
             const savedScore = localStorage.getItem("cbt_score");
             if (savedScore) {
                 document.getElementById("login").style.display = "none";
-                showResult(parseInt(savedScore));
+                // Perlu soal untuk menampilkan result? Jika soal belum ada, load dulu
+                if (soal && soal.length > 0) {
+                    showResult(parseInt(savedScore));
+                } else {
+                    // Load soal dulu dari API
+                    fetch(API + "?action=getSoal")
+                        .then(r => r.json())
+                        .then(res => {
+                            if (res && res.soal) {
+                                soal = res.soal;
+                                showResult(parseInt(savedScore));
+                            }
+                        });
+                }
             }
         } else {
+            // Belum submit, lanjutkan ujian
             document.getElementById("login").style.display = "none";
             document.getElementById("app").style.display = "block";
-            document.getElementById("totalCount").innerText = soal.length;
-            renderQuestion();
-            updateNavGrid();
-            updateStats();
-            updateProgress();
-            startTimer();
+            
+            if (soal && soal.length > 0) {
+                // Render dari state yang sudah ada
+                document.getElementById("totalCount").innerText = soal.length;
+                renderQuestion();
+                updateNavGrid();
+                updateStats();
+                updateProgress();
+                startTimer();
+            } else {
+                // Soal belum ada, ambil dari API
+                loadQuestions();
+            }
         }
     }
 }

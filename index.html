@@ -114,20 +114,20 @@
 
     </div>
 
-    <!-- SIDEBAR -->
+    <!-- SIDEBAR - LENGKAP DENGAN SEMUA FITUR -->
     <div class="side">
 
-      <h3>Navigasi Soal</h3>
+      <h3>📊 Navigasi Soal</h3>
 
       <div class="summary">
 
         <div class="summary-item">
-          <span>Terjawab</span>
+          <span>✅ Terjawab</span>
           <strong id="answeredSummary">0</strong>
         </div>
 
         <div class="summary-item">
-          <span>Belum</span>
+          <span>❌ Belum</span>
           <strong id="unansweredSummary">0</strong>
         </div>
 
@@ -148,25 +148,59 @@
         </div>
 
         <div>
+          <span class="dot review-dot"></span>
+          Tandai Review
+        </div>
+
+        <div>
           <span class="dot empty-dot"></span>
           Belum Dijawab
         </div>
 
       </div>
 
-      <button class="submit-btn" onclick="submit()">
-        Kumpulkan Jawaban
-      </button>
+      <!-- MENU FITUR CBT LENGKAP -->
+      <div style="margin-top: 20px;">
+        <button class="submit-btn" onclick="showReviewPanel()" style="background: linear-gradient(135deg, #f59e0b, #f97316);">
+          📋 Review & Submit
+        </button>
+      </div>
 
       <hr style="margin:20px 0;border:none;border-top:1px solid #eee;">
 
-      <button class="secondary-btn" onclick="toggleDarkMode()">
-        🌙 Dark Mode
-      </button>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <button class="secondary-btn" onclick="toggleRandomize()">
+          🎲 Acak Soal
+        </button>
 
-      <button class="secondary-btn" style="margin-top:10px;" onclick="toggleCalculator()">
-        🧮 Kalkulator
-      </button>
+        <button class="secondary-btn" id="reviewBtn" onclick="toggleReview()">
+          🏷️ Tandai Review
+        </button>
+
+        <button class="secondary-btn" onclick="showUnansweredOnly()">
+          🔍 Soal Belum Dijawab
+        </button>
+
+        <button class="secondary-btn" onclick="showFlaggedOnly()">
+          🚩 Soal Ditandai
+        </button>
+
+        <button class="secondary-btn" onclick="resetNavigation()">
+          🔄 Reset Navigasi
+        </button>
+      </div>
+
+      <hr style="margin:20px 0;border:none;border-top:1px solid #eee;">
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <button class="secondary-btn" onclick="toggleDarkMode()">
+          🌙 Dark Mode
+        </button>
+
+        <button class="secondary-btn" onclick="toggleCalculator()">
+          🧮 Kalkulator
+        </button>
+      </div>
 
     </div>
 
@@ -179,7 +213,7 @@
 
   <div class="result-card">
 
-    <h2>Hasil Ujian</h2>
+    <h2>📝 Hasil Ujian</h2>
 
     <div class="score-circle">
       <span id="scoreNumber">0</span>
@@ -187,13 +221,18 @@
 
     <p id="skor"></p>
 
-    <h3>Leaderboard</h3>
+    <div style="display: flex; gap: 10px; margin-top: 20px;">
+      <button class="submit-btn" onclick="showDiscussion()" style="flex:1; background: linear-gradient(135deg, #8b5cf6, #a78bfa);">
+        📖 Pembahasan
+      </button>
+      <button class="submit-btn" onclick="restartExam()" style="flex:1; background: linear-gradient(135deg, #10b981, #34d399);">
+        🔄 Ujian Baru
+      </button>
+    </div>
+
+    <h3>🏆 Leaderboard</h3>
 
     <div id="board"></div>
-
-    <button class="submit-btn" onclick="restartExam()" style="margin-top:20px;">
-      Ujian Baru
-    </button>
 
   </div>
 

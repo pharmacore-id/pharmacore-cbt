@@ -4,10 +4,283 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>PHARMACORE CBT - UKMPPAI</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<style>
+  :root {
+    --bg:#f8f6ff;
+    --primary:#8b5cf6;
+    --primary-light:#ede9fe;
+    --primary-soft:#f5f3ff;
+    --text:#1f2937;
+    --muted:#6b7280;
+    --card:#ffffff;
+    --border:#ebe7ff;
+    --success:#10b981;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(180deg, #f7f4ff 0%, #fcfbff 100%);
+    color: var(--text);
+    transition: background 0.3s, color 0.3s;
+  }
+  body.dark-mode {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #eee;
+  }
+  body.dark-mode .login-card, body.dark-mode .card, body.dark-mode .side, body.dark-mode .result-card, body.dark-mode .modal-content, body.dark-mode .calculator-box {
+    background: #1e1e2e;
+    border-color: #3d3d4a;
+  }
+  body.dark-mode .secondary-btn { background: #2d2d3a; color: #a78bfa; }
+  body.dark-mode .summary-item, body.dark-mode .grid button, body.dark-mode .leaderboard-item { background: #2d2d3a; }
+  body.dark-mode .timer { background: #2d2d3a; color: #f59e0b; }
+
+  /* LOGIN */
+  #login { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 30px; }
+  .login-card { width:100%; max-width:500px; background: rgba(255,255,255,.85); backdrop-filter: blur(20px); border-radius: 32px; padding: 42px; box-shadow: 0 30px 60px rgba(139,92,246,.10); text-align:center; }
+  .badge { background:#ede9fe; color:#7c3aed; display:inline-block; padding:10px 18px; border-radius:999px; font-weight:600; margin-bottom:20px; }
+  .login-card h1 { font-size:42px; color:#6d28d9; margin:22px 0 10px; }
+  .subtitle { color:var(--muted); margin-bottom:32px; }
+  .form-group { margin-bottom:18px; text-align:left; }
+  .form-group label { display:block; font-weight:600; margin-bottom:8px; }
+  input { width:100%; padding:16px; border-radius:16px; border:1px solid var(--border); background:#faf9ff; transition:.25s; }
+  input:focus { outline:none; border-color:#8b5cf6; box-shadow:0 0 0 4px rgba(139,92,246,.12); }
+  .start-btn { width:100%; background:linear-gradient(135deg,#8b5cf6,#a78bfa); color:white; border:none; padding:16px; border-radius:18px; font-weight:600; cursor:pointer; transition:.25s; }
+  .start-btn:hover { transform:translateY(-2px); }
+
+  /* TOPBAR */
+  .topbar { position:sticky; top:0; z-index:999; background:rgba(255,255,255,.8); backdrop-filter:blur(18px); border-bottom:1px solid var(--border); padding:12px 24px; display:flex; justify-content:space-between; align-items:center; }
+  .brand { font-size:24px; font-weight:800; color:#6d28d9; }
+  .top-right { display:flex; gap:12px; align-items:center; }
+  .progress-text { font-size:14px; color:var(--muted); }
+  .timer { background:white; border-radius:999px; padding:8px 16px; font-weight:700; color:#7c3aed; box-shadow:0 10px 20px rgba(139,92,246,.08); }
+
+  /* LAYOUT */
+  .wrapper { max-width:1400px; margin:auto; padding:30px; display:flex; gap:24px; }
+  .card { flex:3; background:white; border-radius:30px; border:1px solid var(--border); padding:35px; box-shadow:0 15px 35px rgba(139,92,246,.05); }
+  .side { flex:1; background:white; border-radius:30px; border:1px solid var(--border); padding:24px; height:fit-content; position:sticky; top:95px; }
+
+  /* SUMMARY */
+  .summary { display:flex; justify-content:space-between; gap:12px; margin-bottom:20px; }
+  .summary-item { flex:1; background:#f8f6ff; border-radius:16px; padding:12px 8px; text-align:center; }
+  .summary-item span { display:block; color:#6b7280; font-size:12px; margin-bottom:4px; }
+  .summary-item strong { font-size:20px; font-weight:800; }
+
+  /* QUESTION */
+  .question-badge { width:fit-content; padding:10px 16px; border-radius:999px; background:#ede9fe; color:#6d28d9; font-weight:600; margin-bottom:18px; }
+  .progress { height:10px; background:#eee8ff; border-radius:999px; overflow:hidden; margin-bottom:30px; }
+  .fill { width:0%; height:100%; background:linear-gradient(90deg,#8b5cf6,#c4b5fd); transition:.3s; }
+  #q { font-size:24px; line-height:1.7; font-weight:600; margin-bottom:28px; }
+
+  /* OPTIONS */
+  .opt { display:flex; align-items:center; gap:16px; padding:18px; margin-bottom:14px; border-radius:20px; border:1px solid var(--border); background:white; cursor:pointer; transition:.2s; }
+  .opt:hover { background:#faf8ff; border-color:#c4b5fd; }
+  .opt.active { background:#f4f1ff; border:2px solid #8b5cf6; }
+  .letter { width:42px; height:42px; border-radius:50%; background:#ede9fe; color:#6d28d9; display:flex; align-items:center; justify-content:center; font-weight:700; }
+
+  /* BUTTONS */
+  .action-row { display:flex; gap:12px; margin-top:28px; }
+  .secondary-btn { flex:1; border:none; padding:14px; border-radius:16px; background:#f5f3ff; color:#6d28d9; font-weight:600; cursor:pointer; transition:.25s; }
+  .secondary-btn:hover { transform:translateY(-2px); background:#ede9fe; }
+  .submit-btn { width:100%; margin-top:24px; border:none; padding:16px; border-radius:18px; background:linear-gradient(135deg,#8b5cf6,#a78bfa); color:white; font-weight:700; cursor:pointer; transition:.25s; }
+  .submit-btn:hover { transform:translateY(-2px); }
+  .ragu-btn { flex:1; border:none; padding:14px; border-radius:16px; background:white; border:1px solid #fcd34d; color:#b45309; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .ragu-btn.active { background:#fef3c7; border-color:#f59e0b; color:#92400e; }
+
+  /* NAVIGATION GRID */
+  .grid { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:20px; }
+  .grid button { aspect-ratio:1/1; border:none; border-radius:12px; background:#f5f3ff; color:#6d28d9; font-weight:700; cursor:pointer; transition:.2s; }
+  .done { background:#10b981 !important; color:white !important; }
+  .ragu { background:#fef3c7 !important; color:#b45309 !important; border:2px solid #fbbf24 !important; }
+  .activeQ { border:2px solid #8b5cf6 !important; transform:scale(1.05); }
+  .legend { margin-top:18px; font-size:12px; display:flex; gap:16px; flex-wrap:wrap; }
+  .legend div { display:flex; align-items:center; gap:6px; }
+  .dot { width:12px; height:12px; border-radius:50%; display:inline-block; }
+  .done-dot { background:#10b981; }
+  .ragu-dot { background:#f59e0b; }
+  .empty-dot { background:#d1d5db; }
+
+  /* RESULT */
+  #result { display:none; min-height:100vh; justify-content:center; align-items:center; padding:30px; }
+  .result-card { background:white; width:100%; max-width:680px; border-radius:32px; text-align:center; padding:40px; box-shadow:0 20px 40px rgba(139,92,246,.08); }
+  .score-circle { width:180px; height:180px; margin:25px auto; border-radius:50%; border:8px solid #8b5cf6; background:#f3efff; display:flex; align-items:center; justify-content:center; font-size:52px; font-weight:800; color:#6d28d9; }
+  .result-summary { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; background:#f8f6ff; border-radius:24px; padding:16px; margin:20px 0; text-align:center; }
+  .result-summary span { display:block; font-size:12px; color:#6b7280; }
+  .result-summary strong { font-size:18px; margin-top:4px; display:block; }
+  .footer-copyright { margin-top:30px; font-size:12px; color:#9ca3af; text-align:center; }
+
+  /* DISCUSSION MODAL */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 10000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .modal-content {
+    background: white;
+    border-radius: 24px;
+    max-width: 800px;
+    width: 90%;
+    max-height: 85vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: modalFadeIn 0.3s ease;
+  }
+  @keyframes modalFadeIn {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .modal-header { display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid #e5e7eb; }
+  .modal-header h2 { margin:0; color:#6d28d9; }
+  .close-modal { background:none; border:none; font-size:24px; cursor:pointer; padding:0 8px; }
+  .modal-body { flex:1; overflow-y:auto; padding:20px 24px; }
+
+  .discussion-question {
+    background: #f9fafb;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-left: 6px solid #8b5cf6;
+  }
+  body.dark-mode .discussion-question {
+    background: #2d2d3a;
+  }
+  .discussion-question h4 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 18px;
+  }
+  .option-item {
+    padding: 8px 12px;
+    margin: 6px 0;
+    border-radius: 12px;
+    background: white;
+    border: 1px solid #e5e7eb;
+  }
+  body.dark-mode .option-item {
+    background: #1e1e2e;
+    border-color: #3d3d4a;
+  }
+  .correct-option {
+    background: #d1fae5;
+    border-color: #10b981;
+    color: #065f46;
+  }
+  .wrong-option {
+    background: #fee2e2;
+    border-color: #ef4444;
+    color: #991b1b;
+  }
+  .user-correct {
+    background: #d1fae5;
+    border: 2px solid #10b981;
+  }
+  .discussion-pembahasan {
+    margin-top: 12px;
+    padding: 12px;
+    background: #f3f4f6;
+    border-radius: 12px;
+    font-size: 14px;
+  }
+  body.dark-mode .discussion-pembahasan {
+    background: #1e1e2e;
+  }
+
+  /* MODAL SEBELUM SUBMIT */
+  .review-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:24px; }
+  .review-stat { text-align:center; padding:12px; border-radius:16px; background:#f9fafb; }
+  .review-stat.answered { background:#d1fae5; }
+  .review-stat.ragu { background:#fed7aa; }
+  .review-stat.unanswered { background:#fee2e2; }
+  .review-stat-value { font-size:28px; font-weight:800; }
+  .review-stat-label { font-size:12px; color:#6b7280; }
+  .review-question-item { display:flex; justify-content:space-between; align-items:center; padding:10px; margin:5px 0; border-radius:10px; background:#f9fafb; }
+  .review-question-item.answered { border-left:4px solid #10b981; }
+  .review-question-item.ragu { border-left:4px solid #f59e0b; }
+  .review-question-item.unanswered { border-left:4px solid #ef4444; }
+  .review-warning { margin-top:20px; padding:12px; background:#fee2e2; border-radius:12px; color:#991b1b; font-size:14px; text-align:center; }
+
+  /* CALCULATOR */
+  .calculator-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 10001;
+    justify-content: center;
+    align-items: center;
+  }
+  .calculator-box {
+    background: white;
+    border-radius: 24px;
+    padding: 20px;
+    width: 480px;
+    max-width: 90%;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  }
+  .calculator-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; font-weight:600; }
+  .close-calc { background:none; border:none; font-size:24px; cursor:pointer; }
+  #calcDisplay { width:100%; padding:20px; font-size:28px; text-align:right; margin-bottom:15px; border:1px solid var(--border); border-radius:16px; background:#f8f6ff; font-family:monospace; }
+  .calc-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; }
+  .calc-grid button { padding:14px 0; font-size:14px; border:none; border-radius:12px; background:#f0f0f0; cursor:pointer; transition:0.2s; font-weight:600; }
+  .calc-operator { background:#f59e0b !important; color:white !important; }
+  .calc-func { background:#8b5cf6 !important; color:white !important; }
+  .calc-mem { background:#10b981 !important; color:white !important; }
+  .calc-clear { background:#ef4444 !important; color:white !important; }
+
+  /* LEADERBOARD */
+  #board { margin-top:20px; max-height:400px; overflow-y:auto; }
+  .leaderboard-card { background:#f9fafb; border-radius:24px; padding:20px; margin-bottom:20px; }
+  .leaderboard-header { display:flex; justify-content:space-between; padding-bottom:12px; border-bottom:2px solid #e5e7eb; margin-bottom:12px; font-weight:700; font-size:13px; color:#6b7280; }
+  .leaderboard-header .rank { width:50px; text-align:center; }
+  .leaderboard-header .name { flex:1; text-align:left; }
+  .leaderboard-header .score { width:70px; text-align:center; }
+  .leaderboard-header .time { width:80px; text-align:center; }
+  .leaderboard-item { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-radius:16px; margin-bottom:6px; background:white; transition:0.2s; }
+  .leaderboard-item .rank { width:50px; text-align:center; font-weight:700; }
+  .rank-1 { color:#fbbf24; } .rank-2 { color:#9ca3af; } .rank-3 { color:#d97706; }
+  .leaderboard-item .name { flex:1; text-align:left; font-weight:600; }
+  .leaderboard-item .score { width:70px; text-align:center; font-weight:700; color:#10b981; }
+  .leaderboard-item .time { width:80px; text-align:center; font-size:13px; font-family:monospace; }
+  .my-rank { border:2px solid #8b5cf6; background:#ede9fe; }
+
+  /* PRINT */
+  @media print {
+    body * { visibility: hidden; }
+    #discussionModal, #discussionModal * { visibility: visible; }
+    #discussionModal { position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 20px; background: white; }
+    .modal-content { box-shadow: none; padding: 0; }
+    .close-modal, .secondary-btn { display: none; }
+  }
+
+  @media (max-width: 900px) {
+    .wrapper { flex-direction: column; padding:15px; }
+    .side { position:static; }
+    #q { font-size:20px; }
+    .login-card { padding:28px; }
+    .login-card h1 { font-size:32px; }
+    .grid button { font-size:12px; }
+    .action-row { flex-wrap:wrap; }
+    .topbar { padding:12px 16px; }
+    .brand { font-size:18px; }
+    .timer { padding:6px 12px; font-size:14px; }
+    .card { padding:20px; }
+    .result-summary { grid-template-columns:repeat(2,1fr); }
+    .calculator-box { width:95%; }
+  }
+</style>
 </head>
 <body>
 
@@ -87,7 +360,21 @@
   </div>
 </div>
 
-<!-- RESULT dengan review jawaban detail (seperti gambar) -->
+<!-- MODAL REVIEW & PEMBAHASAN (setelah submit) -->
+<div id="discussionModal" class="modal" style="display:none;">
+  <div class="modal-content" style="max-width: 800px; width: 90%;">
+    <div class="modal-header">
+      <h2>📖 Review & Pembahasan Jawaban</h2>
+      <div>
+        <button class="secondary-btn" onclick="exportDiscussionPDF()" style="margin-right: 8px;">📄 Export PDF</button>
+        <button class="close-modal" onclick="closeDiscussionModal()">✕</button>
+      </div>
+    </div>
+    <div class="modal-body" id="discussionContent" style="max-height: 70vh; overflow-y: auto;"></div>
+  </div>
+</div>
+
+<!-- RESULT CARD -->
 <div id="result" style="display:none;">
   <div class="result-card">
     <h2>📝 Hasil Ujian</h2>
@@ -99,8 +386,7 @@
       <div><span>Salah</span><strong id="resultSalah">0</strong></div>
       <div><span>Waktu</span><strong id="resultWaktu">00:00</strong></div>
     </div>
-    <button class="secondary-btn" onclick="toggleAnswerReview()" style="margin:10px auto;">📋 Review Jawaban</button>
-    <div id="answerReviewPanel" style="display:none; margin-top:20px; text-align:left; max-height:400px; overflow-y:auto;"></div>
+    <button class="secondary-btn" onclick="openDiscussionModal()" style="margin:10px auto;">📋 Review & Pembahasan</button>
     <button class="submit-btn" onclick="restartExam()" style="margin-top:20px;">🔄 Ujian Baru</button>
     <h3>🏆 Leaderboard</h3>
     <div id="board"></div>
@@ -108,7 +394,7 @@
   </div>
 </div>
 
-<!-- CALCULATOR SCIENTIFIC -->
+<!-- CALCULATOR SCIENTIFIC MODAL -->
 <div id="calculatorModal" class="calculator-modal" style="display:none;">
   <div class="calculator-box">
     <div class="calculator-header"><span>🧮 Kalkulator Scientific</span><button class="close-calc" onclick="toggleCalculator()">✕</button></div>
@@ -125,6 +411,497 @@
   </div>
 </div>
 
-<script src="script.js"></script>
+<script>
+// ==========================================
+// VARIABEL GLOBAL
+// ==========================================
+let currentQuestion = 0;
+let answers = {};
+let ragu = {};
+let soal = [];
+let token = "";
+let nama = "";
+let timer = null;
+let isDone = false;
+let timeLeft = 3600;
+let isLoggedIn = false;
+let calcMemory = 0;
+let completionTimeSeconds = 0;
+const API = "https://script.google.com/macros/s/AKfycbyo48NoxjaBHGHkRCxgkxOB3Cys2Wa3mBG7AvK_n3TidyCSQcjSf5vSbCJpkI0-QJhk/exec";
+const OPTIONS = ['A','B','C','D','E'];
+
+// ==========================================
+// SAVE & LOAD STATE
+// ==========================================
+function saveState() {
+    localStorage.setItem("cbt_answers", JSON.stringify(answers));
+    localStorage.setItem("cbt_ragu", JSON.stringify(ragu));
+    localStorage.setItem("cbt_current", currentQuestion);
+    localStorage.setItem("cbt_time", timeLeft);
+    localStorage.setItem("cbt_isLoggedIn", isLoggedIn);
+    localStorage.setItem("cbt_nama", nama);
+    localStorage.setItem("cbt_token", token);
+    if (soal && soal.length) localStorage.setItem("cbt_soal", JSON.stringify(soal));
+}
+function loadSavedState() {
+    const savedAnswers = localStorage.getItem("cbt_answers");
+    const savedRagu = localStorage.getItem("cbt_ragu");
+    const savedCurrent = localStorage.getItem("cbt_current");
+    const savedTime = localStorage.getItem("cbt_time");
+    const savedLoggedIn = localStorage.getItem("cbt_isLoggedIn");
+    const savedNama = localStorage.getItem("cbt_nama");
+    const savedToken = localStorage.getItem("cbt_token");
+    const savedSoal = localStorage.getItem("cbt_soal");
+    if (savedAnswers) answers = JSON.parse(savedAnswers);
+    if (savedRagu) ragu = JSON.parse(savedRagu);
+    if (savedCurrent) currentQuestion = parseInt(savedCurrent);
+    if (savedTime) timeLeft = parseInt(savedTime);
+    if (savedLoggedIn === "true") { isLoggedIn = true; nama = savedNama || ""; token = savedToken || ""; }
+    if (savedSoal) soal = JSON.parse(savedSoal);
+}
+function clearSession() {
+    localStorage.clear();
+    answers = {}; ragu = {}; currentQuestion = 0; isDone = false; timeLeft = 3600; isLoggedIn = false; soal = []; nama = ""; token = "";
+}
+
+// ==========================================
+// UI UPDATE
+// ==========================================
+function updateProgress() {
+    if (!soal.length) return;
+    let progress = ((currentQuestion + 1) / soal.length) * 100;
+    let fillEl = document.getElementById("progressFill");
+    if (fillEl) fillEl.style.width = progress + "%";
+}
+function updateStats() {
+    if (!soal.length) return;
+    const answered = Object.keys(answers).length;
+    const raguCount = Object.keys(ragu).length;
+    document.getElementById("answeredCount").innerText = answered;
+    document.getElementById("answeredSummary").innerText = answered;
+    document.getElementById("raguSummary").innerText = raguCount;
+    document.getElementById("unansweredSummary").innerText = soal.length - answered;
+}
+
+// ==========================================
+// RENDER QUESTION (5 OPSI)
+// ==========================================
+function renderQuestion() {
+    if (!soal.length) return;
+    const s = soal[currentQuestion];
+    if (!s) return;
+    document.getElementById("questionLabel").innerHTML = "Soal " + (currentQuestion + 1);
+    document.getElementById("q").innerHTML = s.pertanyaan;
+    let optHtml = "";
+    for (let opt of OPTIONS) {
+        const optLower = opt.toLowerCase();
+        optHtml += `<div class="opt ${answers[currentQuestion] == opt ? 'active' : ''}" onclick="pick('${opt}')">
+            <div class="letter">${opt}</div><div>${s[optLower] || ''}</div></div>`;
+    }
+    document.getElementById("opt").innerHTML = optHtml;
+    const raguBtn = document.getElementById("raguBtn");
+    if (ragu[currentQuestion]) {
+        raguBtn.classList.add("active");
+        raguBtn.innerHTML = "🚩 Ditandai Ragu";
+    } else {
+        raguBtn.classList.remove("active");
+        raguBtn.innerHTML = "🚩 Ragu";
+    }
+    updateProgress();
+}
+function pick(ans) {
+    answers[currentQuestion] = ans;
+    if (ragu[currentQuestion]) delete ragu[currentQuestion];
+    saveState();
+    renderQuestion();
+    updateNavGrid();
+    updateStats();
+}
+function updateNavGrid() {
+    if (!soal.length) return;
+    let html = "";
+    for (let i = 0; i < soal.length; i++) {
+        let cls = [];
+        if (answers[i]) cls.push("done");
+        if (ragu[i]) cls.push("ragu");
+        if (i === currentQuestion) cls.push("activeQ");
+        html += `<button class="${cls.join(' ')}" onclick="goToQuestion(${i})">${i + 1}</button>`;
+    }
+    document.getElementById("nav").innerHTML = html;
+}
+function goToQuestion(idx) {
+    currentQuestion = idx;
+    renderQuestion();
+    updateNavGrid();
+    updateStats();
+    updateProgress();
+    saveState();
+}
+function nextQuestion() {
+    if (currentQuestion < soal.length - 1) {
+        currentQuestion++;
+        renderQuestion();
+        updateNavGrid();
+        updateStats();
+        updateProgress();
+        saveState();
+    } else {
+        if (confirm("Anda sudah di soal terakhir. Apakah ingin mengumpulkan jawaban?")) showReviewModal();
+    }
+}
+function prevQuestion() {
+    if (currentQuestion > 0) {
+        currentQuestion--;
+        renderQuestion();
+        updateNavGrid();
+        updateStats();
+        updateProgress();
+        saveState();
+    }
+}
+function toggleRagu() {
+    if (ragu[currentQuestion]) delete ragu[currentQuestion];
+    else ragu[currentQuestion] = true;
+    saveState();
+    renderQuestion();
+    updateNavGrid();
+    updateStats();
+}
+
+// ==========================================
+// TIMER
+// ==========================================
+function startTimer() {
+    if (localStorage.getItem("cbt_submitted") === "true") return;
+    if (timer) clearInterval(timer);
+    timer = setInterval(() => {
+        if (isDone) return;
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            alert("⏰ Waktu habis! Jawaban akan dikumpulkan otomatis.");
+            submit();
+        } else {
+            timeLeft--;
+            saveState();
+            let m = Math.floor(timeLeft / 60);
+            let s = timeLeft % 60;
+            let timerEl = document.getElementById("timer");
+            if (timerEl) timerEl.innerHTML = `${m}:${s < 10 ? '0' + s : s}`;
+            if (timeLeft === 300) { alert("⏰ 5 menit lagi!"); }
+            if (timeLeft === 60) { alert("⏰ 1 menit lagi!"); }
+        }
+    }, 1000);
+}
+
+// ==========================================
+// REVIEW MODAL SEBELUM SUBMIT
+// ==========================================
+function showReviewModal() {
+    if (!soal.length) return;
+    const answered = Object.keys(answers).length;
+    const raguCount = Object.keys(ragu).length;
+    document.getElementById("reviewTotal").innerText = soal.length;
+    document.getElementById("reviewAnswered").innerText = answered;
+    document.getElementById("reviewRagu").innerText = raguCount;
+    document.getElementById("reviewUnanswered").innerText = soal.length - answered;
+    let listHtml = "";
+    for (let i = 0; i < soal.length; i++) {
+        let status = "", cls = "";
+        if (answers[i]) { status = `✅ Terjawab: ${answers[i]}`; cls = "answered"; }
+        else if (ragu[i]) { status = "🚩 Ditandai Ragu"; cls = "ragu"; }
+        else { status = "❌ Belum dijawab"; cls = "unanswered"; }
+        listHtml += `<div class="review-question-item ${cls}">
+            <span><strong>Soal ${i+1}</strong></span>
+            <span>${status}</span>
+            <button class="secondary-btn" style="padding:5px 10px;" onclick="goToQuestionFromReview(${i})">Lanjutkan</button>
+        </div>`;
+    }
+    document.getElementById("reviewQuestionList").innerHTML = listHtml;
+    document.getElementById("reviewModal").style.display = "flex";
+}
+function goToQuestionFromReview(idx) { closeReviewModal(); goToQuestion(idx); }
+function closeReviewModal() { document.getElementById("reviewModal").style.display = "none"; }
+function confirmSubmit() { closeReviewModal(); submit(); }
+
+// ==========================================
+// SUBMIT & STORE RESULTS
+// ==========================================
+function formatTimeDisplay(seconds) {
+    let mins = Math.floor(seconds / 60);
+    let secs = seconds % 60;
+    return `${mins} menit ${secs} detik`;
+}
+function submit() {
+    if (isDone) return;
+    let unanswered = soal.length - Object.keys(answers).length;
+    if (!confirm(`Yakin kumpul? ${Object.keys(answers).length}/${soal.length} terjawab, ${unanswered} belum. Lanjutkan?`)) return;
+    isDone = true;
+    clearInterval(timer);
+    completionTimeSeconds = 3600 - timeLeft;
+    let score = 0;
+    let results = [];
+    for (let i = 0; i < soal.length; i++) {
+        let isCorrect = (answers[i] == soal[i].kunci);
+        if (isCorrect) score++;
+        let options = {};
+        for (let opt of OPTIONS) {
+            options[opt] = soal[i][opt.toLowerCase()] || '';
+        }
+        results.push({
+            nomor: i+1,
+            pertanyaan: soal[i].pertanyaan,
+            jawabanUser: answers[i] || "(Tidak dijawab)",
+            kunci: soal[i].kunci,
+            benar: isCorrect,
+            pembahasan: soal[i].pembahasan || "Tidak ada pembahasan",
+            options: options
+        });
+    }
+    localStorage.setItem("cbt_submitted", "true");
+    localStorage.setItem("cbt_score", score);
+    localStorage.setItem("cbt_results", JSON.stringify(results));
+    localStorage.setItem("cbt_completion_time", completionTimeSeconds);
+    fetch(API, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "submit", nama, token, skor: score, jawaban: answers, total: soal.length, waktu: formatTimeDisplay(completionTimeSeconds) }) }).catch(e => console.log);
+    showResult(score);
+}
+function showResult(score) {
+    document.getElementById("app").style.display = "none";
+    document.getElementById("result").style.display = "flex";
+    document.getElementById("scoreNumber").innerHTML = score;
+    let persen = Math.round((score / soal.length) * 100);
+    let grade = persen >= 90 ? "🏆 Luar Biasa!" : persen >= 75 ? "✅ Sangat Baik" : persen >= 60 ? "📚 Cukup" : "📖 Perlu Belajar Lebih Lanjut";
+    document.getElementById("skor").innerHTML = `<strong>${grade}</strong><br>${score} dari ${soal.length} benar (${persen}%)`;
+    document.getElementById("resultNama").innerText = nama;
+    document.getElementById("resultBenar").innerText = score;
+    document.getElementById("resultSalah").innerText = soal.length - score;
+    let waktuStr = formatTimeDisplay(completionTimeSeconds);
+    document.getElementById("resultWaktu").innerText = waktuStr;
+    loadLeaderboard();
+}
+
+// ==========================================
+// MODAL REVIEW & PEMBAHASAN (setelah submit)
+// ==========================================
+function openDiscussionModal() {
+    let results = JSON.parse(localStorage.getItem("cbt_results") || "[]");
+    let soalData = JSON.parse(localStorage.getItem("cbt_soal") || "[]");
+    if (!results.length || !soalData.length) {
+        alert("Tidak ada data untuk ditampilkan.");
+        return;
+    }
+    let html = "";
+    for (let i = 0; i < results.length; i++) {
+        const r = results[i];
+        const s = soalData[i];
+        const userAnswer = r.jawabanUser;
+        const correctKey = r.kunci;
+        html += `<div class="discussion-question">
+            <h4>Soal ${r.nomor}. ${r.pertanyaan}</h4>
+            <div class="options-list">`;
+        for (let opt of OPTIONS) {
+            let optionText = s[opt.toLowerCase()] || '';
+            let isUserSelected = (userAnswer === opt);
+            let isCorrectAnswer = (correctKey === opt);
+            let additionalClass = "";
+            let indicator = "";
+            if (isCorrectAnswer && isUserSelected) {
+                additionalClass = "user-correct";
+                indicator = " ✓ (jawaban Anda benar)";
+            } else if (isCorrectAnswer && !isUserSelected) {
+                additionalClass = "correct-option";
+                indicator = " ✓ (kunci jawaban)";
+            } else if (isUserSelected && !isCorrectAnswer) {
+                additionalClass = "wrong-option";
+                indicator = " ✗ (jawaban Anda salah)";
+            }
+            html += `<div class="option-item ${additionalClass}">
+                <strong>${opt}.</strong> ${optionText} ${indicator}
+            </div>`;
+        }
+        html += `</div>
+            <div class="discussion-pembahasan">
+                <strong>📘 Pembahasan:</strong> ${r.pembahasan}
+            </div>
+        </div>`;
+    }
+    document.getElementById("discussionContent").innerHTML = html;
+    document.getElementById("discussionModal").style.display = "flex";
+}
+function closeDiscussionModal() {
+    document.getElementById("discussionModal").style.display = "none";
+}
+function exportDiscussionPDF() {
+    const originalTitle = document.title;
+    document.title = "Review Jawaban - " + nama;
+    window.print();
+    document.title = originalTitle;
+}
+
+// ==========================================
+// LEADERBOARD
+// ==========================================
+function loadLeaderboard() {
+    const board = document.getElementById("board");
+    if (!board) return;
+    board.innerHTML = '<div class="leaderboard-loading">📊 Memuat leaderboard...</div>';
+    fetch(API + "?action=leaderboard&token=" + token).then(r => r.json()).then(res => {
+        if (res.leaderboard && res.leaderboard.length) {
+            let data = res.leaderboard.map(item => ({ nama: item.nama, skor: item.skor, total: soal.length, waktu: item.waktu || "00:00" }));
+            data.sort((a,b) => b.skor - a.skor);
+            let html = `<div class="leaderboard-card"><div class="leaderboard-header"><div class="rank">#</div><div class="name">Peserta</div><div class="score">Skor</div><div class="time">Waktu</div></div><div class="leaderboard-list">`;
+            data.forEach((item, idx) => {
+                let rank = idx+1;
+                let rankClass = rank===1?"rank-1":(rank===2?"rank-2":(rank===3?"rank-3":""));
+                let medal = rank===1?"🥇":(rank===2?"🥈":(rank===3?"🥉":""));
+                let myClass = (item.nama === nama) ? "my-rank" : "";
+                let persen = Math.round((item.skor / item.total) * 100);
+                html += `<div class="leaderboard-item ${myClass}"><div class="rank ${rankClass}">${medal || rank}</div><div class="name">${item.nama}</div><div class="score">${persen}%</div><div class="time">${item.waktu}</div></div>`;
+            });
+            html += `</div></div>`;
+            board.innerHTML = html;
+        } else { board.innerHTML = '<div class="leaderboard-empty">🏆 Belum ada data leaderboard.</div>'; }
+    }).catch(() => { board.innerHTML = '<div class="leaderboard-empty">⚠️ Gagal memuat leaderboard.</div>'; });
+}
+function restartExam() {
+    if (confirm("Ujian baru akan menghapus semua jawaban. Lanjutkan?")) { clearSession(); location.reload(); }
+}
+
+// ==========================================
+// LOGIN & LOAD SOAL
+// ==========================================
+function login() {
+    nama = document.getElementById("nama").value.trim();
+    token = document.getElementById("token").value.trim();
+    if (!nama || !token) { alert("Lengkapi data!"); return; }
+    fetch(API + "?action=validateToken&token=" + token).then(r => r.json()).then(res => {
+        if (!res.valid) { alert("Token tidak valid"); return; }
+        isLoggedIn = true;
+        saveState();
+        document.getElementById("login").style.display = "none";
+        document.getElementById("app").style.display = "block";
+        loadQuestions();
+    }).catch(() => alert("Gagal validasi token"));
+}
+function loadQuestions() {
+    if (soal.length) { startFromSaved(); return; }
+    fetch(API + "?action=getSoal").then(r => r.json()).then(res => {
+        if (!res.soal || !res.soal.length) { alert("Soal tidak ditemukan"); return; }
+        soal = res.soal;
+        document.getElementById("totalCount").innerText = soal.length;
+        startFromSaved();
+        saveState();
+    }).catch(() => alert("Gagal load soal"));
+}
+function startFromSaved() {
+    renderQuestion(); updateNavGrid(); updateStats(); startTimer();
+}
+
+// ==========================================
+// DARK MODE
+// ==========================================
+function toggleDarkMode() {
+    document.body.classList.toggle("dark-mode");
+    localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
+}
+function loadDarkMode() { if (localStorage.getItem("darkMode") === "true") document.body.classList.add("dark-mode"); }
+
+// ==========================================
+// CALCULATOR
+// ==========================================
+function toggleCalculator() {
+    let modal = document.getElementById("calculatorModal");
+    if (modal.style.display === "flex") {
+        modal.style.display = "none";
+        document.removeEventListener("keydown", handleKeyboard);
+    } else {
+        modal.style.display = "flex";
+        document.addEventListener("keydown", handleKeyboard);
+        document.getElementById("calcDisplay").focus();
+    }
+}
+function handleKeyboard(e) {
+    let d = document.getElementById("calcDisplay");
+    if (!d) return;
+    let key = e.key;
+    if (key >= '0' && key <= '9') appendToDisplay(key);
+    else if (key === '.') appendToDisplay('.');
+    else if (key === '+' || key === '-' || key === '*' || key === '/') { let op = key === '*' ? '×' : (key === '/' ? '÷' : key); appendToDisplay(op); }
+    else if (key === 'Enter' || key === '=') calculateResult();
+    else if (key === 'Escape') toggleCalculator();
+    else if (key === 'Backspace') deleteLastCalc();
+    else if (key === 'c' || key === 'C') clearCalc();
+}
+function appendToDisplay(v) { let d = document.getElementById("calcDisplay"); if (d) { if (d.value === "Error") d.value = ""; d.value += v; } }
+function clearCalc() { document.getElementById("calcDisplay").value = ""; }
+function deleteLastCalc() { let d = document.getElementById("calcDisplay"); d.value = d.value.slice(0, -1); }
+function calculateResult() {
+    let d = document.getElementById("calcDisplay");
+    try { let expr = d.value.replace(/×/g, '*').replace(/÷/g, '/'); let r = Function('"use strict"; return (' + expr + ')')(); d.value = r; }
+    catch(e) { d.value = "Error"; }
+}
+function calcFunction(action) {
+    let d = document.getElementById("calcDisplay");
+    let val = parseFloat(d.value) || 0;
+    switch(action) {
+        case 'sin': d.value = Math.sin(val * Math.PI/180); break;
+        case 'cos': d.value = Math.cos(val * Math.PI/180); break;
+        case 'tan': d.value = Math.tan(val * Math.PI/180); break;
+        case 'log': d.value = Math.log10(val); break;
+        case 'ln': d.value = Math.log(val); break;
+        case 'sqrt': d.value = Math.sqrt(val); break;
+        case 'pow2': d.value = val*val; break;
+        case 'pow3': d.value = val*val*val; break;
+        case 'reciprocal': d.value = 1/val; break;
+        case 'pi': d.value = Math.PI; break;
+        case 'e': d.value = Math.E; break;
+        case 'percent': d.value = val/100; break;
+        case 'equal': calculateResult(); break;
+        case 'clear': clearCalc(); break;
+        case 'backspace': deleteLastCalc(); break;
+        case 'mplus': calcMemory += val; break;
+        case 'mminus': calcMemory -= val; break;
+        case 'mr': d.value = calcMemory; break;
+        case 'mc': calcMemory = 0; break;
+    }
+}
+function initCalculatorButtons() {
+    document.querySelectorAll('.calc-num').forEach(btn => btn.onclick = () => appendToDisplay(btn.getAttribute('data-num')));
+    document.querySelectorAll('.calc-operator').forEach(btn => btn.onclick = () => appendToDisplay(btn.getAttribute('data-op')));
+    document.querySelectorAll('.calc-func, .calc-mem, .calc-clear').forEach(btn => btn.onclick = () => calcFunction(btn.getAttribute('data-action')));
+}
+
+// ==========================================
+// CEK SESSION (REFRESH STAY)
+// ==========================================
+function checkExistingSession() {
+    loadSavedState();
+    loadDarkMode();
+    if (isLoggedIn) {
+        const submitted = localStorage.getItem("cbt_submitted");
+        if (submitted === "true") {
+            const savedScore = localStorage.getItem("cbt_score");
+            if (savedScore) {
+                document.getElementById("login").style.display = "none";
+                completionTimeSeconds = parseInt(localStorage.getItem("cbt_completion_time") || "0");
+                if (soal.length) showResult(parseInt(savedScore));
+                else fetch(API+"?action=getSoal").then(r=>r.json()).then(res=>{ soal = res.soal; showResult(parseInt(savedScore)); });
+            }
+        } else {
+            document.getElementById("login").style.display = "none";
+            document.getElementById("app").style.display = "block";
+            if (soal.length) { document.getElementById("totalCount").innerText = soal.length; renderQuestion(); updateNavGrid(); updateStats(); startTimer(); }
+            else loadQuestions();
+        }
+    }
+}
+
+// ==========================================
+// INIT
+// ==========================================
+document.addEventListener("DOMContentLoaded", () => {
+    initCalculatorButtons();
+    checkExistingSession();
+});
+</script>
 </body>
 </html>

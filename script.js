@@ -64,36 +64,28 @@ function renderQuestion() {
     const s = soal[currentQuestion];
     if (!s) return;
 
-    document.getElementById("questionLabel").innerHTML = `Soal ${currentQuestion + 1}`;
+    document.getElementById("questionLabel").innerHTML = "Soal " + (currentQuestion + 1);
     document.getElementById("q").innerHTML = s.pertanyaan;
 
     let optHtml = `
-        <div class="opt ${answers[currentQuestion] == 'A' ? 'active' : ''}" data-answer="A">
+        <div class="opt ${answers[currentQuestion] == 'A' ? 'active' : ''}" onclick="pick('A')">
             <div class="letter">A</div>
             <div>${s.a || "Opsi A"}</div>
         </div>
-        <div class="opt ${answers[currentQuestion] == 'B' ? 'active' : ''}" data-answer="B">
+        <div class="opt ${answers[currentQuestion] == 'B' ? 'active' : ''}" onclick="pick('B')">
             <div class="letter">B</div>
             <div>${s.b || "Opsi B"}</div>
         </div>
-        <div class="opt ${answers[currentQuestion] == 'C' ? 'active' : ''}" data-answer="C">
+        <div class="opt ${answers[currentQuestion] == 'C' ? 'active' : ''}" onclick="pick('C')">
             <div class="letter">C</div>
             <div>${s.c || "Opsi C"}</div>
         </div>
-        <div class="opt ${answers[currentQuestion] == 'D' ? 'active' : ''}" data-answer="D">
+        <div class="opt ${answers[currentQuestion] == 'D' ? 'active' : ''}" onclick="pick('D')">
             <div class="letter">D</div>
             <div>${s.d || "Opsi D"}</div>
         </div>
     `;
     document.getElementById("opt").innerHTML = optHtml;
-
-    // Add click listeners to options
-    document.querySelectorAll('.opt').forEach(opt => {
-        opt.addEventListener('click', function() {
-            const answer = this.getAttribute('data-answer');
-            pick(answer);
-        });
-    });
 
     const raguBtn = document.getElementById("raguBtn");
     if (raguBtn) {
@@ -124,17 +116,9 @@ function updateNavGrid() {
         if (answers[i]) classes.push("done");
         if (ragu[i]) classes.push("ragu");
         if (i === currentQuestion) classes.push("activeQ");
-        html += `<button class="${classes.join(" ")}" data-index="${i}">${i + 1}</button>`;
+        html += `<button class="${classes.join(" ")}" onclick="goToQuestion(${i})">${i + 1}</button>`;
     }
     document.getElementById("nav").innerHTML = html;
-    
-    // Add click listeners
-    document.querySelectorAll('#nav button').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const index = parseInt(this.getAttribute('data-index'));
-            goToQuestion(index);
-        });
-    });
 }
 
 function goToQuestion(index) {
@@ -367,18 +351,12 @@ function toggleDarkMode() {
     document.body.classList.toggle("dark-mode");
     let isDark = document.body.classList.contains("dark-mode");
     localStorage.setItem("darkMode", isDark);
-    let darkBtn = document.getElementById("darkModeBtn");
-    if (darkBtn) {
-        darkBtn.innerHTML = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
-    }
 }
 
 function loadDarkMode() {
     let saved = localStorage.getItem("darkMode");
     if (saved === "true") {
         document.body.classList.add("dark-mode");
-        let darkBtn = document.getElementById("darkModeBtn");
-        if (darkBtn) darkBtn.innerHTML = "☀️ Light Mode";
     }
 }
 
@@ -394,76 +372,31 @@ function toggleCalculator() {
     }
 }
 
+function calc(value) {
+    let display = document.getElementById("calcDisplay");
+    if (display) {
+        display.value += value;
+    }
+}
+
+function calculateResult() {
+    let display = document.getElementById("calcDisplay");
+    if (!display) return;
+    try {
+        let expr = display.value.replace(/×/g, '*').replace(/÷/g, '/');
+        let result = Function('"use strict"; return (' + expr + ')')();
+        display.value = result;
+    } catch (e) {
+        display.value = "Error";
+    }
+}
+
+function clearCalc() {
+    let display = document.getElementById("calcDisplay");
+    if (display) display.value = "";
+}
+
 // ==========================================
-// EVENT LISTENERS & INIT
+// LOAD DARK MODE PREFERENCE ON START
 // ==========================================
-document.addEventListener("DOMContentLoaded", function() {
-    console.log("DOM Ready - Initializing...");
-    
-    // Load dark mode preference
-    loadDarkMode();
-    
-    // Get all buttons and assign events
-    var startBtn = document.getElementById("startBtn");
-    var prevBtn = document.getElementById("prevBtn");
-    var nextBtn = document.getElementById("nextBtn");
-    var raguBtn = document.getElementById("raguBtn");
-    var submitBtn = document.getElementById("submitBtn");
-    var darkModeBtn = document.getElementById("darkModeBtn");
-    var calcBtn = document.getElementById("calcBtn");
-    var restartBtn = document.getElementById("restartBtn");
-    var closeCalcBtn = document.getElementById("closeCalcBtn");
-    
-    if (startBtn) startBtn.onclick = login;
-    if (prevBtn) prevBtn.onclick = prevQuestion;
-    if (nextBtn) nextBtn.onclick = nextQuestion;
-    if (raguBtn) raguBtn.onclick = toggleRagu;
-    if (submitBtn) submitBtn.onclick = submit;
-    if (darkModeBtn) darkModeBtn.onclick = toggleDarkMode;
-    if (calcBtn) calcBtn.onclick = toggleCalculator;
-    if (restartBtn) restartBtn.onclick = restartExam;
-    if (closeCalcBtn) closeCalcBtn.onclick = toggleCalculator;
-    
-    // Calculator buttons
-    var calcBtns = document.querySelectorAll('.calc-btn');
-    for (var i = 0; i < calcBtns.length; i++) {
-        calcBtns[i].onclick = function() {
-            var value = this.getAttribute('data-value');
-            var display = document.getElementById("calcDisplay");
-            if (display && value) {
-                display.value += value;
-            }
-        };
-    }
-    
-    var calcEqual = document.getElementById("calcEqual");
-    if (calcEqual) {
-        calcEqual.onclick = function() {
-            var display = document.getElementById("calcDisplay");
-            if (!display) return;
-            try {
-                var expr = display.value.replace(/×/g, '*').replace(/÷/g, '/');
-                var result = Function('"use strict"; return (' + expr + ')')();
-                display.value = result;
-            } catch (e) {
-                display.value = "Error";
-            }
-        };
-    }
-    
-    var calcClear = document.getElementById("calcClear");
-    if (calcClear) {
-        calcClear.onclick = function() {
-            var display = document.getElementById("calcDisplay");
-            if (display) display.value = "";
-        };
-    }
-    
-    // Close calculator when clicking outside
-    window.onclick = function(e) {
-        var modal = document.getElementById("calculatorModal");
-        if (e.target === modal && modal) {
-            modal.style.display = "none";
-        }
-    };
-});
+loadDarkMode();

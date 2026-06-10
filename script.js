@@ -1,5 +1,5 @@
 // ========== KONFIGURASI ==========
-const API = "https://script.google.com/macros/s/AKfycbx9AH3tu0CCMItBJimHobEqBYezxRVZm_lwJ-9h8s1Bk0NHOu0igf_jUl1GSzY1Obyl/exec"; // 
+const API = "https://script.google.com/macros/s/AKfycbx9AH3tu0CCMItBJimHobEqBYezxRVZm_lwJ-9h8s1Bk0NHOu0igf_jUl1GSzY1Obyl/exec";
 const OPTIONS = ['A','B','C','D','E'];
 
 let currentQuestion = 0, answers = {}, ragu = {}, soal = [], token = "", nama = "";
@@ -85,11 +85,10 @@ function renderQuestion() {
   if (!soal.length) return;
   const s = soal[currentQuestion];
   document.getElementById("questionLabel").innerHTML = "Soal " + (currentQuestion+1);
-  document.getElementById("q").innerHTML = s.pertanyaan;
+  document.getElementById("q").innerHTML = s.Pertanyaan; // PERBAIKAN: huruf besar P
   let optHtml = "";
   for (let opt of OPTIONS) {
-    let optLower = opt.toLowerCase();
-    let optText = s[optLower] || '';
+    let optText = s[opt] || ''; // Langsung pakai opt (A, B, C, D, E) karena properti huruf besar
     if (optText === '') optText = `Opsi ${opt} (belum diisi)`;
     optHtml += `<div class="opt ${answers[currentQuestion]==opt ? 'active' : ''}" onclick="pick('${opt}')">
       <div class="letter">${opt}</div><div>${optText}</div></div>`;
@@ -203,6 +202,11 @@ function formatTimeDisplay(seconds) {
 }
 function submit() {
   if (isDone) return;
+  // Validasi jika soal kosong
+  if (!soal || soal.length === 0) {
+    alert("Soal belum dimuat. Silakan refresh halaman dan login ulang.");
+    return;
+  }
   let unanswered = soal.length - Object.keys(answers).length;
   if (!confirm(`Yakin kumpul? ${Object.keys(answers).length}/${soal.length} terjawab, ${unanswered} belum. Lanjutkan?`)) return;
   isDone = true;
@@ -212,18 +216,18 @@ function submit() {
   let results = [];
   for (let i = 0; i < soal.length; i++) {
     let userAns = answers[i] ? String(answers[i]).trim() : "";
-    let correctAns = soal[i].kunci ? String(soal[i].kunci).trim() : "";
+    let correctAns = soal[i].Kunci ? String(soal[i].Kunci).trim() : ""; // PERBAIKAN: Kunci huruf besar
     let isCorrect = (userAns === correctAns);
     if (isCorrect) score++;
     let options = {};
-    for (let opt of OPTIONS) options[opt] = soal[i][opt.toLowerCase()] || '';
+    for (let opt of OPTIONS) options[opt] = soal[i][opt] || '';
     results.push({
       nomor: i+1,
-      pertanyaan: soal[i].pertanyaan,
+      pertanyaan: soal[i].Pertanyaan, // PERBAIKAN: huruf besar
       jawabanUser: userAns || "(Tidak dijawab)",
       kunci: correctAns,
       benar: isCorrect,
-      pembahasan: soal[i].pembahasan || "Tidak ada pembahasan",
+      pembahasan: soal[i].Pembahasan || "Tidak ada pembahasan", // PERBAIKAN: huruf besar
       options: options
     });
   }
@@ -270,7 +274,7 @@ function openDiscussionModal() {
       <h4>Soal ${r.nomor}. ${r.pertanyaan}</h4>
       <div class="options-list">`;
     for (let opt of OPTIONS) {
-      let optText = s[opt.toLowerCase()] || '';
+      let optText = s[opt] || '';
       let isUser = (userAnswer === opt);
       let isCorrect = (correctKey === opt);
       let addClass = "", indicator = "";
@@ -355,16 +359,24 @@ function login() {
 }
 function loadQuestions() {
   if (soal.length) { startFromSaved(); return; }
-  fetch(API + "?action=getSoal&sheet=" + currentSheetSoal)
+  fetch(API + "?action=getSoal&sheet=" + encodeURIComponent(currentSheetSoal))
     .then(r => r.json())
     .then(res => {
-      if (!res.soal || !res.soal.length) { alert("Soal tidak ditemukan"); return; }
+      if (res.error) {
+        alert("Error dari server: " + res.error);
+        console.error(res.error);
+        return;
+      }
+      if (!res.soal || res.soal.length === 0) {
+        alert("Soal tidak ditemukan di sheet '" + currentSheetSoal + "'. Periksa spreadsheet.");
+        return;
+      }
       soal = res.soal;
       document.getElementById("totalCount").innerText = soal.length;
       startFromSaved();
       saveState();
     })
-    .catch(() => alert("Gagal load soal"));
+    .catch(err => { console.error(err); alert("Gagal load soal: " + err.message); });
 }
 function startFromSaved() {
   renderQuestion();
@@ -455,7 +467,7 @@ function checkExistingSession() {
         document.getElementById("login").style.display = "none";
         completionTimeSeconds = parseInt(localStorage.getItem("cbt_completion_time") || "0");
         if (soal.length) showResult(parseInt(savedScore));
-        else fetch(API+"?action=getSoal&sheet="+currentSheetSoal).then(r=>r.json()).then(res=>{ soal = res.soal; showResult(parseInt(savedScore)); });
+        else fetch(API+"?action=getSoal&sheet="+encodeURIComponent(currentSheetSoal)).then(r=>r.json()).then(res=>{ if(res.soal) soal = res.soal; showResult(parseInt(savedScore)); });
       }
     } else {
       document.getElementById("login").style.display = "none";

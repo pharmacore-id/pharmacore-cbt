@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>PHARMACORE CBT</title>
+<title>PHARMACORE CBT - UKMPPAI Simulation</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,7 +13,6 @@
 
 <link rel="stylesheet" href="style.css">
 
-<!-- FIX: defer supaya DOM aman sebelum JS jalan -->
 <script src="script.js" defer></script>
 
 </head>
@@ -179,7 +178,7 @@
 </div>
 
 <!-- RESULT -->
-<div id="result">
+<div id="result" style="display:none;">
 
   <div class="result-card">
 
@@ -195,24 +194,25 @@
 
     <div id="board"></div>
 
+    <button class="submit-btn" onclick="restartExam()" style="margin-top:20px;">
+      Ujian Baru
+    </button>
+
   </div>
 
 </div>
 
-<!-- CALCULATOR -->
-<div id="calculatorModal" class="calculator-modal">
+<!-- CALCULATOR MODAL -->
+<div id="calculatorModal" class="calculator-modal" style="display:none;">
 
   <div class="calculator-box">
 
     <div class="calculator-header">
       <span>🧮 Kalkulator</span>
-
-      <button class="close-calc" onclick="toggleCalculator()">
-        ✕
-      </button>
+      <button class="close-calc" onclick="toggleCalculator()">✕</button>
     </div>
 
-    <input type="text" id="calcDisplay" readonly>
+    <input type="text" id="calcDisplay" readonly placeholder="0">
 
     <div class="calc-grid">
 
@@ -236,9 +236,7 @@
       <button onclick="calculateResult()">=</button>
       <button onclick="calc('+')">+</button>
 
-      <button class="calc-clear" onclick="clearCalc()">
-        C
-      </button>
+      <button class="calc-clear" onclick="clearCalc()" colspan="2">C</button>
 
     </div>
 

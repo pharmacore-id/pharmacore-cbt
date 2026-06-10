@@ -1,5 +1,5 @@
 // ========== KONFIGURASI ==========
-const API = "https://script.google.com/macros/s/AKfycbx9AH3tu0CCMItBJimHobEqBYezxRVZm_lwJ-9h8s1Bk0NHOu0igf_jUl1GSzY1Obyl/exec"; 
+const API = "https://script.google.com/macros/s/AKfycbx9AH3tu0CCMItBJimHobEqBYezxRVZm_lwJ-9h8s1Bk0NHOu0igf_jUl1GSzY1Obyl/exec"; // GANTI DENGAN URL WEB APP ANDA
 const OPTIONS = ['A', 'B', 'C', 'D', 'E'];
 
 let currentQuestion = 0, answers = {}, ragu = {}, soal = [], token = "", nama = "";
@@ -257,7 +257,7 @@ function showResult(score) {
     loadLeaderboard();
 }
 
-// ========== MODAL PEMBAHASAN & EXPORT PDF ==========
+// ========== MODAL PEMBAHASAN & EXPORT PDF (dengan warna hijau, merah, kuning) ==========
 function openDiscussionModal() {
     let results = JSON.parse(localStorage.getItem("cbt_results") || "[]");
     let soalData = JSON.parse(localStorage.getItem("cbt_soal") || "[]");
@@ -274,12 +274,19 @@ function openDiscussionModal() {
         for (let opt of OPTIONS) {
             let optText = s[opt] || '';
             let isUser = (userAnswer === opt);
-            let isCorrect = (correctKey === opt);
+            let isCorrectKey = (correctKey === opt);
             let bgColor = "#ffffff";
             let indicator = "";
-            if (isCorrect && isUser) { bgColor = "#d1fae5"; indicator = " ✓ (jawaban Anda benar)"; }
-            else if (isCorrect && !isUser) { bgColor = "#d1fae5"; indicator = " ✓ (kunci jawaban)"; }
-            else if (isUser && !isCorrect) { bgColor = "#fee2e2"; indicator = " ✗ (jawaban Anda salah)"; }
+            if (isUser && isCorrectKey) {
+                bgColor = "#d1fae5";   // hijau muda
+                indicator = " ✓ (jawaban Anda benar)";
+            } else if (isUser && !isCorrectKey) {
+                bgColor = "#fee2e2";   // merah muda
+                indicator = " ✗ (jawaban Anda salah)";
+            } else if (!isUser && isCorrectKey) {
+                bgColor = "#fef9c3";   // kuning muda (kunci jawaban)
+                indicator = " ★ (kunci jawaban)";
+            }
             html += `<div style="padding: 8px 12px; margin: 6px 0; border-radius: 12px; background: ${bgColor}; border: 1px solid #e5e7eb;">
                 <strong>${opt}.</strong> ${optText} ${indicator}
             </div>`;
@@ -479,8 +486,6 @@ function checkExistingSession() {
         }
     }
 }
-
-// ========== INIT ==========
 document.addEventListener("DOMContentLoaded", function() {
     initCalculator();
     checkExistingSession();

@@ -3,22 +3,17 @@ window.onerror = function(msg, url, line){
 };
 
 let currentQuestion = 0;
-
 let answers = {};
 let ragu = {};
-
 let totalSoal = 50;
 
 const API = "https://script.google.com/macros/s/AKfycbyo48NoxjaBHGHkRCxgkxOB3Cys2Wa3mBG7AvK_n3TidyCSQcjSf5vSbCJpkI0-QJhk/exec";
 
 let soal = [];
-
 let token = "";
 let nama = "";
-
 let timer;
 let isDone = false;
-
 let timeLeft = 3600;
 
 /* =========================
@@ -47,7 +42,7 @@ function login(){
     document.getElementById("login").style.display = "none";
     document.getElementById("app").style.display = "block";
 
-    load(); // ONLY LOAD HERE
+    load();
 
   })
   .catch(err => {
@@ -58,7 +53,7 @@ function login(){
 }
 
 /* =========================
-LOAD SOAL (SAFE + NO FREEZE)
+LOAD SOAL
 ========================= */
 
 function load(){
@@ -73,15 +68,20 @@ function load(){
     }
 
     soal = res.soal;
+    totalSoal = soal.length;
 
-    document.getElementById("totalCount").innerText = soal.length;
+    document.getElementById("totalCount").innerText = totalSoal;
 
+    loadSavedState();
+    
     currentQuestion = 0;
 
     renderQuestion();
     nav();
     updateStats();
     updateProgress();
+    startTimer();
+
   })
   .catch(err => {
     console.error(err);
@@ -90,11 +90,35 @@ function load(){
 }
 
 /* =========================
+SAVE & LOAD STATE
+========================= */
+
+function saveState(){
+  localStorage.setItem("cbt_answers", JSON.stringify(answers));
+  localStorage.setItem("cbt_ragu", JSON.stringify(ragu));
+  localStorage.setItem("cbt_current", currentQuestion);
+}
+
+function loadSavedState(){
+  const savedAnswers = localStorage.getItem("cbt_answers");
+  const savedRagu = localStorage.getItem("cbt_ragu");
+  const savedCurrent = localStorage.getItem("cbt_current");
+  
+  if(savedAnswers) answers = JSON.parse(savedAnswers);
+  if(savedRagu) ragu = JSON.parse(savedRagu);
+  if(savedCurrent && !isNaN(parseInt(savedCurrent))){
+    currentQuestion = parseInt(savedCurrent);
+  }
+}
+
+/* =========================
 RENDER QUESTION
 ========================= */
 
 function renderQuestion(){
 
+  if(!soal || soal.length === 0) return;
+  
   const s = soal[currentQuestion];
 
   if(!s){
@@ -102,7 +126,7 @@ function renderQuestion(){
     return;
   }
 
-  document.getElementById("questionLabel").innerText =
+  document.getElementById("questionLabel").innerHTML =
     `Soal ${currentQuestion + 1}`;
 
   document.getElementById("q").innerHTML = s.pertanyaan;
@@ -110,34 +134,30 @@ function renderQuestion(){
   document.getElementById("opt").innerHTML = `
     <div class="opt ${answers[currentQuestion]=='A'?'active':''}" onclick="pick('A')">
       <div class="letter">A</div>
-      <div>${s.a}</div>
+      <div>${s.a || "Opsi A"}</div>
     </div>
-
     <div class="opt ${answers[currentQuestion]=='B'?'active':''}" onclick="pick('B')">
       <div class="letter">B</div>
-      <div>${s.b}</div>
+      <div>${s.b || "Opsi B"}</div>
     </div>
-
     <div class="opt ${answers[currentQuestion]=='C'?'active':''}" onclick="pick('C')">
       <div class="letter">C</div>
-      <div>${s.c}</div>
+      <div>${s.c || "Opsi C"}</div>
     </div>
-
     <div class="opt ${answers[currentQuestion]=='D'?'active':''}" onclick="pick('D')">
       <div class="letter">D</div>
-      <div>${s.d}</div>
+      <div>${s.d || "Opsi D"}</div>
     </div>
   `;
 
   const btn = document.querySelector(".ragu-btn");
-
   if(btn){
     if(ragu[currentQuestion]){
       btn.classList.add("active");
-      btn.innerText = "🚩 Ditandai Ragu";
+      btn.innerHTML = "🚩 Ditandai Ragu";
     } else {
       btn.classList.remove("active");
-      btn.innerText = "🚩 Ragu";
+      btn.innerHTML = "🚩 Ragu";
     }
   }
 
@@ -149,11 +169,8 @@ PICK ANSWER
 ========================= */
 
 function pick(v){
-
   answers[currentQuestion] = v;
-
   saveState();
-
   renderQuestion();
   nav();
   updateStats();
@@ -166,8 +183,7 @@ NAVIGATION
 function nav(){
 
   if(!soal || soal.length === 0){
-    document.getElementById("nav").innerHTML =
-      "<small style='color:red'>Soal belum dimuat</small>";
+    document.getElementById("nav").innerHTML = "<small style='color:red'>Soal belum dimuat</small>";
     return;
   }
 
@@ -176,30 +192,45 @@ function nav(){
   for(let x=0; x<soal.length; x++){
 
     let cls = [];
-
     if(answers[x]) cls.push("done");
     if(ragu[x]) cls.push("ragu");
     if(x === currentQuestion) cls.push("activeQ");
 
-    h += `
-      <button class="${cls.join(" ")}" onclick="go(${x})">
-        ${x+1}
-      </button>
-    `;
+    h += `<button class="${cls.join(" ")}" onclick="go(${x})">${x+1}</button>`;
   }
 
   document.getElementById("nav").innerHTML = h;
 }
 
 function go(x){
-
   currentQuestion = x;
-
   renderQuestion();
   nav();
   updateStats();
   updateProgress();
+  saveState();
+}
 
+function nextQuestion(){
+  if(currentQuestion < soal.length - 1){
+    currentQuestion++;
+    renderQuestion();
+    nav();
+    updateStats();
+    updateProgress();
+    saveState();
+  }
+}
+
+function prevQuestion(){
+  if(currentQuestion > 0){
+    currentQuestion--;
+    renderQuestion();
+    nav();
+    updateStats();
+    updateProgress();
+    saveState();
+  }
 }
 
 /* =========================
@@ -207,13 +238,9 @@ PROGRESS
 ========================= */
 
 function updateProgress(){
-
   if(!soal || soal.length === 0) return;
-
   let progress = ((currentQuestion + 1) / soal.length) * 100;
-
   document.getElementById("progressFill").style.width = progress + "%";
-
 }
 
 /* =========================
@@ -221,7 +248,6 @@ STATS
 ========================= */
 
 function updateStats(){
-
   if(!soal || soal.length === 0) return;
 
   const answered = Object.keys(answers).length;
@@ -234,38 +260,46 @@ function updateStats(){
   if(a) a.innerText = answered;
   if(b) b.innerText = answered;
   if(c) c.innerText = unanswered;
-
 }
 
 /* =========================
-TIMER (NO RESET BUG)
+TIMER
 ========================= */
 
 function startTimer(){
 
   const saved = localStorage.getItem("cbt_time");
+  const submitted = localStorage.getItem("cbt_submitted");
+  
+  if(submitted === "true"){
+    return;
+  }
+  
   timeLeft = saved ? parseInt(saved) : 3600;
 
-  clearInterval(timer);
+  if(timer) clearInterval(timer);
 
   timer = setInterval(()=>{
-
-    timeLeft--;
-
-    localStorage.setItem("cbt_time", timeLeft);
-
-    let m = Math.floor(timeLeft/60);
-    let s = timeLeft%60;
-
-    document.getElementById("timer").innerHTML =
-      `${m}:${s<10?'0'+s:s}`;
-
+    
+    if(isDone) return;
+    
     if(timeLeft <= 0){
+      clearInterval(timer);
       submit();
+    } else {
+      timeLeft--;
+      localStorage.setItem("cbt_time", timeLeft);
+      
+      let m = Math.floor(timeLeft/60);
+      let s = timeLeft%60;
+      
+      const timerEl = document.getElementById("timer");
+      if(timerEl){
+        timerEl.innerHTML = `${m}:${s<10?'0'+s:s}`;
+      }
     }
-
+    
   },1000);
-
 }
 
 /* =========================
@@ -273,22 +307,31 @@ RAGU
 ========================= */
 
 function toggleRagu(){
-
-  ragu[currentQuestion] = !ragu[currentQuestion];
-
-  if(!ragu[currentQuestion]){
+  
+  if(ragu[currentQuestion]){
     delete ragu[currentQuestion];
+  } else {
+    ragu[currentQuestion] = true;
   }
-
+  
   saveState();
-
-  renderQuestion();
+  
+  const btn = document.querySelector(".ragu-btn");
+  if(btn){
+    if(ragu[currentQuestion]){
+      btn.classList.add("active");
+      btn.innerHTML = "🚩 Ditandai Ragu";
+    } else {
+      btn.classList.remove("active");
+      btn.innerHTML = "🚩 Ragu";
+    }
+  }
+  
   nav();
-
 }
 
 /* =========================
-SUBMIT (ANTI DOUBLE + SAFE)
+SUBMIT
 ========================= */
 
 function submit(){
@@ -298,34 +341,36 @@ function submit(){
 
   clearInterval(timer);
 
-  document.body.style.pointerEvents = "none";
-
   let skor = 0;
 
-  soal.forEach((s,x)=>{
-
-    if(answers[x] == s.kunci){
+  for(let x=0; x<soal.length; x++){
+    if(answers[x] == soal[x].kunci){
       skor++;
     }
+  }
 
-  });
+  // Save to localStorage
+  localStorage.setItem("cbt_submitted", "true");
+  localStorage.setItem("cbt_score", skor);
 
+  // Send to server (no-cors mode to avoid CORS)
   fetch(API, {
     method: "POST",
+    mode: "no-cors",
     headers: {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
       action: "submit",
-      nama,
-      token,
-      skor,
-      jawaban: answers
+      nama: nama,
+      token: token,
+      skor: skor,
+      jawaban: answers,
+      total: soal.length
     })
-  });
+  }).catch(err => console.error("Submit error:", err));
 
   showResult(skor);
-
 }
 
 /* =========================
@@ -338,86 +383,152 @@ function showResult(skor){
   document.getElementById("result").style.display = "flex";
 
   document.getElementById("scoreNumber").innerHTML = skor;
+  
+  const persen = Math.round((skor / soal.length) * 100);
+  let grade = "";
+  
+  if(persen >= 90) grade = "🏆 Luar Biasa!";
+  else if(persen >= 75) grade = "✅ Sangat Baik";
+  else if(persen >= 60) grade = "📚 Baik, perlu belajar lagi";
+  else grade = "📖 Perlu belajar lebih giat";
+  
+  const skorEl = document.getElementById("skor");
+  if(skorEl){
+    skorEl.innerHTML = `Anda menjawab ${skor} dari ${soal.length} soal dengan benar (${persen}%)<br><strong>${grade}</strong>`;
+  }
 
+  loadLeaderboard();
+}
+
+function loadLeaderboard(){
+  fetch(`${API}?action=leaderboard&token=${token}`)
+    .then(r => r.json())
+    .then(res => {
+      const board = document.getElementById("board");
+      if(!board) return;
+      
+      if(res.leaderboard && res.leaderboard.length > 0){
+        let html = "<ol style='text-align:left;margin-top:20px;'>";
+        res.leaderboard.slice(0,10).forEach((item, idx) => {
+          html += `<li style='margin:10px 0;padding:8px;background:#f8f6ff;border-radius:12px;'>
+            <strong>${item.nama}</strong> - Skor: ${item.skor}/${soal.length}
+          </li>`;
+        });
+        html += "</ol>";
+        board.innerHTML = html;
+      } else {
+        board.innerHTML = "<p>Belum ada data leaderboard</p>";
+      }
+    })
+    .catch(err => {
+      console.error("Leaderboard error:", err);
+      const board = document.getElementById("board");
+      if(board) board.innerHTML = "<p>Gagal memuat leaderboard</p>";
+    });
+}
+
+function restartExam(){
+  localStorage.clear();
+  answers = {};
+  ragu = {};
+  currentQuestion = 0;
+  isDone = false;
+  timeLeft = 3600;
+  
+  document.getElementById("result").style.display = "none";
+  document.getElementById("login").style.display = "flex";
+  document.getElementById("app").style.display = "none";
+  
+  document.getElementById("nama").value = "";
+  document.getElementById("token").value = "";
 }
 
 /* =========================
-TOOGLE DARK MODE
+DARK MODE
 ========================= */
 
 function toggleDarkMode(){
   document.body.classList.toggle("dark-mode");
+  const isDark = document.body.classList.contains("dark-mode");
+  localStorage.setItem("darkMode", isDark);
+}
+
+function loadDarkMode(){
+  const saved = localStorage.getItem("darkMode");
+  if(saved === "true"){
+    document.body.classList.add("dark-mode");
+  }
 }
 
 /* =========================
-TOOGLE CALCULATOR
+CALCULATOR
 ========================= */
 
-function calc(action){
-
-  const display = document.getElementById("calcDisplay");
+function toggleCalculator(){
   const modal = document.getElementById("calculatorModal");
-
-  if(!display || !modal) return;
-
-  // =========================
-  // TOGGLE CALCULATOR
-  // =========================
-  if(action === "toggle"){
-    const isOpen = modal.classList.contains("open");
-
-    if(isOpen){
-      modal.classList.remove("open");
-      modal.style.display = "none";
-    }else{
-      modal.classList.add("open");
-      modal.style.display = "flex";
-    }
-    return;
+  if(!modal) return;
+  
+  if(modal.style.display === "flex"){
+    modal.style.display = "none";
+  } else {
+    modal.style.display = "flex";
   }
-
-  // =========================
-  // CLEAR
-  // =========================
-  if(action === "clear"){
-    display.value = "";
-    return;
-  }
-
-  // =========================
-  // BACKSPACE
-  // =========================
-  if(action === "back"){
-    display.value = display.value.slice(0, -1);
-    return;
-  }
-
-  // =========================
-  // EQUALS / RESULT
-  // =========================
-  if(action === "equal"){
-    try{
-
-      let expr = display.value;
-
-      // SAFE EVAL (basic protection)
-      if(!/^[0-9+\-*/().\sMathsincotaelgqrtp]*$/.test(expr)){
-        display.value = "Error";
-        return;
-      }
-
-      let result = Function('"use strict"; return (' + expr + ')')();
-
-      display.value = result;
-
-    }catch(e){
-      display.value = "Error";
-    }
-    return;
-  }
-
-  // =========================
-  // INPUT NORMAL (angka/operator/scientific)
-  // =========================
-  display.value += action;
 }
+
+function calc(value){
+  const display = document.getElementById("calcDisplay");
+  if(!display) return;
+  display.value += value;
+}
+
+function calculateResult(){
+  const display = document.getElementById("calcDisplay");
+  if(!display) return;
+  
+  try {
+    let expr = display.value.replace(/×/g, '*').replace(/÷/g, '/');
+    const result = Function('"use strict"; return (' + expr + ')')();
+    display.value = result;
+  } catch(e) {
+    display.value = "Error";
+  }
+}
+
+function clearCalc(){
+  const display = document.getElementById("calcDisplay");
+  if(display) display.value = "";
+}
+
+/* =========================
+INITIALIZATION
+========================= */
+
+document.addEventListener("DOMContentLoaded", function(){
+  loadDarkMode();
+  
+  // Check if already submitted
+  const submitted = localStorage.getItem("cbt_submitted");
+  if(submitted === "true"){
+    const savedScore = localStorage.getItem("cbt_score");
+    if(savedScore && soal.length === 0){
+      // Try to load soal first
+      fetch(`${API}?action=getSoal`)
+        .then(r => r.json())
+        .then(res => {
+          if(res && res.soal){
+            soal = res.soal;
+            totalSoal = soal.length;
+            showResult(parseInt(savedScore));
+          }
+        });
+    }
+  }
+  
+  // Close calculator when clicking outside
+  window.addEventListener("click", function(e){
+    const modal = document.getElementById("calculatorModal");
+    if(e.target === modal){
+      modal.style.display = "none";
+    }
+  });
+});

@@ -24,7 +24,7 @@ body {
   background: #f8f6ff;
 }
 
-/* ========== DARK MODE TOTAL ========== */
+/* ========== DARK MODE TOTAL – SEMUA TEKS PUTIH ========== */
 body.dark-mode,
 body.dark-mode .login-card,
 body.dark-mode .card,
@@ -62,14 +62,13 @@ body.dark-mode .badge,
 body.dark-mode .progress,
 body.dark-mode .fill,
 body.dark-mode .my-rank,
-body.dark-mode .correct-option,
-body.dark-mode .wrong-option,
-body.dark-mode .user-correct,
 body.dark-mode .review-warning,
 body.dark-mode .modal-header,
 body.dark-mode .modal-footer,
 body.dark-mode .close-modal,
-body.dark-mode .home-btn {
+body.dark-mode .home-btn,
+body.dark-mode .discussion-question div,
+body.dark-mode .discussion-pembahasan {
   background: #0f0f1a !important;
   border-color: #2a2a3a !important;
   color: #ffffff !important;
@@ -79,6 +78,7 @@ body.dark-mode * {
   color: #ffffff !important;
 }
 
+/* Elemen interaktif tetap gelap tapi sedikit lebih terang */
 body.dark-mode .secondary-btn,
 body.dark-mode .ragu-btn,
 body.dark-mode .submit-btn,
@@ -91,7 +91,6 @@ body.dark-mode input,
 body.dark-mode .search-box button,
 body.dark-mode .opt {
   background: #1e1e2e !important;
-  border-color: #3a3a4a !important;
 }
 
 body.dark-mode .opt.active {
@@ -112,7 +111,7 @@ body.dark-mode .grid button.ragu {
   color: #1e1e2e !important;
 }
 
-/* Warna untuk review pembahasan di dark mode */
+/* Warna khusus untuk opsi di modal pembahasan (hijau, merah, kuning) tetap terlihat */
 body.dark-mode .discussion-question div[style*="background: #d1fae5"] {
   background: #064e3b !important;
   color: #a7f3d0 !important;
@@ -125,17 +124,10 @@ body.dark-mode .discussion-question div[style*="background: #fef9c3"] {
   background: #854d0e !important;
   color: #fef08a !important;
 }
-body.dark-mode .discussion-question div[style*="background: #ffffff"] {
-  background: #2a2a3a !important;
-  color: #ffffff !important;
-}
-body.dark-mode .discussion-pembahasan {
-  background: #0f172a !important;
-  color: #cbd5e1 !important;
-}
 
-/* ========== PRINT – SELALU LIGHT MODE & WARNA TERCETAK ========== */
+/* ========== PRINT – SEMUA SOAL TERCETAK (MULTI PAGE) ========== */
 @media print {
+  /* Sembunyikan semua elemen kecuali modal pembahasan */
   body * {
     visibility: hidden;
   }
@@ -143,14 +135,13 @@ body.dark-mode .discussion-pembahasan {
     visibility: visible;
   }
   #discussionModal {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     margin: 0;
     padding: 20px;
     background: white !important;
-    z-index: 99999;
     overflow: visible !important;
     height: auto !important;
     max-height: none !important;
@@ -172,6 +163,8 @@ body.dark-mode .discussion-pembahasan {
     break-inside: avoid;
     margin-bottom: 30px;
   }
+  /* Opsional: jika ingin setiap soal di halaman baru, gunakan page-break-after: always */
+  /* .discussion-question { page-break-after: always; } */
   .close-modal, .secondary-btn, .modal-header button {
     display: none !important;
   }
@@ -179,6 +172,7 @@ body.dark-mode .discussion-pembahasan {
     border-bottom: 1px solid #ddd;
     margin-bottom: 20px;
   }
+  /* Warna cetak untuk jawaban benar/salah/kunci */
   .discussion-question div[style*="background: #d1fae5"] {
     background: #d1fae5 !important;
     color: #065f46 !important;
@@ -199,7 +193,7 @@ body.dark-mode .discussion-pembahasan {
   }
 }
 
-/* ========== LAYOUT & SPACING ========== */
+/* ========== LAYOUT (tidak berubah, hanya contoh gaya) ========== */
 #login {
   min-height: 100vh;
   display: flex;
@@ -631,35 +625,58 @@ hr {
 }
 .leaderboard-header {
   display: flex;
-  justify-content: space-around;
   align-items: center;
-  padding-bottom: 12px;
-  border-bottom: 2px solid #e5e7eb;
-  margin-bottom: 16px;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-radius: 20px;
+  margin-bottom: 12px;
   font-weight: 700;
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  background: #ede9fe;
+  color: #4c1d95;
+}
+body.dark-mode .leaderboard-header {
+  background: #2a2a3a;
+  color: #a78bfa;
 }
 .leaderboard-header .rank { width: 60px; text-align: center; }
-.leaderboard-header .name { flex: 2; text-align: center; }
-.leaderboard-header .score { width: 90px; text-align: center; }
+.leaderboard-header .name { flex: 2; text-align: left; padding-left: 10px; }
+.leaderboard-header .score { width: 80px; text-align: center; }
 .leaderboard-header .time { width: 110px; text-align: center; }
 .leaderboard-item {
   display: flex;
-  justify-content: space-around;
   align-items: center;
+  justify-content: space-between;
   padding: 12px 16px;
+  margin-bottom: 6px;
   border-radius: 20px;
-  margin-bottom: 8px;
+  background: #f9fafb;
+  transition: all 0.2s;
   font-size: 14px;
 }
-.leaderboard-item .rank { width: 60px; text-align: center; font-weight: 700; }
-.leaderboard-item .name { flex: 2; text-align: center; font-weight: 500; }
-.leaderboard-item .score { width: 90px; text-align: center; font-weight: 700; }
-.leaderboard-item .time { width: 110px; text-align: center; font-family: monospace; }
+body.dark-mode .leaderboard-item {
+  background: #1e1e2e;
+}
+.leaderboard-item:hover {
+  transform: translateX(4px);
+  background: #f3f4f6;
+}
+.leaderboard-item .rank { width: 60px; text-align: center; font-weight: 700; font-size: 16px; }
+.rank-1 { color: #fbbf24; }
+.rank-2 { color: #9ca3af; }
+.rank-3 { color: #d97706; }
+.leaderboard-item .name { flex: 2; text-align: left; padding-left: 10px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.leaderboard-item .score { width: 80px; text-align: center; font-weight: 700; color: #10b981; }
+.leaderboard-item .time { width: 110px; text-align: center; font-family: monospace; font-weight: 500; }
 .my-rank {
   border: 2px solid #8b5cf6;
+  background: #ede9fe;
+}
+body.dark-mode .my-rank {
+  background: #2d2a5e;
+  border-color: #a78bfa;
 }
 .footer-copyright {
   margin-top: 32px;
@@ -725,10 +742,8 @@ hr {
   .review-stats {
     flex-direction: column;
   }
-  .leaderboard-header .rank { width: 40px; }
-  .leaderboard-header .score { width: 65px; }
-  .leaderboard-header .time { width: 80px; }
-  .leaderboard-item .rank { width: 40px; }
-  .leaderboard-item .score { width: 65px; }
-  .leaderboard-item .time { width: 80px; font-size: 11px; }
+  .leaderboard-header .rank, .leaderboard-item .rank { width: 45px; }
+  .leaderboard-header .score, .leaderboard-item .score { width: 65px; }
+  .leaderboard-header .time, .leaderboard-item .time { width: 80px; font-size: 11px; }
+  .leaderboard-header .name, .leaderboard-item .name { font-size: 12px; }
 }

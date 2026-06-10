@@ -13,8 +13,6 @@
 
 <link rel="stylesheet" href="style.css">
 
-<script src="script.js" defer></script>
-
 </head>
 
 <body>
@@ -44,7 +42,7 @@
       <input id="token" placeholder="Masukkan token ujian">
     </div>
 
-    <button class="start-btn" onclick="login()">
+    <button class="start-btn" id="startBtn">
       Mulai Ujian
     </button>
 
@@ -79,7 +77,6 @@
 
   </div>
 
-  <!-- WRAPPER FIXED (STRUCTURE BALANCED) -->
   <div class="wrapper">
 
     <!-- MAIN CARD -->
@@ -101,15 +98,15 @@
 
       <div class="action-row">
 
-        <button type="button" class="secondary-btn" onclick="prevQuestion()">
+        <button type="button" class="secondary-btn" id="prevBtn">
           ← Sebelumnya
         </button>
 
-        <button type="button" class="ragu-btn" onclick="toggleRagu()">
+        <button type="button" class="ragu-btn" id="raguBtn">
           🚩 Ragu
         </button>
 
-        <button type="button" class="secondary-btn" onclick="nextQuestion()">
+        <button type="button" class="secondary-btn" id="nextBtn">
           Berikutnya →
         </button>
 
@@ -157,17 +154,17 @@
 
       </div>
 
-      <button class="submit-btn" onclick="submit()">
+      <button class="submit-btn" id="submitBtn">
         Kumpulkan Jawaban
       </button>
 
       <hr style="margin:20px 0;border:none;border-top:1px solid #eee;">
 
-      <button class="secondary-btn" onclick="toggleDarkMode()">
+      <button class="secondary-btn" id="darkModeBtn">
         🌙 Dark Mode
       </button>
 
-      <button class="secondary-btn" style="margin-top:10px;" onclick="toggleCalculator()">
+      <button class="secondary-btn" id="calcBtn" style="margin-top:10px;">
         🧮 Kalkulator
       </button>
 
@@ -194,7 +191,7 @@
 
     <div id="board"></div>
 
-    <button class="submit-btn" onclick="restartExam()" style="margin-top:20px;">
+    <button class="submit-btn" id="restartBtn" style="margin-top:20px;">
       Ujian Baru
     </button>
 
@@ -209,40 +206,42 @@
 
     <div class="calculator-header">
       <span>🧮 Kalkulator</span>
-      <button class="close-calc" onclick="toggleCalculator()">✕</button>
+      <button class="close-calc" id="closeCalcBtn">✕</button>
     </div>
 
     <input type="text" id="calcDisplay" readonly placeholder="0">
 
     <div class="calc-grid">
 
-      <button onclick="calc('7')">7</button>
-      <button onclick="calc('8')">8</button>
-      <button onclick="calc('9')">9</button>
-      <button onclick="calc('/')">÷</button>
+      <button class="calc-btn" data-value="7">7</button>
+      <button class="calc-btn" data-value="8">8</button>
+      <button class="calc-btn" data-value="9">9</button>
+      <button class="calc-btn" data-value="/">÷</button>
 
-      <button onclick="calc('4')">4</button>
-      <button onclick="calc('5')">5</button>
-      <button onclick="calc('6')">6</button>
-      <button onclick="calc('*')">×</button>
+      <button class="calc-btn" data-value="4">4</button>
+      <button class="calc-btn" data-value="5">5</button>
+      <button class="calc-btn" data-value="6">6</button>
+      <button class="calc-btn" data-value="*">×</button>
 
-      <button onclick="calc('1')">1</button>
-      <button onclick="calc('2')">2</button>
-      <button onclick="calc('3')">3</button>
-      <button onclick="calc('-')">−</button>
+      <button class="calc-btn" data-value="1">1</button>
+      <button class="calc-btn" data-value="2">2</button>
+      <button class="calc-btn" data-value="3">3</button>
+      <button class="calc-btn" data-value="-">−</button>
 
-      <button onclick="calc('0')">0</button>
-      <button onclick="calc('.')">.</button>
-      <button onclick="calculateResult()">=</button>
-      <button onclick="calc('+')">+</button>
+      <button class="calc-btn" data-value="0">0</button>
+      <button class="calc-btn" data-value=".">.</button>
+      <button class="calc-btn" id="calcEqual">=</button>
+      <button class="calc-btn" data-value="+">+</button>
 
-      <button class="calc-clear" onclick="clearCalc()" colspan="2">C</button>
+      <button class="calc-clear" id="calcClear">C</button>
 
     </div>
 
   </div>
 
 </div>
+
+<script src="script.js"></script>
 
 </body>
 </html>

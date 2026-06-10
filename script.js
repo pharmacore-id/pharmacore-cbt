@@ -4,13 +4,15 @@
 let currentQuestion = 0;
 let answers = {};
 let ragu = {};
-let totalSoal = 50;
+let reviewFlag = {}; // Fitur: tandai untuk review
 let soal = [];
 let token = "";
 let nama = "";
 let timer = null;
 let isDone = false;
 let timeLeft = 3600;
+let isRandomized = false;
+let originalSoal = [];
 
 const API = "https://script.google.com/macros/s/AKfycbyo48NoxjaBHGHkRCxgkxOB3Cys2Wa3mBG7AvK_n3TidyCSQcjSf5vSbCJpkI0-QJhk/exec";
 
@@ -20,19 +22,71 @@ const API = "https://script.google.com/macros/s/AKfycbyo48NoxjaBHGHkRCxgkxOB3Cys
 function saveState() {
     localStorage.setItem("cbt_answers", JSON.stringify(answers));
     localStorage.setItem("cbt_ragu", JSON.stringify(ragu));
+    localStorage.setItem("cbt_review", JSON.stringify(reviewFlag));
     localStorage.setItem("cbt_current", currentQuestion);
+    localStorage.setItem("cbt_randomized", isRandomized);
 }
 
 function loadSavedState() {
     const savedAnswers = localStorage.getItem("cbt_answers");
     const savedRagu = localStorage.getItem("cbt_ragu");
+    const savedReview = localStorage.getItem("cbt_review");
     const savedCurrent = localStorage.getItem("cbt_current");
+    const savedRandomized = localStorage.getItem("cbt_randomized");
     
     if (savedAnswers) answers = JSON.parse(savedAnswers);
     if (savedRagu) ragu = JSON.parse(savedRagu);
+    if (savedReview) reviewFlag = JSON.parse(savedReview);
     if (savedCurrent && !isNaN(parseInt(savedCurrent))) {
         currentQuestion = parseInt(savedCurrent);
     }
+    if (savedRandomized === "true") isRandomized = true;
+}
+
+// ==========================================
+// FUNGSI ACAK SOAL
+// ==========================================
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function toggleRandomize() {
+    if (!soal || soal.length === 0) return;
+    
+    if (!isRandomized) {
+        // Simpan soal asli
+        originalSoal = [...soal];
+        // Acak soal
+        soal = shuffleArray([...soal]);
+        isRandomized = true;
+        // Reset jawaban karena urutan soal berubah
+        answers = {};
+        ragu = {};
+        reviewFlag = {};
+        currentQuestion = 0;
+        alert("Soal telah diacak! Jawaban sebelumnya direset.");
+    } else {
+        // Kembalikan ke urutan asli
+        if (originalSoal.length > 0) {
+            soal = [...originalSoal];
+            isRandomized = false;
+            answers = {};
+            ragu = {};
+            reviewFlag = {};
+            currentQuestion = 0;
+            alert("Urutan soal kembali normal. Jawaban direset.");
+        }
+    }
+    
+    saveState();
+    renderQuestion();
+    updateNavGrid();
+    updateStats();
+    updateProgress();
 }
 
 // ==========================================
@@ -57,7 +111,7 @@ function updateStats() {
 }
 
 // ==========================================
-// FUNGSI NAVIGASI
+// FUNGSI RENDER QUESTION
 // ==========================================
 function renderQuestion() {
     if (!soal || soal.length === 0) return;
@@ -65,7 +119,10 @@ function renderQuestion() {
     if (!s) return;
 
     document.getElementById("questionLabel").innerHTML = "Soal " + (currentQuestion + 1);
-    document.getElementById("q").innerHTML = s.pertanyaan;
+    
+    // Tambah indikator review flag
+    let reviewIcon = reviewFlag[currentQuestion] ? ' <span style="color:#f59e0b;">⭐</span>' : '';
+    document.getElementById("q").innerHTML = s.pertanyaan + reviewIcon;
 
     let optHtml = `
         <div class="opt ${answers[currentQuestion] == 'A' ? 'active' : ''}" onclick="pick('A')">
@@ -87,6 +144,7 @@ function renderQuestion() {
     `;
     document.getElementById("opt").innerHTML = optHtml;
 
+    // Update tombol ragu
     const raguBtn = document.getElementById("raguBtn");
     if (raguBtn) {
         if (ragu[currentQuestion]) {
@@ -97,6 +155,19 @@ function renderQuestion() {
             raguBtn.innerHTML = "🚩 Ragu";
         }
     }
+    
+    // Update tombol review
+    const reviewBtn = document.getElementById("reviewBtn");
+    if (reviewBtn) {
+        if (reviewFlag[currentQuestion]) {
+            reviewBtn.classList.add("active");
+            reviewBtn.innerHTML = "⭐ Batal Review";
+        } else {
+            reviewBtn.classList.remove("active");
+            reviewBtn.innerHTML = "🏷️ Tandai Review";
+        }
+    }
+    
     updateProgress();
 }
 
@@ -108,6 +179,23 @@ function pick(answer) {
     updateStats();
 }
 
+// ==========================================
+// FUNGSI FLAG REVIEW
+// ==========================================
+function toggleReview() {
+    if (reviewFlag[currentQuestion]) {
+        delete reviewFlag[currentQuestion];
+    } else {
+        reviewFlag[currentQuestion] = true;
+    }
+    saveState();
+    renderQuestion();
+    updateNavGrid();
+}
+
+// ==========================================
+// FUNGSI NAVIGASI
+// ==========================================
 function updateNavGrid() {
     if (!soal || soal.length === 0) return;
     let html = "";
@@ -115,6 +203,7 @@ function updateNavGrid() {
         let classes = [];
         if (answers[i]) classes.push("done");
         if (ragu[i]) classes.push("ragu");
+        if (reviewFlag[i]) classes.push("review");
         if (i === currentQuestion) classes.push("activeQ");
         html += `<button class="${classes.join(" ")}" onclick="goToQuestion(${i})">${i + 1}</button>`;
     }
@@ -138,6 +227,11 @@ function nextQuestion() {
         updateStats();
         updateProgress();
         saveState();
+    } else {
+        // Jika di soal terakhir, tawarkan submit
+        if (confirm("Anda sudah di soal terakhir. Apakah ingin mengumpulkan jawaban?")) {
+            submit();
+        }
     }
 }
 
@@ -164,7 +258,48 @@ function toggleRagu() {
 }
 
 // ==========================================
-// FUNGSI TIMER
+// FUNGSI REVIEW ALL (Sebelum Submit)
+// ==========================================
+function showReviewPanel() {
+    if (!soal || soal.length === 0) return;
+    
+    let unanswered = [];
+    let flagged = [];
+    let answered_list = [];
+    
+    for (let i = 0; i < soal.length; i++) {
+        if (!answers[i]) {
+            unanswered.push(i + 1);
+        }
+        if (ragu[i]) {
+            flagged.push(i + 1);
+        }
+        if (answers[i]) {
+            answered_list.push(i + 1);
+        }
+    }
+    
+    let message = "📊 RINGKASAN JAWABAN:\n\n";
+    message += `✅ Terjawab: ${answered_list.length}/${soal.length} soal\n`;
+    message += `❌ Belum dijawab: ${unanswered.length} soal\n`;
+    message += `🚩 Ditandai ragu: ${flagged.length} soal\n`;
+    
+    if (unanswered.length > 0) {
+        message += `\n⚠️ Soal belum dijawab: ${unanswered.join(", ")}\n`;
+    }
+    if (flagged.length > 0) {
+        message += `\n🏷️ Soal ditandai ragu: ${flagged.join(", ")}\n`;
+    }
+    
+    message += "\nApakah Anda yakin ingin mengumpulkan jawaban?";
+    
+    if (confirm(message)) {
+        submit();
+    }
+}
+
+// ==========================================
+// FUNGSI TIMER DENGAN PERINGATAN
 // ==========================================
 function startTimer() {
     const saved = localStorage.getItem("cbt_time");
@@ -172,12 +307,16 @@ function startTimer() {
     if (submitted === "true") return;
     
     timeLeft = saved ? parseInt(saved) : 3600;
+    let warningShown5min = false;
+    let warningShown1min = false;
+    
     if (timer) clearInterval(timer);
 
     timer = setInterval(function() {
         if (isDone) return;
         if (timeLeft <= 0) {
             clearInterval(timer);
+            alert("⏰ Waktu habis! Jawaban akan dikumpulkan otomatis.");
             submit();
         } else {
             timeLeft--;
@@ -187,6 +326,20 @@ function startTimer() {
             let timerEl = document.getElementById("timer");
             if (timerEl) {
                 timerEl.innerHTML = m + ":" + (s < 10 ? '0' + s : s);
+                
+                // Peringatan 5 menit
+                if (timeLeft === 300 && !warningShown5min) {
+                    warningShown5min = true;
+                    alert("⏰ Peringatan! Waktu tersisa 5 menit lagi.");
+                    timerEl.style.color = "#f59e0b";
+                }
+                // Peringatan 1 menit
+                if (timeLeft === 60 && !warningShown1min) {
+                    warningShown1min = true;
+                    alert("⏰ Peringatan! Waktu tersisa 1 menit!");
+                    timerEl.style.color = "#ef4444";
+                    timerEl.style.fontWeight = "bold";
+                }
             }
         }
     }, 1000);
@@ -231,6 +384,7 @@ function loadQuestions() {
                 return;
             }
             soal = res.soal;
+            originalSoal = [...soal];
             totalSoal = soal.length;
             document.getElementById("totalCount").innerText = totalSoal;
             loadSavedState();
@@ -248,22 +402,50 @@ function loadQuestions() {
 }
 
 // ==========================================
-// FUNGSI SUBMIT & RESULT
+// FUNGSI SUBMIT DENGAN KONFIRMASI & PEMBAHASAN
 // ==========================================
 function submit() {
     if (isDone) return;
+    
+    // Hitung jumlah belum dijawab
+    let unanswered = 0;
+    for (let i = 0; i < soal.length; i++) {
+        if (!answers[i]) unanswered++;
+    }
+    
+    let confirmMsg = "Apakah Anda yakin ingin mengumpulkan jawaban?\n\n";
+    confirmMsg += `📊 ${Object.keys(answers).length}/${soal.length} soal terjawab\n`;
+    confirmMsg += `❌ ${unanswered} soal belum dijawab\n`;
+    
+    if (unanswered > 0) {
+        confirmMsg += "\n⚠️ PERINGATAN: Soal yang tidak dijawab akan dianggap salah!\n";
+    }
+    
+    if (!confirm(confirmMsg)) return;
+    
     isDone = true;
     clearInterval(timer);
 
     let score = 0;
+    let results = [];
+    
     for (let i = 0; i < soal.length; i++) {
-        if (answers[i] == soal[i].kunci) {
+        let isCorrect = (answers[i] == soal[i].kunci);
+        if (isCorrect) {
             score++;
         }
+        results.push({
+            question: soal[i].pertanyaan,
+            userAnswer: answers[i] || "(Tidak dijawab)",
+            correctAnswer: soal[i].kunci,
+            isCorrect: isCorrect,
+            explanation: soal[i].pembahasan || "Tidak ada pembahasan"
+        });
     }
 
     localStorage.setItem("cbt_submitted", "true");
     localStorage.setItem("cbt_score", score);
+    localStorage.setItem("cbt_results", JSON.stringify(results));
 
     fetch(API, {
         method: "POST",
@@ -282,6 +464,63 @@ function submit() {
     showResult(score);
 }
 
+// ==========================================
+// FUNGSI PEMBAHASAN SOAL
+// ==========================================
+function showDiscussion() {
+    let results = localStorage.getItem("cbt_results");
+    if (!results) {
+        alert("Tidak ada data pembahasan");
+        return;
+    }
+    
+    results = JSON.parse(results);
+    let modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.9);
+        z-index: 10000;
+        overflow-y: auto;
+        padding: 20px;
+    `;
+    
+    let html = `
+        <div style="max-width: 800px; margin: 20px auto; background: white; border-radius: 20px; padding: 30px;">
+            <h2 style="color: #6d28d9;">📖 Pembahasan Soal</h2>
+            <button onclick="this.parentElement.parentElement.remove()" style="float: right; padding: 10px 20px; background: #ef4444; color: white; border: none; border-radius: 10px; cursor: pointer;">Tutup</button>
+            <div style="clear: both;"></div>
+    `;
+    
+    for (let i = 0; i < results.length; i++) {
+        let r = results[i];
+        let statusColor = r.isCorrect ? "#10b981" : "#ef4444";
+        let statusText = r.isCorrect ? "✅ BENAR" : "❌ SALAH";
+        
+        html += `
+            <div style="border: 1px solid #e0e0e0; border-radius: 15px; padding: 15px; margin: 15px 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <strong style="color: #6d28d9;">Soal ${i+1}</strong>
+                    <span style="background: ${statusColor}; color: white; padding: 5px 10px; border-radius: 10px; font-size: 12px;">${statusText}</span>
+                </div>
+                <p style="margin: 10px 0;"><strong>Soal:</strong> ${r.question}</p>
+                <p style="margin: 5px 0;"><strong>Jawaban Anda:</strong> ${r.userAnswer}</p>
+                <p style="margin: 5px 0;"><strong>Kunci Jawaban:</strong> ${r.correctAnswer}</p>
+                <p style="margin: 10px 0; background: #f3f4f6; padding: 10px; border-radius: 10px;">
+                    <strong>📝 Pembahasan:</strong> ${r.explanation}
+                </p>
+            </div>
+        `;
+    }
+    
+    html += `</div>`;
+    modal.innerHTML = html;
+    document.body.appendChild(modal);
+}
+
 function showResult(score) {
     document.getElementById("app").style.display = "none";
     document.getElementById("result").style.display = "flex";
@@ -289,15 +528,21 @@ function showResult(score) {
 
     let percentage = Math.round((score / soal.length) * 100);
     let grade = "";
-    if (percentage >= 90) grade = "🏆 Luar Biasa!";
-    else if (percentage >= 75) grade = "✅ Sangat Baik";
-    else if (percentage >= 60) grade = "📚 Baik, perlu belajar lagi";
-    else grade = "📖 Perlu belajar lebih giat";
-
+    if (percentage >= 90) grade = "🏆 Luar Biasa! Pertahankan!";
+    else if (percentage >= 75) grade = "✅ Sangat Baik, tingkatkan lagi!";
+    else if (percentage >= 60) grade = "📚 Cukup, perlu belajar lebih giat";
+    else grade = "📖 Perbanyak latihan soal ya!";
+    
+    // Tambah tombol pembahasan di result
     let skorEl = document.getElementById("skor");
     if (skorEl) {
-        skorEl.innerHTML = "Anda menjawab " + score + " dari " + soal.length + " soal dengan benar (" + percentage + "%)<br><strong>" + grade + "</strong>";
+        skorEl.innerHTML = `Anda menjawab ${score} dari ${soal.length} soal dengan benar (${percentage}%)<br><strong>${grade}</strong>
+        <br><br>
+        <button onclick="showDiscussion()" style="background: #8b5cf6; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; margin-top: 10px;">
+            📖 Lihat Pembahasan Soal
+        </button>`;
     }
+    
     loadLeaderboard();
 }
 
@@ -329,23 +574,28 @@ function loadLeaderboard() {
 }
 
 function restartExam() {
-    localStorage.clear();
-    answers = {};
-    ragu = {};
-    currentQuestion = 0;
-    isDone = false;
-    timeLeft = 3600;
+    if (confirm("Memulai ujian baru akan menghapus semua jawaban sebelumnya. Lanjutkan?")) {
+        localStorage.clear();
+        answers = {};
+        ragu = {};
+        reviewFlag = {};
+        currentQuestion = 0;
+        isDone = false;
+        timeLeft = 3600;
+        isRandomized = false;
+        soal = originalSoal.length > 0 ? [...originalSoal] : [];
 
-    document.getElementById("result").style.display = "none";
-    document.getElementById("login").style.display = "flex";
-    document.getElementById("app").style.display = "none";
+        document.getElementById("result").style.display = "none";
+        document.getElementById("login").style.display = "flex";
+        document.getElementById("app").style.display = "none";
 
-    document.getElementById("nama").value = "";
-    document.getElementById("token").value = "";
+        document.getElementById("nama").value = "";
+        document.getElementById("token").value = "";
+    }
 }
 
 // ==========================================
-// FUNGSI DARK MODE
+// FUNGSI DARK MODE & CALCULATOR
 // ==========================================
 function toggleDarkMode() {
     document.body.classList.toggle("dark-mode");
@@ -360,9 +610,6 @@ function loadDarkMode() {
     }
 }
 
-// ==========================================
-// FUNGSI CALCULATOR
-// ==========================================
 function toggleCalculator() {
     let modal = document.getElementById("calculatorModal");
     if (modal.style.display === "flex") {
@@ -396,7 +643,4 @@ function clearCalc() {
     if (display) display.value = "";
 }
 
-// ==========================================
-// LOAD DARK MODE PREFERENCE ON START
-// ==========================================
 loadDarkMode();

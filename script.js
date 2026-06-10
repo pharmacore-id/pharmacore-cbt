@@ -1,3 +1,7 @@
+window.onerror = function(msg, url, line){
+  console.error("JS ERROR:", msg, "line:", line);
+};
+
 let currentQuestion = 0;
 
 let answers = {};
@@ -63,14 +67,12 @@ function load(){
   .then(r => r.json())
   .then(res => {
 
-    console.log("API RESPONSE:", res);
-
-    soal = res.soal || [];
-
-    if(!Array.isArray(soal) || soal.length === 0){
-      alert("Soal kosong / API error");
+    if(!res || !res.soal || res.soal.length === 0){
+      alert("Soal tidak ditemukan");
       return;
     }
+
+    soal = res.soal;
 
     document.getElementById("totalCount").innerText = soal.length;
 
@@ -80,17 +82,11 @@ function load(){
     nav();
     updateStats();
     updateProgress();
-
-    startTimer(); // FIXED POSITION
-
   })
   .catch(err => {
-
-    console.error("LOAD ERROR:", err);
-    alert("Gagal load soal dari server");
-
+    console.error(err);
+    alert("Gagal load soal");
   });
-
 }
 
 /* =========================
@@ -99,23 +95,19 @@ RENDER QUESTION
 
 function renderQuestion(){
 
-  let s = soal[currentQuestion];
+  const s = soal[currentQuestion];
 
   if(!s){
-    document.getElementById("q").innerHTML =
-      "<b style='color:red'>Soal tidak tersedia</b>";
-
-    document.getElementById("opt").innerHTML = "";
+    console.error("Soal undefined di index:", currentQuestion);
     return;
   }
 
-  document.getElementById("questionLabel").innerHTML =
+  document.getElementById("questionLabel").innerText =
     `Soal ${currentQuestion + 1}`;
 
   document.getElementById("q").innerHTML = s.pertanyaan;
 
   document.getElementById("opt").innerHTML = `
-
     <div class="opt ${answers[currentQuestion]=='A'?'active':''}" onclick="pick('A')">
       <div class="letter">A</div>
       <div>${s.a}</div>
@@ -135,21 +127,21 @@ function renderQuestion(){
       <div class="letter">D</div>
       <div>${s.d}</div>
     </div>
-
   `;
 
-  const raguBtn = document.querySelector(".ragu-btn");
+  const btn = document.querySelector(".ragu-btn");
 
-  if(raguBtn){
+  if(btn){
     if(ragu[currentQuestion]){
-      raguBtn.classList.add("active");
-      raguBtn.innerHTML = "🚩 Ditandai Ragu";
+      btn.classList.add("active");
+      btn.innerText = "🚩 Ditandai Ragu";
     } else {
-      raguBtn.classList.remove("active");
-      raguBtn.innerHTML = "🚩 Ragu";
+      btn.classList.remove("active");
+      btn.innerText = "🚩 Ragu";
     }
   }
 
+  updateProgress();
 }
 
 /* =========================

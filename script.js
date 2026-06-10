@@ -15,8 +15,10 @@ let nama = "";
 let timer;
 let isDone = false;
 
+let timeLeft = 3600;
+
 /* =========================
-LOGIN (FIXED: ONLY ONE VERSION)
+LOGIN
 ========================= */
 
 function login(){
@@ -41,55 +43,18 @@ function login(){
     document.getElementById("login").style.display = "none";
     document.getElementById("app").style.display = "block";
 
-    load();
-    start(); // FIX: timer sebelumnya tidak pernah dipanggil
+    load(); // ONLY LOAD HERE
+
+  })
+  .catch(err => {
+    console.error("LOGIN ERROR:", err);
+    alert("Gagal validasi token");
   });
+
 }
 
 /* =========================
-STATE
-========================= */
-
-function saveState(){
-
-  localStorage.setItem("cbt_state", JSON.stringify({
-    loggedIn: true,
-    currentQuestion,
-    answers,
-    ragu
-  }));
-}
-
-/* =========================
-INIT RESTORE (FIXED)
-========================= */
-
-window.addEventListener("DOMContentLoaded", function(){
-
-  const raw = localStorage.getItem("cbt_state");
-
-  if(!raw) return;
-
-  try{
-
-    const state = JSON.parse(raw);
-
-    if(!state.loggedIn) return;
-
-    currentQuestion = state.currentQuestion || 0;
-    answers = state.answers || {};
-    ragu = state.ragu || {};
-
-    document.getElementById("login").style.display = "none";
-    document.getElementById("app").style.display = "block";
-
-  } catch(e){
-    localStorage.removeItem("cbt_state");
-  }
-});
-
-/* =========================
-LOAD SOAL
+LOAD SOAL (SAFE + NO FREEZE)
 ========================= */
 
 function load(){
@@ -98,24 +63,51 @@ function load(){
   .then(r => r.json())
   .then(res => {
 
+    console.log("API RESPONSE:", res);
+
     soal = res.soal || [];
+
+    if(!Array.isArray(soal) || soal.length === 0){
+      alert("Soal kosong / API error");
+      return;
+    }
 
     document.getElementById("totalCount").innerText = soal.length;
 
+    currentQuestion = 0;
+
     renderQuestion();
     nav();
-    updateSidebarSummary();
+    updateStats();
+    updateProgress();
+
+    startTimer(); // FIXED POSITION
+
+  })
+  .catch(err => {
+
+    console.error("LOAD ERROR:", err);
+    alert("Gagal load soal dari server");
+
   });
+
 }
 
 /* =========================
-RENDER (FIXED i -> currentQuestion)
+RENDER QUESTION
 ========================= */
 
 function renderQuestion(){
 
   let s = soal[currentQuestion];
-  if(!s) return;
+
+  if(!s){
+    document.getElementById("q").innerHTML =
+      "<b style='color:red'>Soal tidak tersedia</b>";
+
+    document.getElementById("opt").innerHTML = "";
+    return;
+  }
 
   document.getElementById("questionLabel").innerHTML =
     `Soal ${currentQuestion + 1}`;
@@ -124,26 +116,22 @@ function renderQuestion(){
 
   document.getElementById("opt").innerHTML = `
 
-    <div class="opt ${answers[currentQuestion]=='A'?'active':''}"
-         onclick="pick('A')">
+    <div class="opt ${answers[currentQuestion]=='A'?'active':''}" onclick="pick('A')">
       <div class="letter">A</div>
       <div>${s.a}</div>
     </div>
 
-    <div class="opt ${answers[currentQuestion]=='B'?'active':''}"
-         onclick="pick('B')">
+    <div class="opt ${answers[currentQuestion]=='B'?'active':''}" onclick="pick('B')">
       <div class="letter">B</div>
       <div>${s.b}</div>
     </div>
 
-    <div class="opt ${answers[currentQuestion]=='C'?'active':''}"
-         onclick="pick('C')">
+    <div class="opt ${answers[currentQuestion]=='C'?'active':''}" onclick="pick('C')">
       <div class="letter">C</div>
       <div>${s.c}</div>
     </div>
 
-    <div class="opt ${answers[currentQuestion]=='D'?'active':''}"
-         onclick="pick('D')">
+    <div class="opt ${answers[currentQuestion]=='D'?'active':''}" onclick="pick('D')">
       <div class="letter">D</div>
       <div>${s.d}</div>
     </div>
@@ -153,21 +141,19 @@ function renderQuestion(){
   const raguBtn = document.querySelector(".ragu-btn");
 
   if(raguBtn){
-
     if(ragu[currentQuestion]){
       raguBtn.classList.add("active");
       raguBtn.innerHTML = "🚩 Ditandai Ragu";
     } else {
       raguBtn.classList.remove("active");
-      raguBtn.innerHTML = "🚩 Tandai Ragu";
+      raguBtn.innerHTML = "🚩 Ragu";
     }
   }
 
-  updateProgress();
 }
 
 /* =========================
-PICK (FIXED)
+PICK ANSWER
 ========================= */
 
 function pick(v){
@@ -179,13 +165,20 @@ function pick(v){
   renderQuestion();
   nav();
   updateStats();
+
 }
 
 /* =========================
-NAV (FIXED)
+NAVIGATION
 ========================= */
 
 function nav(){
+
+  if(!soal || soal.length === 0){
+    document.getElementById("nav").innerHTML =
+      "<small style='color:red'>Soal belum dimuat</small>";
+    return;
+  }
 
   let h = "";
 
@@ -214,44 +207,8 @@ function go(x){
   renderQuestion();
   nav();
   updateStats();
-}
+  updateProgress();
 
-/* =========================
-NEXT / PREV (FIXED SINGLE SOURCE)
-========================= */
-
-function nextQuestion(){
-
-  if(currentQuestion < soal.length-1){
-    currentQuestion++;
-    renderQuestion();
-    nav();
-    updateStats();
-  }
-}
-
-function prevQuestion(){
-
-  if(currentQuestion > 0){
-    currentQuestion--;
-    renderQuestion();
-    nav();
-    updateStats();
-  }
-}
-
-/* =========================
-RAGU (FIXED)
-========================= */
-
-function toggleRagu(){
-
-  ragu[currentQuestion] = !ragu[currentQuestion];
-
-  saveState();
-
-  renderQuestion();
-  nav();
 }
 
 /* =========================
@@ -260,62 +217,97 @@ PROGRESS
 
 function updateProgress(){
 
-  let progress = ((currentQuestion+1)/soal.length)*100;
+  if(!soal || soal.length === 0) return;
+
+  let progress = ((currentQuestion + 1) / soal.length) * 100;
 
   document.getElementById("progressFill").style.width = progress + "%";
+
 }
 
 /* =========================
-STATS (FIXED consistency)
+STATS
 ========================= */
 
 function updateStats(){
 
-  const answered = Object.keys(answers).length;
+  if(!soal || soal.length === 0) return;
 
+  const answered = Object.keys(answers).length;
   const unanswered = soal.length - answered;
 
-  document.getElementById("answeredCount").innerText = answered;
-  document.getElementById("answeredSummary").innerText = answered;
-  document.getElementById("unansweredSummary").innerText = unanswered;
+  const a = document.getElementById("answeredCount");
+  const b = document.getElementById("answeredSummary");
+  const c = document.getElementById("unansweredSummary");
+
+  if(a) a.innerText = answered;
+  if(b) b.innerText = answered;
+  if(c) c.innerText = unanswered;
+
 }
 
 /* =========================
-TIMER (FIXED: actually starts)
+TIMER (NO RESET BUG)
 ========================= */
 
-function start(){
+function startTimer(){
 
-  let t = 3600;
+  const saved = localStorage.getItem("cbt_time");
+  timeLeft = saved ? parseInt(saved) : 3600;
+
+  clearInterval(timer);
 
   timer = setInterval(()=>{
 
-    t--;
+    timeLeft--;
 
-    let m = Math.floor(t/60);
-    let s = t%60;
+    localStorage.setItem("cbt_time", timeLeft);
+
+    let m = Math.floor(timeLeft/60);
+    let s = timeLeft%60;
 
     document.getElementById("timer").innerHTML =
       `${m}:${s<10?'0'+s:s}`;
 
-    if(t <= 0){
+    if(timeLeft <= 0){
       submit();
     }
 
   },1000);
+
 }
 
 /* =========================
-SUBMIT (unchanged logic)
+RAGU
+========================= */
+
+function toggleRagu(){
+
+  ragu[currentQuestion] = !ragu[currentQuestion];
+
+  if(!ragu[currentQuestion]){
+    delete ragu[currentQuestion];
+  }
+
+  saveState();
+
+  renderQuestion();
+  nav();
+
+}
+
+/* =========================
+SUBMIT (ANTI DOUBLE + SAFE)
 ========================= */
 
 function submit(){
 
   if(isDone) return;
-
   isDone = true;
 
   clearInterval(timer);
+
+  document.body.style.pointerEvents = "none";
 
   let skor = 0;
 
@@ -328,9 +320,12 @@ function submit(){
   });
 
   fetch(API, {
-    method:"POST",
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
     body: JSON.stringify({
-      action:"submit",
+      action: "submit",
       nama,
       token,
       skor,
@@ -339,6 +334,7 @@ function submit(){
   });
 
   showResult(skor);
+
 }
 
 /* =========================
@@ -347,8 +343,9 @@ RESULT
 
 function showResult(skor){
 
-  document.getElementById("app").style.display="none";
-  document.getElementById("result").style.display="flex";
+  document.getElementById("app").style.display = "none";
+  document.getElementById("result").style.display = "flex";
 
   document.getElementById("scoreNumber").innerHTML = skor;
+
 }

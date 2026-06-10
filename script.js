@@ -1,5 +1,5 @@
 // ========== KONFIGURASI ==========
-const API = "https://script.google.com/macros/s/AKfycbx9AH3tu0CCMItBJimHobEqBYezxRVZm_lwJ-9h8s1Bk0NHOu0igf_jUl1GSzY1Obyl/exec"; 
+const API = "https://script.google.com/macros/s/AKfycbx9AH3tu0CCMItBJimHobEqBYezxRVZm_lwJ-9h8s1Bk0NHOu0igf_jUl1GSzY1Obyl/exec"; // 
 const OPTIONS = ['A','B','C','D','E'];
 
 let currentQuestion = 0, answers = {}, ragu = {}, soal = [], token = "", nama = "";
@@ -351,7 +351,7 @@ function login() {
       document.getElementById("app").style.display = "block";
       loadQuestions();
     })
-    .catch(() => alert("Gagal validasi token"));
+    .catch(err => { console.error(err); alert("Gagal validasi token"); });
 }
 function loadQuestions() {
   if (soal.length) { startFromSaved(); return; }

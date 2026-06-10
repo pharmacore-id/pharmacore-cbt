@@ -157,7 +157,6 @@ function pick(v){
   renderQuestion();
   nav();
   updateStats();
-
 }
 
 /* =========================
@@ -354,31 +353,71 @@ function toggleDarkMode(){
 TOOGLE CALCULATOR
 ========================= */
 
-function toggleCalculator(){
+function calc(action){
+
+  const display = document.getElementById("calcDisplay");
   const modal = document.getElementById("calculatorModal");
-  if(!modal) return;
 
-  modal.style.display =
-    modal.style.display === "flex" ? "none" : "flex";
-}
+  if(!display || !modal) return;
 
-function calc(v){
-  const d = document.getElementById("calcDisplay");
-  if(!d) return;
-  d.value += v;
-}
+  // =========================
+  // TOGGLE CALCULATOR
+  // =========================
+  if(action === "toggle"){
+    const isOpen = modal.classList.contains("open");
 
-function clearCalc(){
-  const d = document.getElementById("calcDisplay");
-  if(d) d.value = "";
-}
-
-function calculateResult(){
-  const d = document.getElementById("calcDisplay");
-  if(!d) return;
-  try{
-    d.value = eval(d.value);
-  }catch(e){
-    d.value = "Error";
+    if(isOpen){
+      modal.classList.remove("open");
+      modal.style.display = "none";
+    }else{
+      modal.classList.add("open");
+      modal.style.display = "flex";
+    }
+    return;
   }
+
+  // =========================
+  // CLEAR
+  // =========================
+  if(action === "clear"){
+    display.value = "";
+    return;
+  }
+
+  // =========================
+  // BACKSPACE
+  // =========================
+  if(action === "back"){
+    display.value = display.value.slice(0, -1);
+    return;
+  }
+
+  // =========================
+  // EQUALS / RESULT
+  // =========================
+  if(action === "equal"){
+    try{
+
+      let expr = display.value;
+
+      // SAFE EVAL (basic protection)
+      if(!/^[0-9+\-*/().\sMathsincotaelgqrtp]*$/.test(expr)){
+        display.value = "Error";
+        return;
+      }
+
+      let result = Function('"use strict"; return (' + expr + ')')();
+
+      display.value = result;
+
+    }catch(e){
+      display.value = "Error";
+    }
+    return;
+  }
+
+  // =========================
+  // INPUT NORMAL (angka/operator/scientific)
+  // =========================
+  display.value += action;
 }

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>PHARMACORE CBT - UKMPPAI</title>
+<title>PHARMACORE CBT</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,9 +11,9 @@
 <!-- LOGIN PAGE -->
 <div id="login">
   <div class="login-card">
-    <div class="badge">✨ TRY OUT UKMPPAI</div>
+    <div class="badge">✨ TRY OUT UKOMNAS</div>
     <h1>PHARMACORE CBT</h1>
-    <p class="subtitle">Simulasi dan Prediksi UKMPPAI untuk Calon Apoteker Indonesia</p>
+    <p class="subtitle">Soal Ingatan UKOMNAS dan TO NAS 2025 - 2026 </p>
     <div class="form-group"><label>Nama Peserta</label><input id="nama" placeholder="Masukkan nama lengkap"></div>
     <div class="form-group"><label>Token Ujian</label><input id="token" placeholder="Masukkan token ujian"></div>
     <button class="start-btn" onclick="login()">Mulai Ujian</button>
@@ -26,7 +26,7 @@
   <div class="topbar">
     <div class="brand">PHARMACORE CBT</div>
     <div class="top-right">
-      <button class="home-btn" onclick="goHome()" title="Kembali ke Login">🏠</button>
+      <button class="home-btn" onclick="goHome()">🏠</button>
       <div class="progress-text"><span id="answeredCount">0</span>/<span id="totalCount">0</span> dijawab</div>
       <div class="timer" id="timer">60:00</div>
     </div>
@@ -38,9 +38,9 @@
       <div id="q"></div>
       <div id="opt"></div>
       <div class="action-row">
-        <button type="button" class="secondary-btn" onclick="prevQuestion()">← Sebelumnya</button>
-        <button type="button" class="ragu-btn" id="raguBtn" onclick="toggleRagu()">🚩 Ragu</button>
-        <button type="button" class="secondary-btn" onclick="nextQuestion()">Berikutnya →</button>
+        <button class="secondary-btn" onclick="prevQuestion()">← Sebelumnya</button>
+        <button class="ragu-btn" id="raguBtn" onclick="toggleRagu()">🚩 Ragu</button>
+        <button class="secondary-btn" onclick="nextQuestion()">Berikutnya →</button>
       </div>
     </div>
     <div class="side">
@@ -91,7 +91,7 @@
     <div class="modal-header">
       <h2>📖 Review & Pembahasan Jawaban</h2>
       <div>
-        <button class="secondary-btn" onclick="exportDiscussionPDF()" style="margin-right: 8px;">📄 Export PDF</button>
+        <button class="secondary-btn" onclick="exportDiscussionPDF()">📄 Export PDF</button>
         <button class="close-modal" onclick="closeDiscussionModal()">✕</button>
       </div>
     </div>
@@ -99,7 +99,7 @@
   </div>
 </div>
 
-<!-- RESULT - LANDSCAPE -->
+<!-- RESULT -->
 <div id="result" style="display:none;">
   <div class="result-card">
     <div class="result-left">
@@ -113,8 +113,8 @@
         <div><span>Salah</span><strong id="resultSalah">0</strong></div>
         <div><span>Waktu</span><strong id="resultWaktu">00:00</strong></div>
       </div>
-      <button class="secondary-btn" onclick="openDiscussionModal()" style="margin:10px auto;">📋 Review & Pembahasan</button>
-      <button class="submit-btn" onclick="restartExam()" style="margin-top:20px;">🔄 Ujian Baru</button>
+      <button class="secondary-btn" onclick="openDiscussionModal()">📋 Review & Pembahasan</button>
+      <button class="submit-btn" onclick="restartExam()">🔄 Ujian Baru</button>
     </div>
     <div class="result-right">
       <h3>🏆 Leaderboard</h3>

@@ -120,46 +120,29 @@
       <h3>📊 Navigasi Soal</h3>
 
       <div class="summary">
-
         <div class="summary-item">
           <span>✅ Terjawab</span>
           <strong id="answeredSummary">0</strong>
         </div>
-
         <div class="summary-item">
           <span>🚩 Ragu</span>
           <strong id="raguSummary">0</strong>
         </div>
-
         <div class="summary-item">
           <span>❌ Belum</span>
           <strong id="unansweredSummary">0</strong>
         </div>
-
       </div>
 
       <div id="nav" class="grid"></div>
 
       <div class="legend">
-
-        <div>
-          <span class="dot done-dot"></span>
-          Sudah Dijawab
-        </div>
-
-        <div>
-          <span class="dot ragu-dot"></span>
-          Ditandai Ragu
-        </div>
-
-        <div>
-          <span class="dot empty-dot"></span>
-          Belum Dijawab
-        </div>
-
+        <div><span class="dot done-dot"></span> Sudah Dijawab</div>
+        <div><span class="dot ragu-dot"></span> Ditandai Ragu</div>
+        <div><span class="dot empty-dot"></span> Belum Dijawab</div>
       </div>
 
-      <button class="submit-btn" onclick="showReviewModal()">
+      <button class="submit-btn" id="submitExamBtn" onclick="showReviewModal()">
         📋 Kumpulkan Jawaban
       </button>
 
@@ -170,7 +153,7 @@
       </button>
 
       <button class="secondary-btn" style="margin-top:10px;" onclick="toggleCalculator()">
-        🧮 Kalkulator
+        🧮 Kalkulator Scientific
       </button>
 
     </div>
@@ -186,37 +169,16 @@
       <h2>📋 Review Jawaban</h2>
       <button class="close-modal" onclick="closeReviewModal()">✕</button>
     </div>
-    
     <div class="modal-body">
       <div class="review-stats">
-        <div class="review-stat">
-          <div class="review-stat-value" id="reviewTotal">0</div>
-          <div class="review-stat-label">Total Soal</div>
-        </div>
-        <div class="review-stat answered">
-          <div class="review-stat-value" id="reviewAnswered">0</div>
-          <div class="review-stat-label">✅ Terjawab</div>
-        </div>
-        <div class="review-stat ragu">
-          <div class="review-stat-value" id="reviewRagu">0</div>
-          <div class="review-stat-label">🚩 Ditandai Ragu</div>
-        </div>
-        <div class="review-stat unanswered">
-          <div class="review-stat-value" id="reviewUnanswered">0</div>
-          <div class="review-stat-label">❌ Belum Dijawab</div>
-        </div>
+        <div class="review-stat"><div class="review-stat-value" id="reviewTotal">0</div><div class="review-stat-label">Total Soal</div></div>
+        <div class="review-stat answered"><div class="review-stat-value" id="reviewAnswered">0</div><div class="review-stat-label">✅ Terjawab</div></div>
+        <div class="review-stat ragu"><div class="review-stat-value" id="reviewRagu">0</div><div class="review-stat-label">🚩 Ditandai Ragu</div></div>
+        <div class="review-stat unanswered"><div class="review-stat-value" id="reviewUnanswered">0</div><div class="review-stat-label">❌ Belum Dijawab</div></div>
       </div>
-
-      <div class="review-questions">
-        <h3>Daftar Soal</h3>
-        <div id="reviewQuestionList"></div>
-      </div>
-
-      <div class="review-warning" id="reviewWarning">
-        ⚠️ Perhatian: Soal yang tidak dijawab akan dianggap salah!
-      </div>
+      <div class="review-questions"><h3>Daftar Soal</h3><div id="reviewQuestionList"></div></div>
+      <div class="review-warning">⚠️ Perhatian: Soal yang tidak dijawab akan dianggap salah!</div>
     </div>
-
     <div class="modal-footer">
       <button class="secondary-btn" onclick="closeReviewModal()">Kembali ke Ujian</button>
       <button class="submit-btn" onclick="confirmSubmit()">✅ Ya, Kumpulkan Jawaban</button>
@@ -226,62 +188,67 @@
 
 <!-- RESULT -->
 <div id="result" style="display:none;">
-
   <div class="result-card">
-
     <h2>📝 Hasil Ujian</h2>
-
-    <div class="score-circle">
-      <span id="scoreNumber">0</span>
-    </div>
-
+    <div class="score-circle"><span id="scoreNumber">0</span></div>
     <p id="skor"></p>
-
-    <button class="submit-btn" onclick="restartExam()" style="margin-top:20px;">
-      🔄 Ujian Baru
-    </button>
-
+    <button class="submit-btn" onclick="restartExam()" style="margin-top:20px;">🔄 Ujian Baru</button>
     <h3>🏆 Leaderboard</h3>
-
     <div id="board"></div>
-
   </div>
-
 </div>
 
-<!-- CALCULATOR MODAL -->
+<!-- CALCULATOR SCIENTIFIC MODAL -->
 <div id="calculatorModal" class="calculator-modal" style="display:none;">
   <div class="calculator-box">
     <div class="calculator-header">
-      <span>🧮 Kalkulator</span>
+      <span>🧮 Kalkulator Scientific</span>
       <button class="close-calc" onclick="toggleCalculator()">✕</button>
     </div>
-
     <input type="text" id="calcDisplay" readonly placeholder="0">
-
     <div class="calc-grid">
-      <button onclick="appendToDisplay('7')">7</button>
-      <button onclick="appendToDisplay('8')">8</button>
-      <button onclick="appendToDisplay('9')">9</button>
-      <button class="calc-operator" onclick="appendToDisplay('/')">÷</button>
-
-      <button onclick="appendToDisplay('4')">4</button>
-      <button onclick="appendToDisplay('5')">5</button>
-      <button onclick="appendToDisplay('6')">6</button>
-      <button class="calc-operator" onclick="appendToDisplay('*')">×</button>
-
-      <button onclick="appendToDisplay('1')">1</button>
-      <button onclick="appendToDisplay('2')">2</button>
-      <button onclick="appendToDisplay('3')">3</button>
-      <button class="calc-operator" onclick="appendToDisplay('-')">-</button>
-
-      <button onclick="appendToDisplay('0')">0</button>
-      <button onclick="appendToDisplay('.')">.</button>
-      <button class="calc-equals" onclick="calculateResult()">=</button>
-      <button class="calc-operator" onclick="appendToDisplay('+')">+</button>
-
-      <button class="calc-clear" onclick="clearCalc()">C</button>
-      <button class="calc-clear" onclick="deleteLastCalc()">⌫</button>
+      <!-- Baris 1 -->
+      <button class="calc-func" data-action="sin">sin</button>
+      <button class="calc-func" data-action="cos">cos</button>
+      <button class="calc-func" data-action="tan">tan</button>
+      <button class="calc-func" data-action="log">log</button>
+      <button class="calc-func" data-action="ln">ln</button>
+      <!-- Baris 2 -->
+      <button class="calc-func" data-action="sqrt">√</button>
+      <button class="calc-func" data-action="pow2">x²</button>
+      <button class="calc-func" data-action="pow3">x³</button>
+      <button class="calc-func" data-action="reciprocal">1/x</button>
+      <button class="calc-func" data-action="pi">π</button>
+      <!-- Baris 3 -->
+      <button class="calc-mem" data-action="mplus">M+</button>
+      <button class="calc-mem" data-action="mminus">M-</button>
+      <button class="calc-mem" data-action="mr">MR</button>
+      <button class="calc-mem" data-action="mc">MC</button>
+      <button class="calc-operator" data-op="(">(</button>
+      <!-- Baris 4 -->
+      <button class="calc-num" data-num="7">7</button>
+      <button class="calc-num" data-num="8">8</button>
+      <button class="calc-num" data-num="9">9</button>
+      <button class="calc-operator" data-op="/">÷</button>
+      <button class="calc-operator" data-op=")">)</button>
+      <!-- Baris 5 -->
+      <button class="calc-num" data-num="4">4</button>
+      <button class="calc-num" data-num="5">5</button>
+      <button class="calc-num" data-num="6">6</button>
+      <button class="calc-operator" data-op="*">×</button>
+      <button class="calc-func" data-action="percent">%</button>
+      <!-- Baris 6 -->
+      <button class="calc-num" data-num="1">1</button>
+      <button class="calc-num" data-num="2">2</button>
+      <button class="calc-num" data-num="3">3</button>
+      <button class="calc-operator" data-op="-">-</button>
+      <button class="calc-clear" data-action="clear">C</button>
+      <!-- Baris 7 -->
+      <button class="calc-num" data-num="0">0</button>
+      <button class="calc-num" data-num=".">.</button>
+      <button class="calc-func" data-action="equal">=</button>
+      <button class="calc-operator" data-op="+">+</button>
+      <button class="calc-clear" data-action="backspace">⌫</button>
     </div>
   </div>
 </div>

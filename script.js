@@ -1,5 +1,5 @@
 // ========== KONFIGURASI ==========
-const API = "https://script.google.com/macros/s/AKfycbzsDzTiqFeiRLXqWRkvYJJjnISz5qVM3W0oVwAErZGRm-HLornueWAQZdDUZro2gA3b/exec"; 
+const API = "https://script.google.com/macros/s/AKfycbx9AH3tu0CCMItBJimHobEqBYezxRVZm_lwJ-9h8s1Bk0NHOu0igf_jUl1GSzY1Obyl/exec"; 
 const OPTIONS = ['A','B','C','D','E'];
 
 let currentQuestion = 0, answers = {}, ragu = {}, soal = [], token = "", nama = "";

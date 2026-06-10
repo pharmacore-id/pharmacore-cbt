@@ -89,8 +89,8 @@ function renderQuestion() {
 
     // Add click listeners to options
     document.querySelectorAll('.opt').forEach(opt => {
-        opt.addEventListener('click', () => {
-            const answer = opt.getAttribute('data-answer');
+        opt.addEventListener('click', function() {
+            const answer = this.getAttribute('data-answer');
             pick(answer);
         });
     });
@@ -130,8 +130,8 @@ function updateNavGrid() {
     
     // Add click listeners
     document.querySelectorAll('#nav button').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const index = parseInt(btn.getAttribute('data-index'));
+        btn.addEventListener('click', function() {
+            const index = parseInt(this.getAttribute('data-index'));
             goToQuestion(index);
         });
     });
@@ -190,7 +190,7 @@ function startTimer() {
     timeLeft = saved ? parseInt(saved) : 3600;
     if (timer) clearInterval(timer);
 
-    timer = setInterval(() => {
+    timer = setInterval(function() {
         if (isDone) return;
         if (timeLeft <= 0) {
             clearInterval(timer);
@@ -202,7 +202,7 @@ function startTimer() {
             let s = timeLeft % 60;
             let timerEl = document.getElementById("timer");
             if (timerEl) {
-                timerEl.innerHTML = `${m}:${s < 10 ? '0' + s : s}`;
+                timerEl.innerHTML = m + ":" + (s < 10 ? '0' + s : s);
             }
         }
     }, 1000);
@@ -212,6 +212,7 @@ function startTimer() {
 // FUNGSI LOGIN & LOAD
 // ==========================================
 function login() {
+    console.log("Login function called");
     nama = document.getElementById("nama").value.trim();
     token = document.getElementById("token").value.trim();
 
@@ -220,9 +221,9 @@ function login() {
         return;
     }
 
-    fetch(`${API}?action=validateToken&token=${token}`)
-        .then(r => r.json())
-        .then(res => {
+    fetch(API + "?action=validateToken&token=" + token)
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
             if (!res.valid) {
                 alert("Token tidak valid");
                 return;
@@ -231,16 +232,16 @@ function login() {
             document.getElementById("app").style.display = "block";
             loadQuestions();
         })
-        .catch(err => {
+        .catch(function(err) {
             console.error("LOGIN ERROR:", err);
             alert("Gagal validasi token");
         });
 }
 
 function loadQuestions() {
-    fetch(`${API}?action=getSoal`)
-        .then(r => r.json())
-        .then(res => {
+    fetch(API + "?action=getSoal")
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
             if (!res || !res.soal || res.soal.length === 0) {
                 alert("Soal tidak ditemukan");
                 return;
@@ -256,7 +257,7 @@ function loadQuestions() {
             updateProgress();
             startTimer();
         })
-        .catch(err => {
+        .catch(function(err) {
             console.error(err);
             alert("Gagal load soal");
         });
@@ -292,7 +293,7 @@ function submit() {
             jawaban: answers,
             total: soal.length
         })
-    }).catch(err => console.error("Submit error:", err));
+    }).catch(function(err) { console.error("Submit error:", err); });
 
     showResult(score);
 }
@@ -311,31 +312,32 @@ function showResult(score) {
 
     let skorEl = document.getElementById("skor");
     if (skorEl) {
-        skorEl.innerHTML = `Anda menjawab ${score} dari ${soal.length} soal dengan benar (${percentage}%)<br><strong>${grade}</strong>`;
+        skorEl.innerHTML = "Anda menjawab " + score + " dari " + soal.length + " soal dengan benar (" + percentage + "%)<br><strong>" + grade + "</strong>";
     }
     loadLeaderboard();
 }
 
 function loadLeaderboard() {
-    fetch(`${API}?action=leaderboard&token=${token}`)
-        .then(r => r.json())
-        .then(res => {
+    fetch(API + "?action=leaderboard&token=" + token)
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
             let board = document.getElementById("board");
             if (!board) return;
             if (res.leaderboard && res.leaderboard.length > 0) {
                 let html = "<ol style='text-align:left;margin-top:20px;'>";
-                res.leaderboard.slice(0, 10).forEach((item) => {
-                    html += `<li style='margin:10px 0;padding:8px;background:#f8f6ff;border-radius:12px;'>
-                        <strong>${item.nama}</strong> - Skor: ${item.skor}/${soal.length}
-                    </li>`;
-                });
+                for (let i = 0; i < Math.min(10, res.leaderboard.length); i++) {
+                    let item = res.leaderboard[i];
+                    html += "<li style='margin:10px 0;padding:8px;background:#f8f6ff;border-radius:12px;'>";
+                    html += "<strong>" + item.nama + "</strong> - Skor: " + item.skor + "/" + soal.length;
+                    html += "</li>";
+                }
                 html += "</ol>";
                 board.innerHTML = html;
             } else {
                 board.innerHTML = "<p>Belum ada data leaderboard</p>";
             }
         })
-        .catch(err => {
+        .catch(function(err) {
             console.error("Leaderboard error:", err);
             let board = document.getElementById("board");
             if (board) board.innerHTML = "<p>Gagal memuat leaderboard</p>";
@@ -392,40 +394,6 @@ function toggleCalculator() {
     }
 }
 
-function initCalculator() {
-    // Calculator buttons
-    document.querySelectorAll('.calc-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            let value = btn.getAttribute('data-value');
-            let display = document.getElementById("calcDisplay");
-            if (display && value) {
-                display.value += value;
-            }
-        });
-    });
-
-    document.getElementById("calcEqual").addEventListener('click', () => {
-        let display = document.getElementById("calcDisplay");
-        if (!display) return;
-        try {
-            let expr = display.value.replace(/×/g, '*').replace(/÷/g, '/');
-            let result = Function('"use strict"; return (' + expr + ')')();
-            display.value = result;
-        } catch (e) {
-            display.value = "Error";
-        }
-    });
-
-    document.getElementById("calcClear").addEventListener('click', () => {
-        let display = document.getElementById("calcDisplay");
-        if (display) display.value = "";
-    });
-
-    document.getElementById("closeCalcBtn").addEventListener('click', () => {
-        document.getElementById("calculatorModal").style.display = "none";
-    });
-}
-
 // ==========================================
 // EVENT LISTENERS & INIT
 // ==========================================
@@ -435,24 +403,67 @@ document.addEventListener("DOMContentLoaded", function() {
     // Load dark mode preference
     loadDarkMode();
     
-    // Initialize calculator
-    initCalculator();
+    // Get all buttons and assign events
+    var startBtn = document.getElementById("startBtn");
+    var prevBtn = document.getElementById("prevBtn");
+    var nextBtn = document.getElementById("nextBtn");
+    var raguBtn = document.getElementById("raguBtn");
+    var submitBtn = document.getElementById("submitBtn");
+    var darkModeBtn = document.getElementById("darkModeBtn");
+    var calcBtn = document.getElementById("calcBtn");
+    var restartBtn = document.getElementById("restartBtn");
+    var closeCalcBtn = document.getElementById("closeCalcBtn");
     
-    // Button event listeners
-    document.getElementById("startBtn").addEventListener('click', login);
-    document.getElementById("prevBtn").addEventListener('click', prevQuestion);
-    document.getElementById("nextBtn").addEventListener('click', nextQuestion);
-    document.getElementById("raguBtn").addEventListener('click', toggleRagu);
-    document.getElementById("submitBtn").addEventListener('click', submit);
-    document.getElementById("darkModeBtn").addEventListener('click', toggleDarkMode);
-    document.getElementById("calcBtn").addEventListener('click', toggleCalculator);
-    document.getElementById("restartBtn").addEventListener('click', restartExam);
+    if (startBtn) startBtn.onclick = login;
+    if (prevBtn) prevBtn.onclick = prevQuestion;
+    if (nextBtn) nextBtn.onclick = nextQuestion;
+    if (raguBtn) raguBtn.onclick = toggleRagu;
+    if (submitBtn) submitBtn.onclick = submit;
+    if (darkModeBtn) darkModeBtn.onclick = toggleDarkMode;
+    if (calcBtn) calcBtn.onclick = toggleCalculator;
+    if (restartBtn) restartBtn.onclick = restartExam;
+    if (closeCalcBtn) closeCalcBtn.onclick = toggleCalculator;
+    
+    // Calculator buttons
+    var calcBtns = document.querySelectorAll('.calc-btn');
+    for (var i = 0; i < calcBtns.length; i++) {
+        calcBtns[i].onclick = function() {
+            var value = this.getAttribute('data-value');
+            var display = document.getElementById("calcDisplay");
+            if (display && value) {
+                display.value += value;
+            }
+        };
+    }
+    
+    var calcEqual = document.getElementById("calcEqual");
+    if (calcEqual) {
+        calcEqual.onclick = function() {
+            var display = document.getElementById("calcDisplay");
+            if (!display) return;
+            try {
+                var expr = display.value.replace(/×/g, '*').replace(/÷/g, '/');
+                var result = Function('"use strict"; return (' + expr + ')')();
+                display.value = result;
+            } catch (e) {
+                display.value = "Error";
+            }
+        };
+    }
+    
+    var calcClear = document.getElementById("calcClear");
+    if (calcClear) {
+        calcClear.onclick = function() {
+            var display = document.getElementById("calcDisplay");
+            if (display) display.value = "";
+        };
+    }
     
     // Close calculator when clicking outside
-    window.addEventListener("click", function(e) {
-        let modal = document.getElementById("calculatorModal");
-        if (e.target === modal) {
+    window.onclick = function(e) {
+        var modal = document.getElementById("calculatorModal");
+        if (e.target === modal && modal) {
             modal.style.display = "none";
         }
-    });
+    };
 });

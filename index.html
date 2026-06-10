@@ -29,6 +29,15 @@
 
 </div>
 
+<!-- ================= SAVE STATE ================= -->
+  function saveState(){
+  localStorage.setItem("cbt_state", JSON.stringify({
+    currentQuestion,
+    answers,
+    ragu
+  }));
+}
+
 <!-- ================= APP ================= -->
 <div id="app" style="display:none;">
 

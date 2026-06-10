@@ -508,7 +508,7 @@ body.dark-mode .brand {
 .result-card {
   background: white;
   width: 100%;
-  max-width: 620px;
+  max-width: 720px;
   border-radius: 32px;
   text-align: center;
   padding: 40px;
@@ -538,57 +538,6 @@ body.dark-mode .brand {
 #skor {
   margin: 20px 0;
   line-height: 1.6;
-}
-
-#board {
-  margin-top: 20px;
-  max-height: 300px;
-  overflow-y: auto;
-  text-align: left;
-}
-
-/* Review Table after submit */
-.answer-review-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-.answer-review-table th,
-.answer-review-table td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: left;
-  vertical-align: top;
-}
-
-.answer-review-table th {
-  background: #f3f0ff;
-  font-weight: 700;
-}
-
-body.dark-mode .answer-review-table th {
-  background: #2d2d3a;
-}
-
-.answer-review-table .correct {
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.answer-review-table .wrong {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-body.dark-mode .answer-review-table .correct {
-  background: #064e3b;
-  color: #a7f3d0;
-}
-
-body.dark-mode .answer-review-table .wrong {
-  background: #7f1d1d;
-  color: #fecaca;
 }
 
 /* MODAL REVIEW */
@@ -816,53 +765,48 @@ body.dark-mode .answer-review-table .wrong {
   color: white !important;
 }
 
-/* MOBILE */
-@media (max-width: 900px) {
-  .wrapper {
-    flex-direction: column;
-    padding: 15px;
-  }
-  .side {
-    position: static;
-  }
-  #q {
-    font-size: 20px;
-  }
-  .login-card {
-    padding: 28px;
-  }
-  .login-card h1 {
-    font-size: 32px;
-  }
-  .grid button {
-    font-size: 12px;
-  }
-  .action-row {
-    flex-wrap: wrap;
-  }
-  .topbar {
-    padding: 12px 16px;
-  }
-  .brand {
-    font-size: 18px;
-  }
-  .timer {
-    padding: 8px 12px;
-    font-size: 16px;
-  }
-  .card {
-    padding: 20px;
-  }
-  .review-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .calculator-box {
-    width: 95%;
-  }
-  .calc-grid button {
-    font-size: 11px;
-    padding: 10px 0;
-  }
+/* ANSWER REVIEW TABLE */
+.answer-review-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.answer-review-table th,
+.answer-review-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.answer-review-table th {
+  background: #f3f0ff;
+  font-weight: 700;
+}
+
+body.dark-mode .answer-review-table th {
+  background: #2d2d3a;
+}
+
+.answer-review-table .correct {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.answer-review-table .wrong {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+body.dark-mode .answer-review-table .correct {
+  background: #064e3b;
+  color: #a7f3d0;
+}
+
+body.dark-mode .answer-review-table .wrong {
+  background: #7f1d1d;
+  color: #fecaca;
 }
 
 /* ==================================
@@ -911,7 +855,7 @@ body.dark-mode .leaderboard-header {
     color: #9ca3af;
 }
 
-.leaderboard-header .rank { width: 50px; text-align: center; }
+.leaderboard-header .rank { width: 60px; text-align: center; }
 .leaderboard-header .name { flex: 1; text-align: left; padding-left: 8px; }
 .leaderboard-header .score { width: 80px; text-align: center; }
 .leaderboard-header .time { width: 100px; text-align: center; }
@@ -949,7 +893,7 @@ body.dark-mode .leaderboard-item:hover {
 
 /* Rank styling */
 .rank {
-    width: 50px;
+    width: 60px;
     text-align: center;
     font-weight: 700;
     font-size: 18px;
@@ -986,7 +930,6 @@ body.dark-mode .name {
     width: 80px;
     text-align: center;
     font-weight: 700;
-    color: #10b981;
     font-size: 16px;
 }
 
@@ -1022,4 +965,65 @@ body.dark-mode .my-rank {
     padding: 40px;
     color: #6b7280;
     font-size: 14px;
+}
+
+/* MOBILE */
+@media (max-width: 900px) {
+  .wrapper {
+    flex-direction: column;
+    padding: 15px;
+  }
+  .side {
+    position: static;
+  }
+  #q {
+    font-size: 20px;
+  }
+  .login-card {
+    padding: 28px;
+  }
+  .login-card h1 {
+    font-size: 32px;
+  }
+  .grid button {
+    font-size: 12px;
+  }
+  .action-row {
+    flex-wrap: wrap;
+  }
+  .topbar {
+    padding: 12px 16px;
+  }
+  .brand {
+    font-size: 18px;
+  }
+  .timer {
+    padding: 8px 12px;
+    font-size: 16px;
+  }
+  .card {
+    padding: 20px;
+  }
+  .review-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .calculator-box {
+    width: 95%;
+  }
+  .calc-grid button {
+    font-size: 11px;
+    padding: 10px 0;
+  }
+  .leaderboard-header .rank,
+  .rank {
+    width: 45px;
+  }
+  .leaderboard-header .score,
+  .score {
+    width: 60px;
+  }
+  .leaderboard-header .time,
+  .time {
+    width: 80px;
+  }
 }

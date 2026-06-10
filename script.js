@@ -301,53 +301,99 @@ function exportDiscussionPDF() { window.print(); }
 
 // ========== LEADERBOARD ==========
 function loadLeaderboard() {
-    const board = document.getElementById("board");
-    if (!board) return;
-    board.innerHTML = '<div style="text-align:center; padding:20px;">Memuat leaderboard...</div>';
-    fetch(API + "?action=leaderboard&token=" + token)
-        .then(r => r.json())
-        .then(res => {
-            if (res.leaderboard && res.leaderboard.length) {
-                let data = res.leaderboard.map(item => ({ nama: item.nama, skor: item.skor, total: soal.length, waktu: item.waktu || "00:00" }));
-                data.sort((a, b) => b.skor - a.skor);
-                let html = `<div class="leaderboard-card">
-                    <div class="leaderboard-header">
-                        <div class="rank">#</div>
-                        <div class="name">Peserta</div>
-                        <div class="score">Skor</div>
-                        <div class="time">Waktu</div>
-                    </div>`;
-                data.forEach((item, idx) => {
-                    let rank = idx + 1;
-                    let medal = rank === 1 ? "🥇" : (rank === 2 ? "🥈" : (rank === 3 ? "🥉" : ""));
-                    let myClass = (item.nama === nama) ? "my-rank" : "";
-                    let persen = Math.round((item.skor / item.total) * 100);
-                    html += `<div class="leaderboard-item ${myClass}">
-                        <div class="rank">${medal || rank}</div>
-                        <div class="name">${item.nama}</div>
-                        <div class="score">${persen}%</div>
-                        <div class="time">${item.waktu}</div>
-                    </div>`;
-                });
-                html += `</div>`;
-                board.innerHTML = html;
-            } else {
-                board.innerHTML = '<div style="text-align:center; padding:20px;">🏆 Belum ada data leaderboard.</div>';
-            }
-        })
-        .catch(() => board.innerHTML = '<div style="text-align:center; padding:20px;">⚠️ Gagal memuat leaderboard.</div>');
-}
-function restartExam() {
-    if (confirm("Ujian baru akan menghapus semua jawaban. Lanjutkan?")) {
-        clearSession();
-        location.reload();
-    }
-}
-function goHome() {
-    if (confirm("Kembali ke halaman login? Semua kemajuan ujian akan hilang.")) {
-        clearSession();
-        location.reload();
-    }
+  const board = document.getElementById("board");
+  if (!board) return;
+  board.innerHTML = '<div style="text-align:center; padding:20px;">Memuat leaderboard...</div>';
+  fetch(API + "?action=leaderboard&token=" + token)
+    .then(r => r.json())
+    .then(res => {
+      if (res.leaderboard && res.leaderboard.length) {
+        let data = res.leaderboard.map(item => ({
+          nama: item.nama,
+          skor: item.skor,
+          total: soal.length,
+          waktu: item.waktu || "00:00"
+        }));
+        data.sort((a, b) => b.skor - a.skor);
+        
+        // Podium untuk 3 besar
+        let podiumHtml = `<div class="podium-container">`;
+        const top3 = data.slice(0, 3);
+        const medals = ["🥇", "🥈", "🥉"];
+        const colors = ["podium-1", "podium-2", "podium-3"];
+        for (let i = 0; i < top3.length; i++) {
+          const item = top3[i];
+          const persen = Math.round((item.skor / item.total) * 100);
+          podiumHtml += `
+            <div class="podium-item ${colors[i]}">
+              <div class="podium-block"><div class="medal">${medals[i]}</div></div>
+              <div class="podium-rank">#${i+1}</div>
+              <div class="podium-name">${item.nama}</div>
+              <div class="podium-score">${persen}%</div>
+              <div class="podium-time">${item.waktu}</div>
+            </div>
+          `;
+        }
+        podiumHtml += `</div>`;
+        
+        // Top 10 peserta (ambil maksimal 10, tapi bisa kurang)
+        const top10 = data.slice(0, 10);
+        let listHtml = `<div class="leaderboard-list">
+          <div class="leaderboard-header">
+            <div class="rank">#</div>
+            <div class="name">Peserta</div>
+            <div class="score">Skor</div>
+            <div class="time">Waktu</div>
+          </div>`;
+        let userRankData = null;
+        for (let i = 0; i < top10.length; i++) {
+          const item = top10[i];
+          const rank = i + 1;
+          const myClass = (item.nama === nama) ? "my-rank" : "";
+          const persen = Math.round((item.skor / item.total) * 100);
+          if (item.nama === nama) {
+            userRankData = { rank, persen, waktu: item.waktu };
+          }
+          listHtml += `
+            <div class="leaderboard-item ${myClass}">
+              <div class="rank">${rank}</div>
+              <div class="name">${item.nama}</div>
+              <div class="score">${persen}%</div>
+              <div class="time">${item.waktu}</div>
+            </div>
+          `;
+        }
+        listHtml += `</div>`;
+        
+        // Cari peringkat user jika tidak masuk top 10
+        if (!userRankData) {
+          const userFull = data.find(item => item.nama === nama);
+          if (userFull) {
+            const rankFull = data.findIndex(item => item.nama === nama) + 1;
+            const persenFull = Math.round((userFull.skor / userFull.total) * 100);
+            userRankData = { rank: rankFull, persen: persenFull, waktu: userFull.waktu };
+          }
+        }
+        
+        // Tampilkan "Peringkat Anda" card
+        let yourRankHtml = '';
+        if (userRankData) {
+          yourRankHtml = `
+            <div class="your-rank-card">
+              <span>🏆</span> Peringkat Anda: #${userRankData.rank} &nbsp;|&nbsp;
+              Skor: ${userRankData.persen}% &nbsp;|&nbsp; Waktu: ${userRankData.waktu}
+            </div>
+          `;
+        } else {
+          yourRankHtml = `<div class="your-rank-card"><span>📊</span> Anda belum memiliki data di leaderboard. Selesaikan ujian untuk muncul!</div>`;
+        }
+        
+        board.innerHTML = podiumHtml + listHtml + yourRankHtml;
+      } else {
+        board.innerHTML = '<div style="text-align:center; padding:20px;">🏆 Belum ada data leaderboard.</div>';
+      }
+    })
+    .catch(() => board.innerHTML = '<div style="text-align:center; padding:20px;">⚠️ Gagal memuat leaderboard.</div>');
 }
 
 // ========== LOGIN & LOAD SOAL ==========

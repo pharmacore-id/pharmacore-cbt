@@ -1,5 +1,5 @@
 // ========== KONFIGURASI ==========
-const API = "https://script.google.com/macros/s/AKfycbx9AH3tu0CCMItBJimHobEqBYezxRVZm_lwJ-9h8s1Bk0NHOu0igf_jUl1GSzY1Obyl/exec";
+const API = "https://script.google.com/macros/s/AKfycbx9AH3tu0CCMItBJimHobEqBYezxRVZm_lwJ-9h8s1Bk0NHOu0igf_jUl1GSzY1Obyl/exec"; // GANTI DENGAN URL WEB APP ANDA
 const OPTIONS = ['A','B','C','D','E'];
 
 let currentQuestion = 0, answers = {}, ragu = {}, soal = [], token = "", nama = "";
@@ -85,11 +85,11 @@ function renderQuestion() {
   if (!soal.length) return;
   const s = soal[currentQuestion];
   document.getElementById("questionLabel").innerHTML = "Soal " + (currentQuestion+1);
-  document.getElementById("q").innerHTML = s.Pertanyaan; // PERBAIKAN: huruf besar P
+  document.getElementById("q").innerHTML = s.Pertanyaan;
   let optHtml = "";
   for (let opt of OPTIONS) {
-    let optText = s[opt] || ''; // Langsung pakai opt (A, B, C, D, E) karena properti huruf besar
-    if (optText === '') optText = `Opsi ${opt} (belum diisi)`;
+    let optText = s[opt] || '';
+    if (optText === '') optText = `Opsi ${opt}`;
     optHtml += `<div class="opt ${answers[currentQuestion]==opt ? 'active' : ''}" onclick="pick('${opt}')">
       <div class="letter">${opt}</div><div>${optText}</div></div>`;
   }
@@ -202,11 +202,7 @@ function formatTimeDisplay(seconds) {
 }
 function submit() {
   if (isDone) return;
-  // Validasi jika soal kosong
-  if (!soal || soal.length === 0) {
-    alert("Soal belum dimuat. Silakan refresh halaman dan login ulang.");
-    return;
-  }
+  if (!soal || soal.length === 0) { alert("Soal belum dimuat."); return; }
   let unanswered = soal.length - Object.keys(answers).length;
   if (!confirm(`Yakin kumpul? ${Object.keys(answers).length}/${soal.length} terjawab, ${unanswered} belum. Lanjutkan?`)) return;
   isDone = true;
@@ -216,18 +212,18 @@ function submit() {
   let results = [];
   for (let i = 0; i < soal.length; i++) {
     let userAns = answers[i] ? String(answers[i]).trim() : "";
-    let correctAns = soal[i].Kunci ? String(soal[i].Kunci).trim() : ""; // PERBAIKAN: Kunci huruf besar
+    let correctAns = soal[i].Kunci ? String(soal[i].Kunci).trim() : "";
     let isCorrect = (userAns === correctAns);
     if (isCorrect) score++;
     let options = {};
     for (let opt of OPTIONS) options[opt] = soal[i][opt] || '';
     results.push({
       nomor: i+1,
-      pertanyaan: soal[i].Pertanyaan, // PERBAIKAN: huruf besar
+      pertanyaan: soal[i].Pertanyaan,
       jawabanUser: userAns || "(Tidak dijawab)",
       kunci: correctAns,
       benar: isCorrect,
-      pembahasan: soal[i].Pembahasan || "Tidak ada pembahasan", // PERBAIKAN: huruf besar
+      pembahasan: soal[i].Pembahasan || "Tidak ada pembahasan",
       options: options
     });
   }
@@ -236,12 +232,7 @@ function submit() {
   localStorage.setItem("cbt_results", JSON.stringify(results));
   localStorage.setItem("cbt_completion_time", completionTimeSeconds);
   let waktuStr = formatTimeDisplay(completionTimeSeconds);
-  fetch(API, {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ action: "submit", nama, token, skor: score, jawaban: answers, total: soal.length, waktu: waktuStr })
-  }).catch(e => console.log);
+  fetch(API, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "submit", nama, token, skor: score, jawaban: answers, total: soal.length, waktu: waktuStr }) }).catch(e => console.log);
   showResult(score);
 }
 function showResult(score) {
@@ -270,218 +261,114 @@ function openDiscussionModal() {
     const s = soalData[i];
     const userAnswer = r.jawabanUser;
     const correctKey = r.kunci;
-    html += `<div class="discussion-question">
-      <h4>Soal ${r.nomor}. ${r.pertanyaan}</h4>
-      <div class="options-list">`;
+    html += `<div class="discussion-question" style="margin-bottom: 20px; border-radius: 20px; border-left: 6px solid #8b5cf6; background: #f9fafb; padding: 16px;">
+      <h4 style="margin-top: 0; margin-bottom: 12px;">Soal ${r.nomor}. ${r.pertanyaan}</h4>
+      <div>`;
     for (let opt of OPTIONS) {
       let optText = s[opt] || '';
       let isUser = (userAnswer === opt);
       let isCorrect = (correctKey === opt);
-      let addClass = "", indicator = "";
-      if (isCorrect && isUser) { addClass = "user-correct"; indicator = " ✓ (jawaban Anda benar)"; }
-      else if (isCorrect && !isUser) { addClass = "correct-option"; indicator = " ✓ (kunci jawaban)"; }
-      else if (isUser && !isCorrect) { addClass = "wrong-option"; indicator = " ✗ (jawaban Anda salah)"; }
-      html += `<div class="option-item ${addClass}"><strong>${opt}.</strong> ${optText} ${indicator}</div>`;
+      let bgColor = "", indicator = "";
+      if (isCorrect && isUser) { bgColor = "#d1fae5"; indicator = " ✓ (jawaban Anda benar)"; }
+      else if (isCorrect && !isUser) { bgColor = "#d1fae5"; indicator = " ✓ (kunci jawaban)"; }
+      else if (isUser && !isCorrect) { bgColor = "#fee2e2"; indicator = " ✗ (jawaban Anda salah)"; }
+      else { bgColor = "#ffffff"; }
+      html += `<div style="padding: 8px 12px; margin: 6px 0; border-radius: 12px; background: ${bgColor}; border: 1px solid #e5e7eb;">
+        <strong>${opt}.</strong> ${optText} ${indicator}
+      </div>`;
     }
-    html += `</div><div class="discussion-pembahasan"><strong>📘 Pembahasan:</strong> ${r.pembahasan}</div></div>`;
+    html += `</div><div style="margin-top: 12px; padding: 12px; background: #f3f4f6; border-radius: 12px;"><strong>📘 Pembahasan:</strong> ${r.pembahasan}</div></div>`;
   }
   document.getElementById("discussionContent").innerHTML = html;
   document.getElementById("discussionModal").style.display = "flex";
 }
 function closeDiscussionModal() { document.getElementById("discussionModal").style.display = "none"; }
-function exportDiscussionPDF() {
-  const originalTitle = document.title;
-  document.title = "Review Jawaban - " + nama;
-  window.print();
-  document.title = originalTitle;
-}
+function exportDiscussionPDF() { window.print(); }
 
 // ========== LEADERBOARD ==========
 function loadLeaderboard() {
   const board = document.getElementById("board");
   if (!board) return;
   board.innerHTML = '<div>Memuat leaderboard...</div>';
-  fetch(API + "?action=leaderboard&token=" + token)
-    .then(r => r.json())
-    .then(res => {
-      if (res.leaderboard && res.leaderboard.length) {
-        let data = res.leaderboard.map(item => ({ nama: item.nama, skor: item.skor, total: soal.length, waktu: item.waktu || "00:00" }));
-        data.sort((a,b) => b.skor - a.skor);
-        let html = `<div class="leaderboard-card"><div class="leaderboard-header"><div class="rank">#</div><div class="name">Peserta</div><div class="score">Skor</div><div class="time">Waktu</div></div><div class="leaderboard-list">`;
-        data.forEach((item, idx) => {
-          let rank = idx+1;
-          let rankClass = rank===1?"rank-1":(rank===2?"rank-2":(rank===3?"rank-3":""));
-          let medal = rank===1?"🥇":(rank===2?"🥈":(rank===3?"🥉":""));
-          let myClass = (item.nama === nama) ? "my-rank" : "";
-          let persen = Math.round((item.skor / item.total) * 100);
-          html += `<div class="leaderboard-item ${myClass}"><div class="rank ${rankClass}">${medal || rank}</div><div class="name">${item.nama}</div><div class="score">${persen}%</div><div class="time">${item.waktu}</div></div>`;
-        });
-        html += `</div></div>`;
-        board.innerHTML = html;
-      } else {
-        board.innerHTML = '<div>🏆 Belum ada data leaderboard.</div>';
-      }
-    })
-    .catch(() => board.innerHTML = '<div>Gagal memuat leaderboard.</div>');
+  fetch(API + "?action=leaderboard&token=" + token).then(r => r.json()).then(res => {
+    if (res.leaderboard && res.leaderboard.length) {
+      let data = res.leaderboard.map(item => ({ nama: item.nama, skor: item.skor, total: soal.length, waktu: item.waktu || "00:00" }));
+      data.sort((a,b) => b.skor - a.skor);
+      let html = `<div class="leaderboard-card"><div class="leaderboard-header"><div class="rank">#</div><div class="name">Peserta</div><div class="score">Skor</div><div class="time">Waktu</div></div>`;
+      data.forEach((item, idx) => {
+        let rank = idx+1, medal = rank===1?"🥇":rank===2?"🥈":rank===3?"🥉":"", myClass = (item.nama === nama) ? "my-rank" : "", persen = Math.round((item.skor / item.total) * 100);
+        html += `<div class="leaderboard-item ${myClass}"><div class="rank">${medal || rank}</div><div class="name">${item.nama}</div><div class="score">${persen}%</div><div class="time">${item.waktu}</div></div>`;
+      });
+      html += `</div>`;
+      board.innerHTML = html;
+    } else board.innerHTML = '<div>🏆 Belum ada data.</div>';
+  }).catch(() => board.innerHTML = '<div>Gagal memuat leaderboard.</div>');
 }
-function restartExam() {
-  if (confirm("Ujian baru akan menghapus semua jawaban. Lanjutkan?")) {
-    clearSession();
-    location.reload();
-  }
-}
-function goHome() {
-  if (confirm("Kembali ke halaman login? Semua kemajuan ujian akan hilang.")) {
-    clearSession();
-    location.reload();
-  }
-}
+function restartExam() { if (confirm("Ujian baru akan menghapus semua jawaban. Lanjutkan?")) { clearSession(); location.reload(); } }
+function goHome() { if (confirm("Kembali ke halaman login?")) { clearSession(); location.reload(); } }
 
 // ========== LOGIN & LOAD SOAL ==========
 function login() {
   nama = document.getElementById("nama").value.trim();
   token = document.getElementById("token").value.trim();
   if (!nama || !token) { alert("Lengkapi data!"); return; }
-  fetch(API + "?action=validateToken&token=" + token)
-    .then(r => r.json())
-    .then(res => {
-      if (!res.valid) { alert("Token tidak valid"); return; }
-      currentDurasi = res.durasi || 3600;
-      currentSheetSoal = res.sheetSoal || "SOAL A";
-      timeLeft = currentDurasi;
-      isLoggedIn = true;
-      saveState();
-      document.getElementById("login").style.display = "none";
-      document.getElementById("app").style.display = "block";
-      loadQuestions();
-    })
-    .catch(err => { console.error(err); alert("Gagal validasi token"); });
+  fetch(API + "?action=validateToken&token=" + token).then(r => r.json()).then(res => {
+    if (!res.valid) { alert("Token tidak valid"); return; }
+    currentDurasi = res.durasi || 3600; currentSheetSoal = res.sheetSoal || "SOAL A"; timeLeft = currentDurasi; isLoggedIn = true;
+    saveState();
+    document.getElementById("login").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    loadQuestions();
+  }).catch(() => alert("Gagal validasi token"));
 }
 function loadQuestions() {
   if (soal.length) { startFromSaved(); return; }
-  fetch(API + "?action=getSoal&sheet=" + encodeURIComponent(currentSheetSoal))
-    .then(r => r.json())
-    .then(res => {
-      if (res.error) {
-        alert("Error dari server: " + res.error);
-        console.error(res.error);
-        return;
-      }
-      if (!res.soal || res.soal.length === 0) {
-        alert("Soal tidak ditemukan di sheet '" + currentSheetSoal + "'. Periksa spreadsheet.");
-        return;
-      }
-      soal = res.soal;
-      document.getElementById("totalCount").innerText = soal.length;
-      startFromSaved();
-      saveState();
-    })
-    .catch(err => { console.error(err); alert("Gagal load soal: " + err.message); });
+  fetch(API + "?action=getSoal&sheet=" + encodeURIComponent(currentSheetSoal)).then(r => r.json()).then(res => {
+    if (res.error) { alert("Error: " + res.error); return; }
+    if (!res.soal || !res.soal.length) { alert("Soal tidak ditemukan di sheet " + currentSheetSoal); return; }
+    soal = res.soal;
+    document.getElementById("totalCount").innerText = soal.length;
+    startFromSaved();
+    saveState();
+  }).catch(() => alert("Gagal load soal"));
 }
-function startFromSaved() {
-  renderQuestion();
-  updateNavGrid();
-  updateStats();
-  startTimer();
-}
+function startFromSaved() { renderQuestion(); updateNavGrid(); updateStats(); startTimer(); }
 
 // ========== DARK MODE ==========
-function toggleDarkMode() {
-  document.body.classList.toggle("dark-mode");
-  localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
-}
+function toggleDarkMode() { document.body.classList.toggle("dark-mode"); localStorage.setItem("darkMode", document.body.classList.contains("dark-mode")); }
 function loadDarkMode() { if (localStorage.getItem("darkMode") === "true") document.body.classList.add("dark-mode"); }
 
 // ========== CALCULATOR ==========
-function toggleCalculator() {
-  let modal = document.getElementById("calculatorModal");
-  if (modal.style.display === "flex") {
-    modal.style.display = "none";
-    document.removeEventListener("keydown", handleKeyboard);
-  } else {
-    modal.style.display = "flex";
-    document.addEventListener("keydown", handleKeyboard);
-    document.getElementById("calcDisplay").focus();
-  }
-}
-function handleKeyboard(e) {
-  let d = document.getElementById("calcDisplay");
-  if (!d) return;
-  let key = e.key;
-  if (key >= '0' && key <= '9') appendToDisplay(key);
-  else if (key === '.') appendToDisplay('.');
-  else if (key === '+' || key === '-' || key === '*' || key === '/') {
-    let op = key === '*' ? '×' : (key === '/' ? '÷' : key);
-    appendToDisplay(op);
-  } else if (key === 'Enter' || key === '=') calculateResult();
-  else if (key === 'Escape') toggleCalculator();
-  else if (key === 'Backspace') deleteLastCalc();
-  else if (key === 'c' || key === 'C') clearCalc();
-}
+function toggleCalculator() { let m = document.getElementById("calculatorModal"); if (m.style.display === "flex") { m.style.display = "none"; document.removeEventListener("keydown", handleKeyboard); } else { m.style.display = "flex"; document.addEventListener("keydown", handleKeyboard); document.getElementById("calcDisplay").focus(); } }
+function handleKeyboard(e) { let d = document.getElementById("calcDisplay"); if (!d) return; let key = e.key; if (key >= '0' && key <= '9') appendToDisplay(key); else if (key === '.') appendToDisplay('.'); else if (key === '+' || key === '-' || key === '*' || key === '/') { let op = key === '*' ? '×' : (key === '/' ? '÷' : key); appendToDisplay(op); } else if (key === 'Enter' || key === '=') calculateResult(); else if (key === 'Escape') toggleCalculator(); else if (key === 'Backspace') deleteLastCalc(); else if (key === 'c' || key === 'C') clearCalc(); }
 function appendToDisplay(v) { let d = document.getElementById("calcDisplay"); if (d) { if (d.value === "Error") d.value = ""; d.value += v; } }
 function clearCalc() { document.getElementById("calcDisplay").value = ""; }
 function deleteLastCalc() { let d = document.getElementById("calcDisplay"); d.value = d.value.slice(0, -1); }
-function calculateResult() {
-  let d = document.getElementById("calcDisplay");
-  try { let expr = d.value.replace(/×/g, '*').replace(/÷/g, '/'); let r = Function('"use strict"; return (' + expr + ')')(); d.value = r; } catch(e) { d.value = "Error"; }
-}
-function calcFunction(action) {
-  let d = document.getElementById("calcDisplay");
-  let val = parseFloat(d.value) || 0;
+function calculateResult() { let d = document.getElementById("calcDisplay"); try { let expr = d.value.replace(/×/g, '*').replace(/÷/g, '/'); let r = Function('"use strict"; return (' + expr + ')')(); d.value = r; } catch(e) { d.value = "Error"; } }
+function calcFunction(action) { let d = document.getElementById("calcDisplay"); let val = parseFloat(d.value) || 0;
   switch(action) {
-    case 'sin': d.value = Math.sin(val * Math.PI/180); break;
-    case 'cos': d.value = Math.cos(val * Math.PI/180); break;
-    case 'tan': d.value = Math.tan(val * Math.PI/180); break;
-    case 'log': d.value = Math.log10(val); break;
-    case 'ln': d.value = Math.log(val); break;
-    case 'sqrt': d.value = Math.sqrt(val); break;
-    case 'pow2': d.value = val*val; break;
-    case 'pow3': d.value = val*val*val; break;
-    case 'reciprocal': d.value = 1/val; break;
-    case 'pi': d.value = Math.PI; break;
-    case 'e': d.value = Math.E; break;
-    case 'percent': d.value = val/100; break;
-    case 'equal': calculateResult(); break;
-    case 'clear': clearCalc(); break;
-    case 'backspace': deleteLastCalc(); break;
-    case 'mplus': calcMemory += val; break;
-    case 'mminus': calcMemory -= val; break;
-    case 'mr': d.value = calcMemory; break;
-    case 'mc': calcMemory = 0; break;
+    case 'sin': d.value = Math.sin(val * Math.PI/180); break; case 'cos': d.value = Math.cos(val * Math.PI/180); break; case 'tan': d.value = Math.tan(val * Math.PI/180); break;
+    case 'log': d.value = Math.log10(val); break; case 'ln': d.value = Math.log(val); break; case 'sqrt': d.value = Math.sqrt(val); break;
+    case 'pow2': d.value = val*val; break; case 'pow3': d.value = val*val*val; break; case 'reciprocal': d.value = 1/val; break;
+    case 'pi': d.value = Math.PI; break; case 'e': d.value = Math.E; break; case 'percent': d.value = val/100; break;
+    case 'equal': calculateResult(); break; case 'clear': clearCalc(); break; case 'backspace': deleteLastCalc(); break;
+    case 'mplus': calcMemory += val; break; case 'mminus': calcMemory -= val; break; case 'mr': d.value = calcMemory; break; case 'mc': calcMemory = 0; break;
   }
 }
-function initCalculator() {
-  document.querySelectorAll('.calc-num').forEach(btn => btn.onclick = () => appendToDisplay(btn.getAttribute('data-num')));
-  document.querySelectorAll('.calc-operator').forEach(btn => btn.onclick = () => appendToDisplay(btn.getAttribute('data-op')));
-  document.querySelectorAll('.calc-func, .calc-mem, .calc-clear').forEach(btn => btn.onclick = () => calcFunction(btn.getAttribute('data-action')));
-}
+function initCalculator() { document.querySelectorAll('.calc-num').forEach(btn => btn.onclick = () => appendToDisplay(btn.getAttribute('data-num'))); document.querySelectorAll('.calc-operator').forEach(btn => btn.onclick = () => appendToDisplay(btn.getAttribute('data-op'))); document.querySelectorAll('.calc-func, .calc-mem, .calc-clear').forEach(btn => btn.onclick = () => calcFunction(btn.getAttribute('data-action'))); }
 
 // ========== CEK SESSION ==========
 function checkExistingSession() {
-  loadSavedState();
-  loadDarkMode();
+  loadSavedState(); loadDarkMode();
   if (isLoggedIn) {
     if (localStorage.getItem("cbt_submitted") === "true") {
       let savedScore = localStorage.getItem("cbt_score");
-      if (savedScore) {
-        document.getElementById("login").style.display = "none";
-        completionTimeSeconds = parseInt(localStorage.getItem("cbt_completion_time") || "0");
-        if (soal.length) showResult(parseInt(savedScore));
-        else fetch(API+"?action=getSoal&sheet="+encodeURIComponent(currentSheetSoal)).then(r=>r.json()).then(res=>{ if(res.soal) soal = res.soal; showResult(parseInt(savedScore)); });
-      }
+      if (savedScore) { document.getElementById("login").style.display = "none"; completionTimeSeconds = parseInt(localStorage.getItem("cbt_completion_time") || "0"); if (soal.length) showResult(parseInt(savedScore)); else fetch(API+"?action=getSoal&sheet="+encodeURIComponent(currentSheetSoal)).then(r=>r.json()).then(res=>{ if(res.soal) soal = res.soal; showResult(parseInt(savedScore)); }); }
     } else {
       document.getElementById("login").style.display = "none";
       document.getElementById("app").style.display = "block";
-      if (soal.length) {
-        document.getElementById("totalCount").innerText = soal.length;
-        renderQuestion(); updateNavGrid(); updateStats(); startTimer();
-      } else loadQuestions();
+      if (soal.length) { document.getElementById("totalCount").innerText = soal.length; renderQuestion(); updateNavGrid(); updateStats(); startTimer(); } else loadQuestions();
     }
   }
 }
-
-// ========== INIT ==========
-document.addEventListener("DOMContentLoaded", () => {
-  initCalculator();
-  checkExistingSession();
-});
+document.addEventListener("DOMContentLoaded", () => { initCalculator(); checkExistingSession(); });

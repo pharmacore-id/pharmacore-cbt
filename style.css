@@ -752,7 +752,17 @@ MOBILE RESPONSIVE
   }
 }
 
-/* Tambahkan ini di style.css untuk legend review dot */
 .review-dot {
     background: #fbbf24;
+}
+
+.review {
+    background: #fbbf24 !important;
+    color: #78350f !important;
+    border: 2px solid #f59e0b !important;
+}
+
+.review.activeQ {
+    background: #f59e0b !important;
+    color: white !important;
 }

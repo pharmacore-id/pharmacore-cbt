@@ -74,7 +74,7 @@ function load(){
 
     loadSavedState();
     
-    currentQuestion = 0;
+    if(currentQuestion >= soal.length) currentQuestion = 0;
 
     renderQuestion();
     nav();
@@ -126,9 +126,7 @@ function renderQuestion(){
     return;
   }
 
-  document.getElementById("questionLabel").innerHTML =
-    `Soal ${currentQuestion + 1}`;
-
+  document.getElementById("questionLabel").innerHTML = `Soal ${currentQuestion + 1}`;
   document.getElementById("q").innerHTML = s.pertanyaan;
 
   document.getElementById("opt").innerHTML = `
@@ -177,7 +175,7 @@ function pick(v){
 }
 
 /* =========================
-NAVIGATION
+NAVIGATION - FUNGSI LENGKAP
 ========================= */
 
 function nav(){
@@ -211,6 +209,7 @@ function go(x){
   saveState();
 }
 
+// NEXT QUESTION - FIXED
 function nextQuestion(){
   if(currentQuestion < soal.length - 1){
     currentQuestion++;
@@ -222,6 +221,7 @@ function nextQuestion(){
   }
 }
 
+// PREV QUESTION - FIXED
 function prevQuestion(){
   if(currentQuestion > 0){
     currentQuestion--;
@@ -240,7 +240,8 @@ PROGRESS
 function updateProgress(){
   if(!soal || soal.length === 0) return;
   let progress = ((currentQuestion + 1) / soal.length) * 100;
-  document.getElementById("progressFill").style.width = progress + "%";
+  let fillEl = document.getElementById("progressFill");
+  if(fillEl) fillEl.style.width = progress + "%";
 }
 
 /* =========================
@@ -303,7 +304,7 @@ function startTimer(){
 }
 
 /* =========================
-RAGU
+RAGU - FIXED
 ========================= */
 
 function toggleRagu(){
@@ -349,11 +350,9 @@ function submit(){
     }
   }
 
-  // Save to localStorage
   localStorage.setItem("cbt_submitted", "true");
   localStorage.setItem("cbt_score", skor);
 
-  // Send to server (no-cors mode to avoid CORS)
   fetch(API, {
     method: "POST",
     mode: "no-cors",
@@ -444,24 +443,34 @@ function restartExam(){
 }
 
 /* =========================
-DARK MODE
+DARK MODE - FIXED
 ========================= */
 
 function toggleDarkMode(){
   document.body.classList.toggle("dark-mode");
   const isDark = document.body.classList.contains("dark-mode");
   localStorage.setItem("darkMode", isDark);
+  
+  // Update button text if needed
+  const darkBtn = document.querySelector(".side .secondary-btn");
+  if(darkBtn && darkBtn.innerHTML.includes("Dark")){
+    darkBtn.innerHTML = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
+  }
 }
 
 function loadDarkMode(){
   const saved = localStorage.getItem("darkMode");
   if(saved === "true"){
     document.body.classList.add("dark-mode");
+    const darkBtn = document.querySelector(".side .secondary-btn");
+    if(darkBtn && darkBtn.innerHTML.includes("Dark")){
+      darkBtn.innerHTML = "☀️ Light Mode";
+    }
   }
 }
 
 /* =========================
-CALCULATOR
+CALCULATOR - FIXED
 ========================= */
 
 function toggleCalculator(){
@@ -506,12 +515,19 @@ INITIALIZATION
 document.addEventListener("DOMContentLoaded", function(){
   loadDarkMode();
   
+  // Close calculator when clicking outside
+  window.addEventListener("click", function(e){
+    const modal = document.getElementById("calculatorModal");
+    if(e.target === modal){
+      modal.style.display = "none";
+    }
+  });
+  
   // Check if already submitted
   const submitted = localStorage.getItem("cbt_submitted");
   if(submitted === "true"){
     const savedScore = localStorage.getItem("cbt_score");
     if(savedScore && soal.length === 0){
-      // Try to load soal first
       fetch(`${API}?action=getSoal`)
         .then(r => r.json())
         .then(res => {
@@ -523,12 +539,4 @@ document.addEventListener("DOMContentLoaded", function(){
         });
     }
   }
-  
-  // Close calculator when clicking outside
-  window.addEventListener("click", function(e){
-    const modal = document.getElementById("calculatorModal");
-    if(e.target === modal){
-      modal.style.display = "none";
-    }
-  });
 });

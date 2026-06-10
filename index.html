@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>PHARMACORE CBT - UKMPPAI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -59,7 +59,7 @@
         <div><span class="dot empty-dot"></span> Belum Dijawab</div>
       </div>
       <button class="submit-btn" onclick="showReviewModal()">📋 Kumpulkan Jawaban</button>
-      <hr style="margin:20px 0;border:none;border-top:1px solid #eee;">
+      <hr>
       <button class="secondary-btn" onclick="toggleDarkMode()">🌙 Dark Mode</button>
       <button class="secondary-btn" style="margin-top:10px;" onclick="toggleCalculator()">🧮 Kalkulator Scientific</button>
     </div>
@@ -87,17 +87,24 @@
   </div>
 </div>
 
-<!-- RESULT dengan review jawaban detail -->
+<!-- RESULT dengan review jawaban detail (seperti gambar) -->
 <div id="result" style="display:none;">
   <div class="result-card">
     <h2>📝 Hasil Ujian</h2>
     <div class="score-circle"><span id="scoreNumber">0</span></div>
     <p id="skor"></p>
-    <button class="secondary-btn" onclick="toggleAnswerReview()" style="margin:10px auto;">📋 Review Jawaban Saya</button>
+    <div class="result-summary">
+      <div><span>Nama</span><strong id="resultNama"></strong></div>
+      <div><span>Benar</span><strong id="resultBenar">0</strong></div>
+      <div><span>Salah</span><strong id="resultSalah">0</strong></div>
+      <div><span>Waktu</span><strong id="resultWaktu">00:00</strong></div>
+    </div>
+    <button class="secondary-btn" onclick="toggleAnswerReview()" style="margin:10px auto;">📋 Review Jawaban</button>
     <div id="answerReviewPanel" style="display:none; margin-top:20px; text-align:left; max-height:400px; overflow-y:auto;"></div>
     <button class="submit-btn" onclick="restartExam()" style="margin-top:20px;">🔄 Ujian Baru</button>
     <h3>🏆 Leaderboard</h3>
     <div id="board"></div>
+    <div class="footer-copyright">PHARMACORE CBT © 2026</div>
   </div>
 </div>
 

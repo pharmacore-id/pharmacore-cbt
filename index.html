@@ -13,21 +13,21 @@
 
 <link rel="stylesheet" href="style.css">
 
-<!-- FIX: defer supaya DOM aman sebelum JS jalan -->
+<!-- FIX: defer supaya DOM aman -->
 <script src="script.js" defer></script>
 
 </head>
 
 <body>
 
-<!-- LOGIN PAGE -->
+<!-- =========================
+LOGIN
+========================= -->
 <div id="login">
 
   <div class="login-card">
 
-    <div class="badge">
-      ✨ TRY OUT UKMPPAI
-    </div>
+    <div class="badge">✨ TRY OUT UKMPPAI</div>
 
     <h1>PHARMACORE CBT</h1>
 
@@ -57,14 +57,14 @@
 
 </div>
 
-<!-- CBT APP -->
+<!-- =========================
+APP
+========================= -->
 <div id="app" style="display:none;">
 
   <div class="topbar">
 
-    <div class="brand">
-      PHARMACORE CBT
-    </div>
+    <div class="brand">PHARMACORE CBT</div>
 
     <div class="top-right">
 
@@ -72,24 +72,18 @@
         <span id="answeredCount">0</span>/<span id="totalCount">0</span> dijawab
       </div>
 
-      <div class="timer" id="timer">
-        60:00
-      </div>
+      <div class="timer" id="timer">60:00</div>
 
     </div>
-
   </div>
 
-  <!-- WRAPPER FIXED (STRUCTURE BALANCED) -->
   <div class="wrapper">
 
-    <!-- MAIN CARD -->
+    <!-- MAIN -->
     <div class="card">
 
       <div class="question-header">
-        <div class="question-badge" id="questionLabel">
-          Soal 1
-        </div>
+        <div class="question-badge" id="questionLabel">Soal 1</div>
       </div>
 
       <div class="progress">
@@ -97,20 +91,19 @@
       </div>
 
       <div id="q"></div>
-
       <div id="opt"></div>
 
       <div class="action-row">
 
-        <button type="button" class="secondary-btn" onclick="prevQuestion()">
+        <button class="secondary-btn" onclick="prevQuestion()">
           ← Sebelumnya
         </button>
 
-        <button type="button" class="ragu-btn" onclick="toggleRagu()">
+        <button class="ragu-btn" onclick="toggleRagu()">
           🚩 Ragu
         </button>
 
-        <button type="button" class="secondary-btn" onclick="nextQuestion()">
+        <button class="secondary-btn" onclick="nextQuestion()">
           Berikutnya →
         </button>
 
@@ -140,22 +133,9 @@
       <div id="nav" class="grid"></div>
 
       <div class="legend">
-
-        <div>
-          <span class="dot done-dot"></span>
-          Sudah Dijawab
-        </div>
-
-        <div>
-          <span class="dot ragu-dot"></span>
-          Ditandai Ragu
-        </div>
-
-        <div>
-          <span class="dot empty-dot"></span>
-          Belum Dijawab
-        </div>
-
+        <div><span class="dot done-dot"></span>Sudah Dijawab</div>
+        <div><span class="dot ragu-dot"></span>Ditandai Ragu</div>
+        <div><span class="dot empty-dot"></span>Belum Dijawab</div>
       </div>
 
       <button class="submit-btn" onclick="submit()">
@@ -164,21 +144,23 @@
 
       <hr style="margin:20px 0;border:none;border-top:1px solid #eee;">
 
-      <button class="secondary-btn" onclick="toggleDarkMode()">
-        🌙 Dark Mode
+      <!-- FIXED TOGGLE (NO DUPLICATE, NO CONFLICT) -->
+      <button class="secondary-btn" onclick="calc('toggle')">
+        🧮 Kalkulator
       </button>
 
-      <button class="secondary-btn" style="margin-top:10px;" onclick="toggleCalculator()">
-        🧮 Kalkulator
+      <button class="secondary-btn" style="margin-top:10px;" onclick="toggleDarkMode()">
+        🌙 Dark Mode
       </button>
 
     </div>
 
   </div>
-
 </div>
 
-<!-- RESULT -->
+<!-- =========================
+RESULT
+========================= -->
 <div id="result">
 
   <div class="result-card">
@@ -199,7 +181,9 @@
 
 </div>
 
-<!-- CALCULATOR -->
+<!-- =========================
+CALCULATOR
+========================= -->
 <div id="calculatorModal" class="calculator-modal">
 
   <div class="calculator-box">
@@ -207,9 +191,7 @@
     <div class="calculator-header">
       <span>🧮 Kalkulator</span>
 
-      <button class="close-calc" onclick="toggleCalculator()">
-        ✕
-      </button>
+      <button onclick="calc('toggle')">✕</button>
     </div>
 
     <input type="text" id="calcDisplay" readonly>
@@ -233,12 +215,23 @@
 
       <button onclick="calc('0')">0</button>
       <button onclick="calc('.')">.</button>
-      <button onclick="calculateResult()">=</button>
+      <button onclick="calc('equal')">=</button>
       <button onclick="calc('+')">+</button>
 
-      <button class="calc-clear" onclick="clearCalc()">
-        C
-      </button>
+      <!-- SCIENTIFIC -->
+      <button onclick="calc('Math.sin(')">sin</button>
+      <button onclick="calc('Math.cos(')">cos</button>
+      <button onclick="calc('Math.tan(')">tan</button>
+      <button onclick="calc('Math.sqrt(')">√</button>
+
+      <button onclick="calc('Math.log10(')">log</button>
+      <button onclick="calc('Math.log(')">ln</button>
+      <button onclick="calc('**')">^</button>
+      <button onclick="calc('(')">(</button>
+
+      <button onclick="calc(')')">)</button>
+      <button onclick="calc('back')">⌫</button>
+      <button onclick="calc('clear')">C</button>
 
     </div>
 

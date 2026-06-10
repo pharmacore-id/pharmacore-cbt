@@ -89,8 +89,10 @@ function renderQuestion() {
   let optHtml = "";
   for (let opt of OPTIONS) {
     let optLower = opt.toLowerCase();
+    let optText = s[optLower] || '';
+    if (optText === '') optText = `Opsi ${opt} (belum diisi)`;
     optHtml += `<div class="opt ${answers[currentQuestion]==opt ? 'active' : ''}" onclick="pick('${opt}')">
-      <div class="letter">${opt}</div><div>${s[optLower] || ''}</div></div>`;
+      <div class="letter">${opt}</div><div>${optText}</div></div>`;
   }
   document.getElementById("opt").innerHTML = optHtml;
   const raguBtn = document.getElementById("raguBtn");
@@ -209,15 +211,17 @@ function submit() {
   let score = 0;
   let results = [];
   for (let i = 0; i < soal.length; i++) {
-    let isCorrect = (answers[i] == soal[i].kunci);
+    let userAns = answers[i] ? String(answers[i]).trim() : "";
+    let correctAns = soal[i].kunci ? String(soal[i].kunci).trim() : "";
+    let isCorrect = (userAns === correctAns);
     if (isCorrect) score++;
     let options = {};
     for (let opt of OPTIONS) options[opt] = soal[i][opt.toLowerCase()] || '';
     results.push({
       nomor: i+1,
       pertanyaan: soal[i].pertanyaan,
-      jawabanUser: answers[i] || "(Tidak dijawab)",
-      kunci: soal[i].kunci,
+      jawabanUser: userAns || "(Tidak dijawab)",
+      kunci: correctAns,
       benar: isCorrect,
       pembahasan: soal[i].pembahasan || "Tidak ada pembahasan",
       options: options
@@ -227,11 +231,12 @@ function submit() {
   localStorage.setItem("cbt_score", score);
   localStorage.setItem("cbt_results", JSON.stringify(results));
   localStorage.setItem("cbt_completion_time", completionTimeSeconds);
+  let waktuStr = formatTimeDisplay(completionTimeSeconds);
   fetch(API, {
     method: "POST",
     mode: "no-cors",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ action: "submit", nama, token, skor: score, jawaban: answers, total: soal.length, waktu: formatTimeDisplay(completionTimeSeconds) })
+    body: JSON.stringify({ action: "submit", nama, token, skor: score, jawaban: answers, total: soal.length, waktu: waktuStr })
   }).catch(e => console.log);
   showResult(score);
 }

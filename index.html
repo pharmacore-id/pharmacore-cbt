@@ -12,12 +12,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="style.css">
+
+<!-- FIX: defer supaya DOM aman sebelum JS jalan -->
+<script src="script.js" defer></script>
+
 </head>
 
 <body>
 
 <!-- LOGIN PAGE -->
-
 <div id="login">
 
   <div class="login-card">
@@ -55,7 +58,6 @@
 </div>
 
 <!-- CBT APP -->
-
 <div id="app" style="display:none;">
 
   <div class="topbar">
@@ -78,27 +80,20 @@
 
   </div>
 
+  <!-- WRAPPER FIXED (STRUCTURE BALANCED) -->
   <div class="wrapper">
 
-    <!-- MAIN -->
-
+    <!-- MAIN CARD -->
     <div class="card">
 
       <div class="question-header">
-
         <div class="question-badge" id="questionLabel">
           Soal 1
         </div>
-
       </div>
 
       <div class="progress">
-
-        <div
-          class="fill"
-          id="progressFill">
-        </div>
-
+        <div class="fill" id="progressFill"></div>
       </div>
 
       <div id="q"></div>
@@ -107,100 +102,83 @@
 
       <div class="action-row">
 
-  <button
-    type="button"
-    class="secondary-btn"
-    onclick="prevQuestion()">
-    ← Sebelumnya
-  </button>
+        <button type="button" class="secondary-btn" onclick="prevQuestion()">
+          ← Sebelumnya
+        </button>
 
-  <button
-    type="button"
-    class="ragu-btn"
-    onclick="toggleRagu()">
-    🚩 Ragu
-  </button>
+        <button type="button" class="ragu-btn" onclick="toggleRagu()">
+          🚩 Ragu
+        </button>
 
-  <button
-    type="button"
-    class="secondary-btn"
-    onclick="nextQuestion()">
-    Berikutnya →
-  </button>
+        <button type="button" class="secondary-btn" onclick="nextQuestion()">
+          Berikutnya →
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="side">
+
+      <h3>Navigasi Soal</h3>
+
+      <div class="summary">
+
+        <div class="summary-item">
+          <span>Terjawab</span>
+          <strong id="answeredSummary">0</strong>
+        </div>
+
+        <div class="summary-item">
+          <span>Belum</span>
+          <strong id="unansweredSummary">0</strong>
+        </div>
+
+      </div>
+
+      <div id="nav" class="grid"></div>
+
+      <div class="legend">
+
+        <div>
+          <span class="dot done-dot"></span>
+          Sudah Dijawab
+        </div>
+
+        <div>
+          <span class="dot ragu-dot"></span>
+          Ditandai Ragu
+        </div>
+
+        <div>
+          <span class="dot empty-dot"></span>
+          Belum Dijawab
+        </div>
+
+      </div>
+
+      <button class="submit-btn" onclick="submit()">
+        Kumpulkan Jawaban
+      </button>
+
+      <hr style="margin:20px 0;border:none;border-top:1px solid #eee;">
+
+      <button class="secondary-btn" onclick="toggleDarkMode()">
+        🌙 Dark Mode
+      </button>
+
+      <button class="secondary-btn" style="margin-top:10px;" onclick="toggleCalculator()">
+        🧮 Kalkulator
+      </button>
+
+    </div>
+
+  </div>
 
 </div>
 
-    </div>
-
-<!-- SIDEBAR -->
-
-<div class="side">
-
-  <h3>Navigasi Soal</h3>
-
-  <div class="summary">
-
-    <div class="summary-item">
-      <span>Terjawab</span>
-      <strong id="answeredSummary">0</strong>
-    </div>
-
-    <div class="summary-item">
-      <span>Belum</span>
-      <strong id="unansweredSummary">0</strong>
-    </div>
-
-  </div>
-
-  <div id="nav" class="grid"></div>
-
-  <div class="legend">
-
-    <div>
-      <span class="dot done-dot"></span>
-      Sudah Dijawab
-    </div>
-
-    <div>
-      <span class="dot ragu-dot"></span>
-      Ditandai Ragu
-    </div>
-
-    <div>
-      <span class="dot empty-dot"></span>
-      Belum Dijawab
-    </div>
-
-  </div>
-
-  <button
-    class="submit-btn"
-    onclick="submit()">
-    Kumpulkan Jawaban
-  </button>
-
-  <hr style="margin:20px 0;border:none;border-top:1px solid #eee;">
-
-  <!-- TOOLS (ONLY ONCE - FIXED) -->
-  <button
-    class="secondary-btn"
-    onclick="toggleDarkMode()">
-    🌙 Dark Mode
-  </button>
-
-  <button
-    class="secondary-btn"
-    style="margin-top:10px;"
-    onclick="toggleCalculator()">
-    🧮 Kalkulator
-  </button>
-
-</div>
-    </div>
-  </div>
-    
 <!-- RESULT -->
-
 <div id="result">
 
   <div class="result-card">
@@ -221,8 +199,7 @@
 
 </div>
 
-  <!-- CALCULATOR POPUP -->
-
+<!-- CALCULATOR -->
 <div id="calculatorModal" class="calculator-modal">
 
   <div class="calculator-box">
@@ -230,17 +207,12 @@
     <div class="calculator-header">
       <span>🧮 Kalkulator</span>
 
-      <button
-        class="close-calc"
-        onclick="toggleCalculator()">
+      <button class="close-calc" onclick="toggleCalculator()">
         ✕
       </button>
     </div>
 
-    <input
-      type="text"
-      id="calcDisplay"
-      readonly>
+    <input type="text" id="calcDisplay" readonly>
 
     <div class="calc-grid">
 
@@ -264,9 +236,7 @@
       <button onclick="calculateResult()">=</button>
       <button onclick="calc('+')">+</button>
 
-      <button
-        class="calc-clear"
-        onclick="clearCalc()">
+      <button class="calc-clear" onclick="clearCalc()">
         C
       </button>
 
@@ -275,8 +245,6 @@
   </div>
 
 </div>
-
-<script src="script.js"></script>
 
 </body>
 </html>

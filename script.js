@@ -341,3 +341,44 @@ function showResult(skor){
   document.getElementById("scoreNumber").innerHTML = skor;
 
 }
+
+/* =========================
+TOOGLE DARK MODE
+========================= */
+
+function toggleDarkMode(){
+  document.body.classList.toggle("dark-mode");
+}
+
+/* =========================
+TOOGLE CALCULATOR
+========================= */
+
+function toggleCalculator(){
+  const modal = document.getElementById("calculatorModal");
+  if(!modal) return;
+
+  modal.style.display =
+    modal.style.display === "flex" ? "none" : "flex";
+}
+
+function calc(v){
+  const d = document.getElementById("calcDisplay");
+  if(!d) return;
+  d.value += v;
+}
+
+function clearCalc(){
+  const d = document.getElementById("calcDisplay");
+  if(d) d.value = "";
+}
+
+function calculateResult(){
+  const d = document.getElementById("calcDisplay");
+  if(!d) return;
+  try{
+    d.value = eval(d.value);
+  }catch(e){
+    d.value = "Error";
+  }
+}

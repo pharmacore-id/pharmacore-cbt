@@ -2,8 +2,8 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>PHARMACORE CBT - UKMPPAI Simulation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PHARMACORE CBT - UKMPPAI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -78,7 +78,7 @@
         <div class="review-stat unanswered"><div class="review-stat-value" id="reviewUnanswered">0</div><div class="review-stat-label">❌ Belum Dijawab</div></div>
       </div>
       <div class="review-questions"><h3>Daftar Soal</h3><div id="reviewQuestionList"></div></div>
-      <div class="review-warning">⚠️ Perhatian: Soal yang tidak dijawab akan dianggap salah!</div>
+      <div class="review-warning">⚠️ Soal yang tidak dijawab akan dianggap salah!</div>
     </div>
     <div class="modal-footer">
       <button class="secondary-btn" onclick="closeReviewModal()">Kembali ke Ujian</button>
@@ -87,7 +87,7 @@
   </div>
 </div>
 
-<!-- RESULT dengan review jawaban dan leaderboard modern -->
+<!-- RESULT dengan review jawaban detail -->
 <div id="result" style="display:none;">
   <div class="result-card">
     <h2>📝 Hasil Ujian</h2>
@@ -96,12 +96,12 @@
     <button class="secondary-btn" onclick="toggleAnswerReview()" style="margin:10px auto;">📋 Review Jawaban Saya</button>
     <div id="answerReviewPanel" style="display:none; margin-top:20px; text-align:left; max-height:400px; overflow-y:auto;"></div>
     <button class="submit-btn" onclick="restartExam()" style="margin-top:20px;">🔄 Ujian Baru</button>
-    <h3>🏆 Papan Peringkat</h3>
+    <h3>🏆 Leaderboard</h3>
     <div id="board"></div>
   </div>
 </div>
 
-<!-- CALCULATOR SCIENTIFIC MODAL -->
+<!-- CALCULATOR SCIENTIFIC -->
 <div id="calculatorModal" class="calculator-modal" style="display:none;">
   <div class="calculator-box">
     <div class="calculator-header"><span>🧮 Kalkulator Scientific</span><button class="close-calc" onclick="toggleCalculator()">✕</button></div>

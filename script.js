@@ -12,6 +12,10 @@ let isDone = false;
 let timeLeft = 3600;
 let isLoggedIn = false;
 
+// Kalkulator memory
+let calcMemory = 0;
+let lastAnswer = 0;
+
 const API = "https://script.google.com/macros/s/AKfycbyo48NoxjaBHGHkRCxgkxOB3Cys2Wa3mBG7AvK_n3TidyCSQcjSf5vSbCJpkI0-QJhk/exec";
 
 // ==========================================
@@ -72,7 +76,7 @@ function clearSession() {
 }
 
 // ==========================================
-// FUNGSI UPDATE UI
+// FUNGSI UPDATE UI (TERMASUK RAGU SUMMARY)
 // ==========================================
 function updateProgress() {
     if (!soal || soal.length === 0) return;
@@ -85,16 +89,17 @@ function updateStats() {
     if (!soal || soal.length === 0) return;
     const answered = Object.keys(answers).length;
     const raguCount = Object.keys(ragu).length;
+    const unanswered = soal.length - answered;
     
-    const a = document.getElementById("answeredCount");
-    const b = document.getElementById("answeredSummary");
-    const c = document.getElementById("raguSummary");
-    const d = document.getElementById("unansweredSummary");
+    const answeredCount = document.getElementById("answeredCount");
+    const answeredSummary = document.getElementById("answeredSummary");
+    const raguSummary = document.getElementById("raguSummary");
+    const unansweredSummary = document.getElementById("unansweredSummary");
     
-    if (a) a.innerText = answered;
-    if (b) b.innerText = answered;
-    if (c) c.innerText = raguCount;
-    if (d) d.innerText = soal.length - answered;
+    if (answeredCount) answeredCount.innerText = answered;
+    if (answeredSummary) answeredSummary.innerText = answered;
+    if (raguSummary) raguSummary.innerText = raguCount;
+    if (unansweredSummary) unansweredSummary.innerText = unanswered;
 }
 
 // ==========================================
@@ -144,6 +149,7 @@ function renderQuestion() {
 
 function pick(answer) {
     answers[currentQuestion] = answer;
+    // Jika dijawab, hapus tanda ragu jika ada
     if (ragu[currentQuestion]) {
         delete ragu[currentQuestion];
     }
@@ -213,11 +219,11 @@ function toggleRagu() {
     saveState();
     renderQuestion();
     updateNavGrid();
-    updateStats();
+    updateStats();  // <-- penting: update jumlah ragu di sidebar
 }
 
 // ==========================================
-// FUNGSI TIMER (BERFUNGSI)
+// FUNGSI TIMER
 // ==========================================
 function startTimer() {
     const submitted = localStorage.getItem("cbt_submitted");
@@ -345,7 +351,6 @@ function login() {
 }
 
 function loadQuestions() {
-    // Cek apakah soal sudah tersimpan di localStorage
     if (soal && soal.length > 0) {
         renderQuestion();
         updateNavGrid();
@@ -515,15 +520,42 @@ function loadDarkMode() {
 }
 
 // ==========================================
-// FUNGSI CALCULATOR
+// FUNGSI CALCULATOR SCIENTIFIC + KEYBOARD
 // ==========================================
 function toggleCalculator() {
     let modal = document.getElementById("calculatorModal");
     if (modal.style.display === "flex") {
         modal.style.display = "none";
+        document.removeEventListener("keydown", handleKeyboard);
     } else {
         modal.style.display = "flex";
+        document.addEventListener("keydown", handleKeyboard);
         document.getElementById("calcDisplay").focus();
+    }
+}
+
+function handleKeyboard(e) {
+    let display = document.getElementById("calcDisplay");
+    if (!display) return;
+    
+    const key = e.key;
+    if (key >= '0' && key <= '9') {
+        appendToDisplay(key);
+    } else if (key === '.') {
+        appendToDisplay('.');
+    } else if (key === '+' || key === '-' || key === '*' || key === '/') {
+        let op = key;
+        if (op === '*') op = '×';
+        if (op === '/') op = '÷';
+        appendToDisplay(op);
+    } else if (key === 'Enter' || key === '=') {
+        calculateResult();
+    } else if (key === 'Escape') {
+        toggleCalculator();
+    } else if (key === 'Backspace') {
+        deleteLastCalc();
+    } else if (key === 'c' || key === 'C') {
+        clearCalc();
     }
 }
 
@@ -552,9 +584,54 @@ function calculateResult() {
         let expr = display.value.replace(/×/g, '*').replace(/÷/g, '/');
         let result = Function('"use strict"; return (' + expr + ')')();
         display.value = result;
+        lastAnswer = result;
     } catch (e) {
         display.value = "Error";
     }
+}
+
+// Fungsi scientific
+function calcFunction(action) {
+    let display = document.getElementById("calcDisplay");
+    if (!display) return;
+    let val = parseFloat(display.value);
+    if (isNaN(val) && action !== 'pi' && action !== 'e') val = 0;
+    
+    switch(action) {
+        case 'sin': display.value = Math.sin(val * Math.PI / 180); break;
+        case 'cos': display.value = Math.cos(val * Math.PI / 180); break;
+        case 'tan': display.value = Math.tan(val * Math.PI / 180); break;
+        case 'log': display.value = Math.log10(val); break;
+        case 'ln': display.value = Math.log(val); break;
+        case 'sqrt': display.value = Math.sqrt(val); break;
+        case 'pow2': display.value = Math.pow(val, 2); break;
+        case 'pow3': display.value = Math.pow(val, 3); break;
+        case 'reciprocal': display.value = 1 / val; break;
+        case 'pi': display.value = Math.PI; break;
+        case 'e': display.value = Math.E; break;
+        case 'percent': display.value = val / 100; break;
+        case 'equal': calculateResult(); break;
+        case 'mplus': calcMemory += val; break;
+        case 'mminus': calcMemory -= val; break;
+        case 'mr': display.value = calcMemory; break;
+        case 'mc': calcMemory = 0; break;
+        case 'clear': clearCalc(); break;
+        case 'backspace': deleteLastCalc(); break;
+    }
+}
+
+// Inisialisasi event listener untuk tombol kalkulator
+function initCalculatorButtons() {
+    // Tombol angka dan operator
+    document.querySelectorAll('.calc-num').forEach(btn => {
+        btn.onclick = () => appendToDisplay(btn.getAttribute('data-num'));
+    });
+    document.querySelectorAll('.calc-operator').forEach(btn => {
+        btn.onclick = () => appendToDisplay(btn.getAttribute('data-op'));
+    });
+    document.querySelectorAll('.calc-func, .calc-mem, .calc-clear').forEach(btn => {
+        btn.onclick = () => calcFunction(btn.getAttribute('data-action'));
+    });
 }
 
 // ==========================================
@@ -588,4 +665,7 @@ function checkExistingSession() {
 // ==========================================
 // INITIALIZATION
 // ==========================================
-checkExistingSession();
+document.addEventListener("DOMContentLoaded", function() {
+    initCalculatorButtons();
+    checkExistingSession();
+});

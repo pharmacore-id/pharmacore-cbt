@@ -581,20 +581,23 @@ hr {
   background: white;
   border: 1px solid #e5e7eb;
 }
-.option-item.correct-option {
+/* Light mode: jawaban user benar -> hijau */
+.option-item.user-correct {
   background: #d1fae5 !important;
-  border-color: #10b981 !important;
+  border: 2px solid #10b981 !important;
   color: #065f46 !important;
 }
+/* Light mode: jawaban user salah -> merah */
 .option-item.wrong-option {
   background: #fee2e2 !important;
   border-color: #ef4444 !important;
   color: #991b1b !important;
 }
-.option-item.user-correct {
-  background: #d1fae5 !important;
-  border: 2px solid #10b981 !important;
-  color: #065f46 !important;
+/* Light mode: kunci jawaban (benar, tidak dipilih user) -> KUNING */
+.option-item.correct-option {
+  background: #fef9c3 !important;
+  border-color: #f59e0b !important;
+  color: #854d0e !important;
 }
 .discussion-pembahasan {
   margin-top: 16px;
@@ -744,6 +747,33 @@ hr {
   margin-bottom: 16px;
   font-family: monospace;
 }
+.calculator-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.calculator-header span {
+  font-weight: 600;
+}
+.close-calc {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 20px;
+  transition: 0.2s;
+}
+.close-calc:hover {
+  background: rgba(0,0,0,0.1);
+}
+body.dark-mode .close-calc {
+  color: white;
+}
+body.dark-mode .close-calc:hover {
+  background: rgba(255,255,255,0.2);
+}
 
 /* ========== DARK MODE TOTAL ========== */
 body.dark-mode,
@@ -836,20 +866,20 @@ body.dark-mode .review-question-item .lanjutkan-link:hover {
   color: #c4b5fd !important;
 }
 /* ====== REVIEW PEMBAHASAN DARK MODE ====== */
-body.dark-mode .option-item.correct-option {
-  background: #064e3b !important;
-  border-color: #10b981 !important;
-  color: #a7f3d0 !important;
+body.dark-mode .option-item.user-correct {
+  background: #10b981 !important;
+  border-color: #a78bfa !important;
+  color: white !important;
 }
 body.dark-mode .option-item.wrong-option {
   background: #7f1d1d !important;
   border-color: #ef4444 !important;
   color: #fecaca !important;
 }
-body.dark-mode .option-item.user-correct {
-  background: #10b981 !important;
-  border-color: #a78bfa !important;
-  color: white !important;
+body.dark-mode .option-item.correct-option {
+  background: #ca8a04 !important;    /* kuning gelap untuk dark mode */
+  border-color: #fbbf24 !important;
+  color: #fef08a !important;
 }
 body.dark-mode .discussion-pembahasan {
   background: #0f172a !important;
@@ -880,16 +910,34 @@ body.dark-mode .podium-score,
 body.dark-mode .podium-time {
   color: #ffffff !important;
 }
-body.dark-mode .podium-1 .podium-block { background: linear-gradient(135deg, #b45309, #92400e) !important; }
-body.dark-mode .podium-2 .podium-block { background: linear-gradient(135deg, #4b5563, #374151) !important; }
-body.dark-mode .podium-3 .podium-block { background: linear-gradient(135deg, #78350f, #451a03) !important; }
+body.dark-mode .podium-1 .podium-block {
+  background: linear-gradient(135deg, #b45309, #92400e) !important;
+}
+body.dark-mode .podium-2 .podium-block {
+  background: linear-gradient(135deg, #4b5563, #374151) !important;
+}
+body.dark-mode .podium-3 .podium-block {
+  background: linear-gradient(135deg, #78350f, #451a03) !important;
+}
 /* ====== KALKULATOR DARK MODE ====== */
-body.dark-mode .calculator-box { background: #1e1e2e; }
-body.dark-mode .calc-num { background: #2d2d3a; color: white; }
-body.dark-mode .calc-func { background: #3a3a4a; color: white; }
-body.dark-mode #calcDisplay { background: #0f0f1a; color: white; border-color: #3a3a4a; }
+body.dark-mode .calculator-box {
+  background: #1e1e2e;
+}
+body.dark-mode .calc-num {
+  background: #2d2d3a;
+  color: white;
+}
+body.dark-mode .calc-func {
+  background: #3a3a4a;
+  color: white;
+}
+body.dark-mode #calcDisplay {
+  background: #0f0f1a;
+  color: white;
+  border-color: #3a3a4a;
+}
 
-/* ========== PRINT: SEMUA SOAL TERCETAK (MULTI PAGE) DENGAN WARNA ========== */
+/* ========== PRINT: SEMUA SOAL TERCETAK TIDAK DIPAKSA HALAMAN BARU ========== */
 @media print {
   body * {
     visibility: hidden;
@@ -924,7 +972,7 @@ body.dark-mode #calcDisplay { background: #0f0f1a; color: white; border-color: #
   .discussion-question {
     page-break-inside: avoid;
     break-inside: avoid;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
   }
   .close-modal, .secondary-btn, .modal-header button {
     display: none !important;
@@ -933,7 +981,7 @@ body.dark-mode #calcDisplay { background: #0f0f1a; color: white; border-color: #
     border-bottom: 1px solid #ddd;
     margin-bottom: 20px;
   }
-  .correct-option {
+  .user-correct {
     background: #d1fae5 !important;
     color: #065f46 !important;
     -webkit-print-color-adjust: exact;
@@ -945,9 +993,11 @@ body.dark-mode #calcDisplay { background: #0f0f1a; color: white; border-color: #
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  .user-correct {
-    background: #d1fae5 !important;
-    color: #065f46 !important;
+  .correct-option {
+    background: #fef9c3 !important;
+    color: #854d0e !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }
 

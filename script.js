@@ -439,9 +439,11 @@ function login() {
         return;
       }
       
-      // Jika token sudah digunakan, tampilkan hasil
+      // JIKA TOKEN SUDAH PERNAH DIGUNAKAN (used = true)
       if (res.used) {
         alert("Token ini sudah digunakan. Menampilkan hasil ujian...");
+        
+        // Coba ambil data hasil dari localStorage terlebih dahulu
         const savedScore = localStorage.getItem("cbt_score");
         const savedResults = localStorage.getItem("cbt_results");
         const savedSoal = localStorage.getItem("cbt_soal");
@@ -451,12 +453,12 @@ function login() {
           document.getElementById("login").style.display = "none";
           showResult(parseInt(savedScore));
         } else {
-          alert("Tidak dapat menemukan hasil ujian untuk token ini.");
+          alert("Tidak dapat menemukan hasil ujian untuk token ini. Silakan hubungi admin.");
         }
-        return;
+        return; // PENTING: HENTIKAN EKSEKUSI DI SINI, JANGAN LANJUTKAN KE UJIAN BARU
       }
       
-      // Token baru, mulai ujian
+      // JIKA TOKEN BARU (used = false), MULAI UJIAN BARU
       currentDurasi = res.durasi || 3600;
       currentSheetSoal = res.sheetSoal || "SOAL A";
       timeLeft = currentDurasi;

@@ -434,7 +434,7 @@ function login() {
   fetch(API + "?action=validateToken&token=" + token)
     .then(r => r.json())
     .then(res => {
-      console.log("Response dari server:", res); // CEK DI CONSOLE BROWSER
+      console.log("Response validateToken:", res);
       
       if (!res.valid) {
         alert("Token tidak valid!");
@@ -443,9 +443,9 @@ function login() {
       
       // JIKA TOKEN SUDAH PERNAH DIGUNAKAN (used = true)
       if (res.used === true) {
-        alert("Token ini sudah digunakan. Menampilkan hasil ujian...");
+        alert("Token ini sudah digunakan. Mengambil data hasil ujian...");
         
-        // Coba ambil data hasil dari localStorage
+        // Coba ambil dari localStorage dulu
         const savedScore = localStorage.getItem("cbt_score");
         const savedResults = localStorage.getItem("cbt_results");
         const savedSoal = localStorage.getItem("cbt_soal");
@@ -455,9 +455,39 @@ function login() {
           document.getElementById("login").style.display = "none";
           showResult(parseInt(savedScore));
         } else {
-          alert("Tidak dapat menemukan hasil ujian untuk token ini.");
+          // Ambil dari server (Spreadsheet)
+          fetch(API + "?action=getResult&token=" + encodeURIComponent(token) + "&nama=" + encodeURIComponent(nama))
+            .then(r => r.json())
+            .then(result => {
+              console.log("Response getResult:", result);
+              if (result.success && result.score !== undefined) {
+                // Simpan ke localStorage agar下次 tidak perlu ambil lagi
+                localStorage.setItem("cbt_submitted", "true");
+                localStorage.setItem("cbt_score", result.score);
+                localStorage.setItem("cbt_completion_time", result.waktu || "0");
+                
+                // Untuk pembahasan, kita butuh data soal
+                fetch(API + "?action=getSoal&sheet=" + encodeURIComponent(res.sheetSoal || "SOAL A"))
+                  .then(r => r.json())
+                  .then(soalRes => {
+                    if (soalRes.soal) {
+                      soal = soalRes.soal;
+                      // Simpan soal ke localStorage
+                      localStorage.setItem("cbt_soal", JSON.stringify(soal));
+                    }
+                    document.getElementById("login").style.display = "none";
+                    showResult(parseInt(result.score));
+                  });
+              } else {
+                alert("Tidak dapat menemukan hasil ujian untuk token ini. Error: " + (result.error || "Unknown"));
+              }
+            })
+            .catch(err => {
+              console.error(err);
+              alert("Gagal mengambil data hasil ujian dari server");
+            });
         }
-        return; // PENTING: HENTIKAN EKSEKUSI
+        return;
       }
       
       // JIKA TOKEN BARU (used = false), MULAI UJIAN BARU
@@ -475,7 +505,6 @@ function login() {
       alert("Gagal validasi token");
     });
 }
-
 function loadQuestions() {
   if (soal.length) { startFromSaved(); return; }
   fetch(API + "?action=getSoal&sheet=" + encodeURIComponent(currentSheetSoal))

@@ -247,6 +247,10 @@ input {
   font-weight: 700;
   cursor: pointer;
   font-size: 13px;
+  transition: 0.2s;
+}
+.grid button:hover {
+  transform: scale(1.02);
 }
 .done {
   background: #10b981 !important;
@@ -403,7 +407,6 @@ hr {
 .result-right {
   flex: 2;
   min-width: 280px;
-  text-align: left;
 }
 .result-left-header {
   display: flex;
@@ -451,7 +454,7 @@ hr {
   color: #6b7280;
 }
 
-/* ========== REVIEW MODAL SEBELUM SUBMIT ========== */
+/* ========== MODAL REVIEW SEBELUM SUBMIT ========== */
 .modal, .calculator-modal {
   position: fixed;
   top: 0;
@@ -685,7 +688,7 @@ hr {
   font-weight: bold;
 }
 
-/* ========== KALKULATOR SCIENTIFIC (LAYOUT WINDOWS) ========== */
+/* ========== KALKULATOR SCIENTIFIC ========== */
 .calculator-box {
   width: 450px;
   padding: 24px;
@@ -752,7 +755,6 @@ body.dark-mode .result-card,
 body.dark-mode .modal-content,
 body.dark-mode .calculator-box,
 body.dark-mode .summary-item,
-body.dark-mode .grid button,
 body.dark-mode .review-stat,
 body.dark-mode .leaderboard-card,
 body.dark-mode .score-circle,
@@ -762,8 +764,8 @@ body.dark-mode .your-rank-card,
 body.dark-mode .discussion-question,
 body.dark-mode .option-item,
 body.dark-mode .review-question-item,
-body.dark-mode .leaderboard-item,
-body.dark-mode .leaderboard-header {
+body.dark-mode .leaderboard-header,
+body.dark-mode .leaderboard-item {
   background: #0f0f1a !important;
   border-color: #2a2a3a !important;
   color: #ffffff !important;
@@ -796,24 +798,44 @@ body.dark-mode .question-badge {
   background: #2d2a5e !important;
   color: #a78bfa !important;
 }
+/* ====== NAVIGASI SOAL DARK MODE ====== */
+body.dark-mode .grid button {
+  background: #2d2d3a !important;
+  color: #ffffff !important;
+  border: 1px solid #3a3a4a !important;
+}
 body.dark-mode .grid button.done {
   background: #10b981 !important;
   color: white !important;
+  border: none !important;
 }
 body.dark-mode .grid button.ragu {
   background: #f59e0b !important;
   color: #1e1e2e !important;
+  border: 2px solid #fbbf24 !important;
 }
 body.dark-mode .grid button.activeQ {
   border: 2px solid #a78bfa !important;
+  transform: scale(1.02);
 }
+body.dark-mode .legend .dot.done-dot {
+  background: #10b981;
+}
+body.dark-mode .legend .dot.ragu-dot {
+  background: #f59e0b;
+}
+body.dark-mode .legend .dot.empty-dot {
+  background: #2d2d3a;
+  border: 1px solid #a78bfa;
+}
+/* ====== LANJUTKAN LINK DARK MODE ====== */
 body.dark-mode .review-question-item .lanjutkan-link {
   color: #a78bfa !important;
 }
 body.dark-mode .review-question-item .lanjutkan-link:hover {
   color: #c4b5fd !important;
 }
-/* Opsi jawaban di review pembahasan (dark mode) */
+/* ====== REVIEW PEMBAHASAN DARK MODE ====== */
 body.dark-mode .option-item.correct-option {
   background: #064e3b !important;
   border-color: #10b981 !important;
@@ -838,6 +860,7 @@ body.dark-mode .review-warning {
   color: #fecaca !important;
   border: 1px solid #ef4444 !important;
 }
+/* ====== LEADERBOARD DARK MODE ====== */
 body.dark-mode .leaderboard-item .rank {
   color: #facc15 !important;
 }
@@ -860,15 +883,20 @@ body.dark-mode .podium-time {
 body.dark-mode .podium-1 .podium-block { background: linear-gradient(135deg, #b45309, #92400e) !important; }
 body.dark-mode .podium-2 .podium-block { background: linear-gradient(135deg, #4b5563, #374151) !important; }
 body.dark-mode .podium-3 .podium-block { background: linear-gradient(135deg, #78350f, #451a03) !important; }
+/* ====== KALKULATOR DARK MODE ====== */
 body.dark-mode .calculator-box { background: #1e1e2e; }
 body.dark-mode .calc-num { background: #2d2d3a; color: white; }
 body.dark-mode .calc-func { background: #3a3a4a; color: white; }
 body.dark-mode #calcDisplay { background: #0f0f1a; color: white; border-color: #3a3a4a; }
 
-/* ========== PRINT: SEMUA SOAL TERCETAK ========== */
+/* ========== PRINT: SEMUA SOAL TERCETAK (MULTI PAGE) DENGAN WARNA ========== */
 @media print {
-  body * { visibility: hidden; }
-  #discussionModal, #discussionModal * { visibility: visible; }
+  body * {
+    visibility: hidden;
+  }
+  #discussionModal, #discussionModal * {
+    visibility: visible;
+  }
   #discussionModal {
     position: absolute;
     top: 0;
@@ -881,28 +909,88 @@ body.dark-mode #calcDisplay { background: #0f0f1a; color: white; border-color: #
     height: auto !important;
     max-height: none !important;
   }
-  .modal-content { box-shadow: none; padding: 0; overflow: visible !important; max-height: none !important; height: auto; }
-  .modal-body { overflow: visible !important; max-height: none !important; height: auto; }
-  .discussion-question { page-break-inside: avoid; break-inside: avoid; margin-bottom: 30px; }
-  .close-modal, .secondary-btn, .modal-header button { display: none !important; }
-  .modal-header { border-bottom: 1px solid #ddd; margin-bottom: 20px; }
-  .correct-option { background: #d1fae5 !important; color: #065f46 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .wrong-option { background: #fee2e2 !important; color: #991b1b !important; }
-  .user-correct { background: #d1fae5 !important; color: #065f46 !important; }
+  .modal-content {
+    box-shadow: none;
+    padding: 0;
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto;
+  }
+  .modal-body {
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto;
+  }
+  .discussion-question {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    margin-bottom: 30px;
+  }
+  .close-modal, .secondary-btn, .modal-header button {
+    display: none !important;
+  }
+  .modal-header {
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+  }
+  .correct-option {
+    background: #d1fae5 !important;
+    color: #065f46 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .wrong-option {
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .user-correct {
+    background: #d1fae5 !important;
+    color: #065f46 !important;
+  }
 }
 
 /* ========== RESPONSIF ========== */
 @media (max-width: 860px) {
-  .wrapper { flex-direction: column; padding: 0 16px; }
-  .side { position: static; }
-  .login-container { flex-direction: column; }
-  .login-left { padding: 20px; }
-  .login-image { max-width: 250px; }
-  .brand { font-size: 16px; white-space: normal; }
-  .top-right { gap: 8px; }
-  .homepage-btn, .darkmode-btn { padding: 4px 12px; font-size: 11px; }
-  .result-card { flex-direction: column; }
-  .review-stats { flex-direction: column; }
-  .calc-grid { gap: 6px; }
-  .calc-grid button { padding: 12px 0; font-size: 14px; }
+  .wrapper {
+    flex-direction: column;
+    padding: 0 16px;
+  }
+  .side {
+    position: static;
+  }
+  .login-container {
+    flex-direction: column;
+  }
+  .login-left {
+    padding: 20px;
+  }
+  .login-image {
+    max-width: 250px;
+  }
+  .brand {
+    font-size: 16px;
+    white-space: normal;
+  }
+  .top-right {
+    gap: 8px;
+  }
+  .homepage-btn, .darkmode-btn {
+    padding: 4px 12px;
+    font-size: 11px;
+  }
+  .result-card {
+    flex-direction: column;
+  }
+  .review-stats {
+    flex-direction: column;
+  }
+  .calc-grid {
+    gap: 6px;
+  }
+  .calc-grid button {
+    padding: 12px 0;
+    font-size: 14px;
+  }
 }

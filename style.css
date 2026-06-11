@@ -31,19 +31,20 @@ body {
   box-shadow: 0 20px 35px rgba(0, 0, 0, 0.1);
 }
 .login-left {
-  flex: 1;
+  flex: 1.2;
   background: #f3efff;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px;
+  padding: 30px;
 }
 .login-image {
   width: 100%;
-  max-width: 300px;
+  max-width: 380px;
   height: auto;
-  border-radius: 24px;
+  border-radius: 28px;
   object-fit: cover;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
 }
 .login-right {
   flex: 1;
@@ -114,44 +115,7 @@ input {
   text-align: center;
 }
 
-/* ========== DARK MODE ========== */
-body.dark-mode,
-body.dark-mode .login-container,
-body.dark-mode .login-right,
-body.dark-mode .login-left,
-body.dark-mode .card,
-body.dark-mode .side,
-body.dark-mode .result-card,
-body.dark-mode .modal-content,
-body.dark-mode .calculator-box,
-body.dark-mode .summary-item,
-body.dark-mode .grid button,
-body.dark-mode .review-stat,
-body.dark-mode .discussion-question,
-body.dark-mode .review-question-item,
-body.dark-mode .leaderboard-card,
-body.dark-mode .score-circle,
-body.dark-mode .result-summary,
-body.dark-mode .badge,
-body.dark-mode .topbar {
-  background: #0f0f1a !important;
-  border-color: #2a2a3a !important;
-  color: #ffffff !important;
-}
-body.dark-mode * {
-  color: #ffffff !important;
-}
-body.dark-mode input,
-body.dark-mode .opt,
-body.dark-mode .secondary-btn,
-body.dark-mode .ragu-btn,
-body.dark-mode .submit-btn,
-body.dark-mode .start-btn {
-  background: #1e1e2e !important;
-  border-color: #3a3a4a !important;
-}
-
-/* ========== TOPBAR DENGAN LOGO ========== */
+/* ========== TOPBAR ========== */
 .topbar {
   display: flex;
   justify-content: space-between;
@@ -206,6 +170,7 @@ body.dark-mode .start-btn {
 }
 .progress-text {
   font-size: 12px;
+  color: #6b7280;
 }
 .timer {
   background: white;
@@ -213,11 +178,284 @@ body.dark-mode .start-btn {
   padding: 4px 12px;
   font-weight: bold;
   font-size: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-/* ========== SISANYA (layout soal, leaderboard, dll) ========== */
-/* ... (semua gaya yang sudah ada sebelumnya, saya tidak tulis ulang untuk menghemat karakter, tapi asumsikan Anda sudah punya) ... */
-.wrapper { display: flex; gap: 24px; max-width: 1400px; margin: 20px auto; padding: 0 20px; }
-.card { flex: 3; padding: 24px; background: white; border-radius: 32px; }
-.side { flex: 1; padding: 24px; background: white; border-radius: 32px; position: sticky; top: 80px; }
-/* ... tambahkan sendiri jika perlu, atau gunakan style.css dari versi sebelumnya yang sudah lengkap */
+/* ========== LAYOUT UJIAN (CARD & SIDEBAR) ========== */
+.wrapper {
+  display: flex;
+  gap: 24px;
+  max-width: 1400px;
+  margin: 24px auto;
+  padding: 0 24px;
+}
+.card {
+  flex: 3;
+  background: white;
+  border-radius: 32px;
+  border: 1px solid #f0eaff;
+  padding: 28px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+}
+.side {
+  flex: 1;
+  background: white;
+  border-radius: 32px;
+  border: 1px solid #f0eaff;
+  padding: 24px;
+  position: sticky;
+  top: 90px;
+  height: fit-content;
+}
+.question-badge {
+  width: fit-content;
+  padding: 6px 16px;
+  border-radius: 40px;
+  background: #ede9fe;
+  color: #6d28d9;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+.progress {
+  height: 6px;
+  background: #eee8ff;
+  border-radius: 10px;
+  margin-bottom: 28px;
+}
+.fill {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, #c4b5fd);
+  border-radius: 10px;
+  transition: 0.3s;
+}
+#q {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+.opt {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: 28px;
+  border: 1px solid #e9e4ff;
+  background: white;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.opt:hover {
+  background: #faf8ff;
+  border-color: #c4b5fd;
+}
+.opt.active {
+  background: #f4f0ff;
+  border: 2px solid #8b5cf6;
+}
+.letter {
+  width: 36px;
+  height: 36px;
+  background: #ede9fe;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+.action-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 28px;
+}
+.secondary-btn, .ragu-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 40px;
+  border: none;
+  background: #f5f3ff;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ragu-btn.active {
+  background: #fef3c7;
+  color: #b45309;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin: 20px 0;
+}
+.grid button {
+  aspect-ratio: 1/1;
+  border: none;
+  border-radius: 16px;
+  background: #f5f3ff;
+  font-weight: 700;
+  cursor: pointer;
+}
+.done { background: #10b981 !important; color: white; }
+.ragu { background: #fef3c7 !important; border: 2px solid #f59e0b; }
+.activeQ { border: 2px solid #8b5cf6; transform: scale(1.02); }
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 16px 0;
+  font-size: 11px;
+}
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+}
+.done-dot { background: #10b981; }
+.ragu-dot { background: #f59e0b; }
+.empty-dot { background: #d1d5db; }
+.submit-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 40px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+/* ========== HASIL UJIAN (LANDSCAPE) ========== */
+.result-card {
+  max-width: 1100px;
+  margin: 30px auto;
+  padding: 32px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  background: white;
+  border-radius: 48px;
+}
+.result-left { flex: 1.2; min-width: 280px; text-align: center; }
+.result-right { flex: 2; min-width: 280px; }
+.result-left-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.score-circle {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 6px solid #8b5cf6;
+  background: #f3efff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 42px;
+  font-weight: 800;
+  margin: 20px auto;
+}
+.result-summary {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  background: #f8f6ff;
+  border-radius: 28px;
+  padding: 16px;
+  margin: 20px 0;
+}
+.result-summary div {
+  text-align: center;
+  flex: 1;
+}
+.result-summary span {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+.result-summary strong {
+  font-size: 18px;
+}
+
+/* ========== DARK MODE ========== */
+body.dark-mode,
+body.dark-mode .login-container,
+body.dark-mode .login-right,
+body.dark-mode .card,
+body.dark-mode .side,
+body.dark-mode .result-card,
+body.dark-mode .modal-content,
+body.dark-mode .calculator-box,
+body.dark-mode .summary-item,
+body.dark-mode .grid button,
+body.dark-mode .review-stat,
+body.dark-mode .leaderboard-card,
+body.dark-mode .score-circle,
+body.dark-mode .result-summary,
+body.dark-mode .topbar {
+  background: #0f0f1a !important;
+  border-color: #2a2a3a !important;
+  color: #ffffff !important;
+}
+body.dark-mode * {
+  color: #ffffff !important;
+}
+body.dark-mode input,
+body.dark-mode .opt,
+body.dark-mode .secondary-btn,
+body.dark-mode .ragu-btn,
+body.dark-mode .submit-btn,
+body.dark-mode .start-btn {
+  background: #1e1e2e !important;
+  border-color: #3a3a4a !important;
+}
+body.dark-mode .opt.active {
+  background: #3b2a6e !important;
+  border-color: #a78bfa !important;
+}
+body.dark-mode .letter {
+  background: #3b2a6e !important;
+}
+body.dark-mode .homepage-btn,
+body.dark-mode .darkmode-btn {
+  background: #2d2a5e !important;
+}
+
+/* ========== RESPONSIF ========== */
+@media (max-width: 860px) {
+  .wrapper {
+    flex-direction: column;
+    padding: 0 16px;
+  }
+  .side {
+    position: static;
+  }
+  .login-container {
+    flex-direction: column;
+  }
+  .login-left {
+    padding: 20px;
+  }
+  .login-image {
+    max-width: 250px;
+  }
+  .brand {
+    font-size: 16px;
+    white-space: normal;
+  }
+  .top-right {
+    gap: 8px;
+  }
+  .homepage-btn, .darkmode-btn {
+    padding: 4px 12px;
+    font-size: 11px;
+  }
+  .result-card {
+    flex-direction: column;
+  }
+}

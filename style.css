@@ -1,4 +1,3 @@
-/* ========== GLOBAL ========== */
 * {
   margin: 0;
   padding: 0;
@@ -831,7 +830,7 @@ body.dark-mode .question-badge {
   background: #2d2a5e !important;
   color: #a78bfa !important;
 }
-/* Navigasi soal */
+/* Navigasi soal dark mode */
 body.dark-mode .grid button {
   background: #2d2d3a !important;
   color: #ffffff !important;
@@ -861,7 +860,7 @@ body.dark-mode .legend .dot.empty-dot {
   background: #2d2d3a;
   border: 1px solid #a78bfa;
 }
-/* Lanjutkan link */
+/* Lanjutkan link dark mode */
 body.dark-mode .review-question-item .lanjutkan-link {
   color: #a78bfa !important;
 }
@@ -922,10 +921,22 @@ body.dark-mode .calc-num { background: #2d2d3a; color: white; }
 body.dark-mode .calc-func { background: #3a3a4a; color: white; }
 body.dark-mode #calcDisplay { background: #0f0f1a; color: white; border-color: #3a3a4a; }
 
-/* ========== PRINT ========== */
+/* ========== TIMER DARK MODE (DISAMAKAN DENGAN BADGE SOAL) ========== */
+body.dark-mode .timer {
+  background: #2d2a5e !important;
+  color: #a78bfa !important;
+  border: 1px solid #a78bfa !important;
+  box-shadow: none !important;
+}
+
+/* ========== PRINT: SEMUA SOAL TERCETAK TIDAK DIPAKSA HALAMAN BARU ========== */
 @media print {
-  body * { visibility: hidden; }
-  #discussionModal, #discussionModal * { visibility: visible; }
+  body * {
+    visibility: hidden;
+  }
+  #discussionModal, #discussionModal * {
+    visibility: visible;
+  }
   #discussionModal {
     position: absolute;
     top: 0;
@@ -938,28 +949,90 @@ body.dark-mode #calcDisplay { background: #0f0f1a; color: white; border-color: #
     height: auto !important;
     max-height: none !important;
   }
-  .modal-content { box-shadow: none; padding: 0; overflow: visible !important; max-height: none !important; height: auto; }
-  .modal-body { overflow: visible !important; max-height: none !important; height: auto; }
-  .discussion-question { page-break-inside: avoid; break-inside: avoid; margin-bottom: 20px; }
-  .close-modal, .secondary-btn, .modal-header button { display: none !important; }
-  .modal-header { border-bottom: 1px solid #ddd; margin-bottom: 20px; }
-  .user-correct { background: #d1fae5 !important; color: #065f46 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .wrong-option { background: #fee2e2 !important; color: #991b1b !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .correct-option { background: #fef9c3 !important; color: #854d0e !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .modal-content {
+    box-shadow: none;
+    padding: 0;
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto;
+  }
+  .modal-body {
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto;
+  }
+  .discussion-question {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    margin-bottom: 20px;
+  }
+  .close-modal, .secondary-btn, .modal-header button {
+    display: none !important;
+  }
+  .modal-header {
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+  }
+  .user-correct {
+    background: #d1fae5 !important;
+    color: #065f46 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .wrong-option {
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .correct-option {
+    background: #fef9c3 !important;
+    color: #854d0e !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 }
 
 /* ========== RESPONSIF ========== */
 @media (max-width: 860px) {
-  .wrapper { flex-direction: column; padding: 0 16px; }
-  .side { position: static; }
-  .login-container { flex-direction: column; }
-  .login-left { padding: 20px; }
-  .login-image { max-width: 250px; }
-  .brand { font-size: 16px; white-space: normal; }
-  .top-right { gap: 8px; }
-  .homepage-btn, .darkmode-btn { padding: 4px 12px; font-size: 11px; }
-  .result-card { flex-direction: column; }
-  .review-stats { flex-direction: column; }
-  .calc-grid { gap: 6px; }
-  .calc-grid button { padding: 12px 0; font-size: 14px; }
+  .wrapper {
+    flex-direction: column;
+    padding: 0 16px;
+  }
+  .side {
+    position: static;
+  }
+  .login-container {
+    flex-direction: column;
+  }
+  .login-left {
+    padding: 20px;
+  }
+  .login-image {
+    max-width: 250px;
+  }
+  .brand {
+    font-size: 16px;
+    white-space: normal;
+  }
+  .top-right {
+    gap: 8px;
+  }
+  .homepage-btn, .darkmode-btn {
+    padding: 4px 12px;
+    font-size: 11px;
+  }
+  .result-card {
+    flex-direction: column;
+  }
+  .review-stats {
+    flex-direction: column;
+  }
+  .calc-grid {
+    gap: 6px;
+  }
+  .calc-grid button {
+    padding: 12px 0;
+    font-size: 14px;
+  }
 }

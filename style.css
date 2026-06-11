@@ -516,7 +516,7 @@ hr {
   gap: 8px;
 }
 .review-question-item .secondary-btn {
-  padding: 6px 12px;
+  padding: 4px 10px;
   font-size: 12px;
 }
 .review-warning {
@@ -653,6 +653,51 @@ hr {
   font-weight: bold;
 }
 
+/* ========== KALKULATOR SCIENTIFIC (GAYA APPLE) ========== */
+.calculator-box {
+  width: 450px;
+  padding: 24px;
+  border-radius: 32px;
+}
+.calc-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-top: 16px;
+}
+.calc-grid button {
+  padding: 16px 0;
+  border-radius: 40px;
+  border: none;
+  font-size: 18px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.1s;
+}
+.calc-grid button:active {
+  transform: scale(0.96);
+}
+.calc-num { background: #2d2d2d; color: white; }
+.calc-operator { background: #f59e0b; color: white; }
+.calc-func { background: #3a3a3a; color: white; }
+.calc-mem { background: #10b981; color: white; }
+.calc-clear { background: #ef4444; color: white; }
+#calcDisplay {
+  width: 100%;
+  padding: 20px;
+  font-size: 32px;
+  text-align: right;
+  border-radius: 24px;
+  margin-bottom: 16px;
+  background: #1a1a1a;
+  color: white;
+  border: none;
+  font-family: monospace;
+}
+body.dark-mode .calc-num { background: #3a3a3a; }
+body.dark-mode .calc-func { background: #4a4a4a; }
+body.dark-mode #calcDisplay { background: #0f0f1a; color: white; }
+
 /* ========== DARK MODE TOTAL ========== */
 body.dark-mode,
 body.dark-mode .login-container,
@@ -692,17 +737,32 @@ body.dark-mode .start-btn {
   border-color: #3a3a4a !important;
 }
 body.dark-mode .opt.active {
-  background: #3b2a6e !important;
+  background: #4c1d95 !important;
   border-color: #a78bfa !important;
 }
 body.dark-mode .letter {
-  background: #3b2a6e !important;
+  background: #4c1d95 !important;
 }
 body.dark-mode .homepage-btn,
 body.dark-mode .darkmode-btn {
   background: #2d2a5e !important;
 }
-/* Dark mode untuk review jawaban */
+/* Opsi jawaban di dark mode */
+body.dark-mode .opt {
+  background: #1e1e2e !important;
+  border-color: #3a3a4a !important;
+  color: #ffffff !important;
+}
+body.dark-mode .opt:hover {
+  background: #2d2d3a !important;
+}
+/* Review warning */
+body.dark-mode .review-warning {
+  background: #7f1d1d !important;
+  color: #fecaca !important;
+  border: 1px solid #ef4444 !important;
+}
+/* Review pembahasan dark mode */
 body.dark-mode .correct-option {
   background: #4c1d95 !important;
   border-color: #a78bfa !important;
@@ -722,95 +782,10 @@ body.dark-mode .discussion-pembahasan {
   background: #0f172a !important;
   color: #cbd5e1 !important;
 }
-/* Dark mode leaderboard */
+/* Leaderboard dark mode */
 body.dark-mode .leaderboard-item .rank {
   color: #facc15 !important;
 }
 body.dark-mode .leaderboard-header .rank,
 body.dark-mode .leaderboard-header .name,
-body.dark-mode .leaderboard-header .score,
-body.dark-mode .leaderboard-header .time {
-  color: #a78bfa !important;
-}
-body.dark-mode .my-rank {
-  background: #2d2a5e !important;
-  border-color: #a78bfa !important;
-}
-body.dark-mode .podium-rank,
-body.dark-mode .podium-name,
-body.dark-mode .podium-score,
-body.dark-mode .podium-time {
-  color: #ffffff !important;
-}
-body.dark-mode .podium-1 .podium-block { background: linear-gradient(135deg, #b45309, #92400e) !important; }
-body.dark-mode .podium-2 .podium-block { background: linear-gradient(135deg, #4b5563, #374151) !important; }
-body.dark-mode .podium-3 .podium-block { background: linear-gradient(135deg, #78350f, #451a03) !important; }
-
-/* ========== CALCULATOR ========== */
-.calculator-box {
-  width: 450px;
-  padding: 24px;
-}
-.calc-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
-  margin-top: 16px;
-}
-.calc-grid button {
-  padding: 12px;
-  border-radius: 16px;
-  border: none;
-  background: #f0f0f0;
-  cursor: pointer;
-  font-size: 14px;
-}
-.calc-operator { background: #f59e0b; color: white; }
-.calc-func { background: #8b5cf6; color: white; }
-.calc-mem { background: #10b981; color: white; }
-.calc-clear { background: #ef4444; color: white; }
-#calcDisplay {
-  width: 100%;
-  padding: 14px;
-  font-size: 22px;
-  text-align: right;
-  border-radius: 24px;
-  margin-bottom: 16px;
-}
-
-/* ========== RESPONSIF ========== */
-@media (max-width: 860px) {
-  .wrapper {
-    flex-direction: column;
-    padding: 0 16px;
-  }
-  .side {
-    position: static;
-  }
-  .login-container {
-    flex-direction: column;
-  }
-  .login-left {
-    padding: 20px;
-  }
-  .login-image {
-    max-width: 250px;
-  }
-  .brand {
-    font-size: 16px;
-    white-space: normal;
-  }
-  .top-right {
-    gap: 8px;
-  }
-  .homepage-btn, .darkmode-btn {
-    padding: 4px 12px;
-    font-size: 11px;
-  }
-  .result-card {
-    flex-direction: column;
-  }
-  .review-stats {
-    flex-direction: column;
-  }
-}
+body.d

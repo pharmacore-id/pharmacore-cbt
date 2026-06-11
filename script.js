@@ -381,40 +381,61 @@ function goHome() {
   }
 }
 
-// ========== LOGIN & LOAD SOAL (dengan one-time token) ==========
+// ========== LOGIN & LOAD SOAL ==========
 function login() {
   nama = document.getElementById("nama").value.trim();
   token = document.getElementById("token").value.trim();
   if (!nama || !token) { alert("Lengkapi data!"); return; }
   
-  // Cek apakah ada session ujian yang belum selesai
-  const savedToken = localStorage.getItem("cbt_token");
-  const savedAnswers = localStorage.getItem("cbt_answers");
-  
-  if (savedToken === token && savedAnswers) {
-    if (confirm("Anda memiliki ujian yang belum selesai. Lanjutkan?")) {
-      // Lanjutkan ujian dari session yang tersimpan
-      loadSavedState();
-      renderQuestion();
-      updateNavGrid();
-      updateStats();
-      startTimer();
-      document.getElementById("login").style.display = "none";
-      document.getElementById("app").style.display = "block";
-      return;
-    }
-  }
-  
-  // Jika tidak ada session atau user memilih baru, validasi token ke server
   fetch(API + "?action=validateToken&token=" + token)
     .then(r => r.json())
     .then(res => {
       if (!res.valid) {
-        alert("Token tidak valid atau sudah digunakan!");
+        alert("Token tidak valid!");
         return;
       }
       
-      // Mulai ujian baru
+      // JIKA TOKEN SUDAH PERNAH DIGUNAKAN (used = true)
+      if (res.used) {
+        alert("Token ini sudah digunakan. Menampilkan hasil ujian...");
+        
+        // Coba ambil data hasil dari localStorage terlebih dahulu
+        const savedScore = localStorage.getItem("cbt_score");
+        const savedResults = localStorage.getItem("cbt_results");
+        const savedSoal = localStorage.getItem("cbt_soal");
+        
+        if (savedScore && savedResults && savedSoal) {
+          soal = JSON.parse(savedSoal);
+          document.getElementById("login").style.display = "none";
+          showResult(parseInt(savedScore));
+        } else {
+          // Jika tidak ada di localStorage, ambil dari server
+          fetch(API + "?action=getResult&token=" + encodeURIComponent(token) + "&nama=" + encodeURIComponent(nama))
+            .then(r => r.json())
+            .then(result => {
+              if (result.score !== undefined) {
+                // Simpan ke localStorage
+                localStorage.setItem("cbt_submitted", "true");
+                localStorage.setItem("cbt_score", result.score);
+                localStorage.setItem("cbt_completion_time", result.waktu || "0");
+                // Untuk hasil detail (pembahasan), kita perlu data soal
+                fetch(API + "?action=getSoal&sheet=SOAL A")
+                  .then(r => r.json())
+                  .then(soalRes => {
+                    if (soalRes.soal) soal = soalRes.soal;
+                    document.getElementById("login").style.display = "none";
+                    showResult(parseInt(result.score));
+                  });
+              } else {
+                alert("Tidak dapat menemukan hasil ujian untuk token ini.");
+              }
+            })
+            .catch(() => alert("Gagal mengambil data hasil ujian"));
+        }
+        return;
+      }
+      
+      // JIKA TOKEN BARU (used = false), MULAI UJIAN BARU
       currentDurasi = res.durasi || 3600;
       currentSheetSoal = res.sheetSoal || "SOAL A";
       timeLeft = currentDurasi;
@@ -427,34 +448,26 @@ function login() {
     .catch(() => alert("Gagal validasi token"));
 }
 
-// Tambahkan fungsi ini untuk melanjutkan ujian
-function loadSavedState() {
-  const savedAnswers = localStorage.getItem("cbt_answers");
-  const savedRagu = localStorage.getItem("cbt_ragu");
-  const savedCurrent = localStorage.getItem("cbt_current");
-  const savedTime = localStorage.getItem("cbt_time");
-  const savedSheet = localStorage.getItem("cbt_sheetSoal");
-  const savedDurasi = localStorage.getItem("cbt_durasi");
-  
-  if (savedAnswers) answers = JSON.parse(savedAnswers);
-  if (savedRagu) ragu = JSON.parse(savedRagu);
-  if (savedCurrent) currentQuestion = parseInt(savedCurrent);
-  if (savedTime) timeLeft = parseInt(savedTime);
-  if (savedSheet) currentSheetSoal = savedSheet;
-  if (savedDurasi) currentDurasi = parseInt(savedDurasi);
-  
-  // Muat ulang data soal jika perlu
-  if (soal.length === 0 && currentSheetSoal) {
-    fetch(API + "?action=getSoal&sheet=" + encodeURIComponent(currentSheetSoal))
-      .then(r => r.json())
-      .then(res => {
-        if (res.soal) soal = res.soal;
-        renderQuestion();
-        updateNavGrid();
-        updateStats();
-      });
-  }
-  isLoggedIn = true;
+function loadQuestions() {
+  if (soal.length) { startFromSaved(); return; }
+  fetch(API + "?action=getSoal&sheet=" + encodeURIComponent(currentSheetSoal))
+    .then(r => r.json())
+    .then(res => {
+      if (res.error) { alert("Error: " + res.error); return; }
+      if (!res.soal || !res.soal.length) { alert("Soal tidak ditemukan di sheet " + currentSheetSoal); return; }
+      soal = res.soal;
+      document.getElementById("totalCount").innerText = soal.length;
+      startFromSaved();
+      saveState();
+    })
+    .catch(() => alert("Gagal load soal"));
+}
+
+function startFromSaved() {
+  renderQuestion();
+  updateNavGrid();
+  updateStats();
+  startTimer();
 }
 
 // ========== DARK MODE ==========
@@ -543,7 +556,6 @@ function checkExistingSession() {
   loadSavedState();
   loadDarkMode();
   
-  // Jika sudah submit, langsung tampilkan hasil
   if (localStorage.getItem("cbt_submitted") === "true") {
     let savedScore = localStorage.getItem("cbt_score");
     if (savedScore) {
@@ -552,7 +564,6 @@ function checkExistingSession() {
       if (soal.length) {
         showResult(parseInt(savedScore));
       } else if (currentSheetSoal) {
-        // Load soal dulu agar leaderboard bisa tampil
         fetch(API + "?action=getSoal&sheet=" + encodeURIComponent(currentSheetSoal))
           .then(r => r.json())
           .then(res => { if (res.soal) soal = res.soal; showResult(parseInt(savedScore)); });
@@ -561,7 +572,6 @@ function checkExistingSession() {
     return;
   }
   
-  // Jika sudah login tapi belum submit, lanjutkan ujian
   if (isLoggedIn) {
     document.getElementById("login").style.display = "none";
     document.getElementById("app").style.display = "block";

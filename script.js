@@ -60,10 +60,14 @@ function updateStats() {
   if (!soal.length) return;
   const answered = Object.keys(answers).length;
   const raguCount = Object.keys(ragu).length;
-  document.getElementById("answeredCount").innerText = answered;
-  document.getElementById("answeredSummary").innerText = answered;
-  document.getElementById("raguSummary").innerText = raguCount;
-  document.getElementById("unansweredSummary").innerText = soal.length - answered;
+  const ansEl = document.getElementById("answeredCount");
+  const ansSum = document.getElementById("answeredSummary");
+  const ragSum = document.getElementById("raguSummary");
+  const unansSum = document.getElementById("unansweredSummary");
+  if (ansEl) ansEl.innerText = answered;
+  if (ansSum) ansSum.innerText = answered;
+  if (ragSum) ragSum.innerText = raguCount;
+  if (unansSum) unansSum.innerText = soal.length - answered;
 }
 
 function updateNavGrid() {
@@ -76,7 +80,8 @@ function updateNavGrid() {
     if (i === currentQuestion) cls.push("activeQ");
     html += `<button class="${cls.join(' ')}" onclick="goToQuestion(${i})">${i + 1}</button>`;
   }
-  document.getElementById("nav").innerHTML = html;
+  const navEl = document.getElementById("nav");
+  if (navEl) navEl.innerHTML = html;
 }
 
 function goToQuestion(idx) {
@@ -89,10 +94,16 @@ function goToQuestion(idx) {
 }
 
 function renderQuestion() {
-  if (!soal.length) return;
+  if (!soal.length || !soal[currentQuestion]) return;
   const s = soal[currentQuestion];
-  document.getElementById("questionLabel").innerHTML = "Soal " + (currentQuestion + 1);
-  document.getElementById("q").innerHTML = s.Pertanyaan || "Soal tidak tersedia";
+  const qLabel = document.getElementById("questionLabel");
+  const qEl = document.getElementById("q");
+  const optEl = document.getElementById("opt");
+  const raguBtn = document.getElementById("raguBtn");
+  
+  if (qLabel) qLabel.innerHTML = "Soal " + (currentQuestion + 1);
+  if (qEl) qEl.innerHTML = s.Pertanyaan || "Soal tidak tersedia";
+  
   let optHtml = "";
   for (let opt of OPTIONS) {
     let optText = s[opt] || '';
@@ -100,14 +111,16 @@ function renderQuestion() {
     optHtml += `<div class="opt ${answers[currentQuestion] == opt ? 'active' : ''}" onclick="pick('${opt}')">
       <div class="letter">${opt}</div><div>${optText}</div></div>`;
   }
-  document.getElementById("opt").innerHTML = optHtml;
-  const raguBtn = document.getElementById("raguBtn");
-  if (ragu[currentQuestion]) {
-    raguBtn.classList.add("active");
-    raguBtn.innerHTML = "🚩 Ditandai Ragu";
-  } else {
-    raguBtn.classList.remove("active");
-    raguBtn.innerHTML = "🚩 Ragu";
+  if (optEl) optEl.innerHTML = optHtml;
+  
+  if (raguBtn) {
+    if (ragu[currentQuestion]) {
+      raguBtn.classList.add("active");
+      raguBtn.innerHTML = "🚩 Ditandai Ragu";
+    } else {
+      raguBtn.classList.remove("active");
+      raguBtn.innerHTML = "🚩 Ragu";
+    }
   }
   updateProgress();
 }
@@ -146,8 +159,11 @@ function prevQuestion() {
 }
 
 function toggleRagu() {
-  if (ragu[currentQuestion]) delete ragu[currentQuestion];
-  else ragu[currentQuestion] = true;
+  if (ragu[currentQuestion]) {
+    delete ragu[currentQuestion];
+  } else {
+    ragu[currentQuestion] = true;
+  }
   saveState();
   renderQuestion();
   updateNavGrid();
@@ -182,10 +198,17 @@ function showReviewModal() {
   if (!soal.length) return;
   const answered = Object.keys(answers).length;
   const raguCount = Object.keys(ragu).length;
-  document.getElementById("reviewTotal").innerText = soal.length;
-  document.getElementById("reviewAnswered").innerText = answered;
-  document.getElementById("reviewRagu").innerText = raguCount;
-  document.getElementById("reviewUnanswered").innerText = soal.length - answered;
+  const reviewTotal = document.getElementById("reviewTotal");
+  const reviewAnswered = document.getElementById("reviewAnswered");
+  const reviewRagu = document.getElementById("reviewRagu");
+  const reviewUnanswered = document.getElementById("reviewUnanswered");
+  const reviewList = document.getElementById("reviewQuestionList");
+  
+  if (reviewTotal) reviewTotal.innerText = soal.length;
+  if (reviewAnswered) reviewAnswered.innerText = answered;
+  if (reviewRagu) reviewRagu.innerText = raguCount;
+  if (reviewUnanswered) reviewUnanswered.innerText = soal.length - answered;
+  
   let listHtml = "";
   for (let i = 0; i < soal.length; i++) {
     let status = "", cls = "";
@@ -198,12 +221,17 @@ function showReviewModal() {
       <button class="secondary-btn lanjutkan-link" onclick="goToQuestionFromReview(${i})">Lanjutkan</button>
     </div>`;
   }
-  document.getElementById("reviewQuestionList").innerHTML = listHtml;
-  document.getElementById("reviewModal").style.display = "flex";
+  if (reviewList) reviewList.innerHTML = listHtml;
+  
+  const reviewModal = document.getElementById("reviewModal");
+  if (reviewModal) reviewModal.style.display = "flex";
 }
 
 function goToQuestionFromReview(idx) { closeReviewModal(); goToQuestion(idx); }
-function closeReviewModal() { document.getElementById("reviewModal").style.display = "none"; }
+function closeReviewModal() { 
+  const modal = document.getElementById("reviewModal");
+  if (modal) modal.style.display = "none";
+}
 function confirmSubmit() { closeReviewModal(); submit(); }
 
 // ========== SUBMIT ==========
@@ -255,17 +283,28 @@ function submit() {
 }
 
 function showResult(score) {
-  document.getElementById("app").style.display = "none";
-  document.getElementById("result").style.display = "flex";
+  const app = document.getElementById("app");
+  const resultDiv = document.getElementById("result");
+  const scoreNum = document.getElementById("scoreNumber");
+  const skorEl = document.getElementById("skor");
+  const resultNama = document.getElementById("resultNama");
+  const resultBenar = document.getElementById("resultBenar");
+  const resultSalah = document.getElementById("resultSalah");
+  const resultWaktu = document.getElementById("resultWaktu");
+  
+  if (app) app.style.display = "none";
+  if (resultDiv) resultDiv.style.display = "flex";
+  
   let persen = Math.round((score / soal.length) * 100);
-  document.getElementById("scoreNumber").innerHTML = persen + "%";
+  if (scoreNum) scoreNum.innerHTML = persen + "%";
+  
   let grade = persen >= 90 ? "🏆 Luar Biasa!" : persen >= 75 ? "✅ Sangat Baik" : persen >= 60 ? "📚 Cukup" : "📖 Perlu Belajar Lebih Lanjut";
-  document.getElementById("skor").innerHTML = `<strong>${grade}</strong><br>${score} dari ${soal.length} benar (${persen}%)`;
-  document.getElementById("resultNama").innerText = nama;
-  document.getElementById("resultBenar").innerText = score;
-  document.getElementById("resultSalah").innerText = soal.length - score;
+  if (skorEl) skorEl.innerHTML = `<strong>${grade}</strong><br>${score} dari ${soal.length} benar (${persen}%)`;
+  if (resultNama) resultNama.innerText = nama;
+  if (resultBenar) resultBenar.innerText = score;
+  if (resultSalah) resultSalah.innerText = soal.length - score;
   let waktuStr = formatTimeDisplay(completionTimeSeconds);
-  document.getElementById("resultWaktu").innerText = waktuStr;
+  if (resultWaktu) resultWaktu.innerText = waktuStr;
   loadLeaderboard();
 }
 
@@ -280,36 +319,41 @@ function openDiscussionModal() {
     const s = soalData[i];
     const userAnswer = r.jawabanUser;
     const correctKey = r.kunci;
-    html += `<div class="discussion-question">
-      <h4>Soal ${r.nomor}. ${r.pertanyaan}</h4>
+    html += `<div class="discussion-question" style="margin-bottom: 20px; border-radius: 20px; border-left: 6px solid #8b5cf6; background: #f9fafb; padding: 16px;">
+      <h4 style="margin-top: 0; margin-bottom: 12px;">Soal ${r.nomor}. ${r.pertanyaan}</h4>
       <div class="options-list">`;
     for (let opt of OPTIONS) {
       let optText = s[opt] || '';
       let isUser = (userAnswer === opt);
       let isCorrectKey = (correctKey === opt);
-      let additionalClass = "";
+      let bgColor = "#ffffff";
       let indicator = "";
       if (isUser && isCorrectKey) {
-        additionalClass = "user-correct";
+        bgColor = "#d1fae5";
         indicator = " ✓ (jawaban Anda benar)";
       } else if (isUser && !isCorrectKey) {
-        additionalClass = "wrong-option";
+        bgColor = "#fee2e2";
         indicator = " ✗ (jawaban Anda salah)";
       } else if (!isUser && isCorrectKey) {
-        additionalClass = "correct-option";
+        bgColor = "#fef9c3";
         indicator = " ★ (kunci jawaban)";
       }
-      html += `<div class="option-item ${additionalClass}">
+      html += `<div style="padding: 8px 12px; margin: 6px 0; border-radius: 12px; background: ${bgColor}; border: 1px solid #e5e7eb;">
         <strong>${opt}.</strong> ${optText} ${indicator}
       </div>`;
     }
-    html += `</div><div class="discussion-pembahasan"><strong>📘 Pembahasan:</strong> ${r.pembahasan}</div></div>`;
+    html += `</div><div style="margin-top: 12px; padding: 12px; background: #f3f4f6; border-radius: 12px;"><strong>📘 Pembahasan:</strong> ${r.pembahasan}</div></div>`;
   }
-  document.getElementById("discussionContent").innerHTML = html;
-  document.getElementById("discussionModal").style.display = "flex";
+  const discussionContent = document.getElementById("discussionContent");
+  const discussionModal = document.getElementById("discussionModal");
+  if (discussionContent) discussionContent.innerHTML = html;
+  if (discussionModal) discussionModal.style.display = "flex";
 }
 
-function closeDiscussionModal() { document.getElementById("discussionModal").style.display = "none"; }
+function closeDiscussionModal() { 
+  const modal = document.getElementById("discussionModal");
+  if (modal) modal.style.display = "none";
+}
 function exportDiscussionPDF() { window.print(); }
 
 // ========== LEADERBOARD ==========
@@ -395,11 +439,9 @@ function login() {
         return;
       }
       
-      // JIKA TOKEN SUDAH PERNAH DIGUNAKAN (used = true)
+      // Jika token sudah digunakan, tampilkan hasil
       if (res.used) {
         alert("Token ini sudah digunakan. Menampilkan hasil ujian...");
-        
-        // Coba ambil data hasil dari localStorage terlebih dahulu
         const savedScore = localStorage.getItem("cbt_score");
         const savedResults = localStorage.getItem("cbt_results");
         const savedSoal = localStorage.getItem("cbt_soal");
@@ -409,33 +451,12 @@ function login() {
           document.getElementById("login").style.display = "none";
           showResult(parseInt(savedScore));
         } else {
-          // Jika tidak ada di localStorage, ambil dari server
-          fetch(API + "?action=getResult&token=" + encodeURIComponent(token) + "&nama=" + encodeURIComponent(nama))
-            .then(r => r.json())
-            .then(result => {
-              if (result.score !== undefined) {
-                // Simpan ke localStorage
-                localStorage.setItem("cbt_submitted", "true");
-                localStorage.setItem("cbt_score", result.score);
-                localStorage.setItem("cbt_completion_time", result.waktu || "0");
-                // Untuk hasil detail (pembahasan), kita perlu data soal
-                fetch(API + "?action=getSoal&sheet=SOAL A")
-                  .then(r => r.json())
-                  .then(soalRes => {
-                    if (soalRes.soal) soal = soalRes.soal;
-                    document.getElementById("login").style.display = "none";
-                    showResult(parseInt(result.score));
-                  });
-              } else {
-                alert("Tidak dapat menemukan hasil ujian untuk token ini.");
-              }
-            })
-            .catch(() => alert("Gagal mengambil data hasil ujian"));
+          alert("Tidak dapat menemukan hasil ujian untuk token ini.");
         }
         return;
       }
       
-      // JIKA TOKEN BARU (used = false), MULAI UJIAN BARU
+      // Token baru, mulai ujian
       currentDurasi = res.durasi || 3600;
       currentSheetSoal = res.sheetSoal || "SOAL A";
       timeLeft = currentDurasi;
@@ -445,7 +466,10 @@ function login() {
       document.getElementById("app").style.display = "block";
       loadQuestions();
     })
-    .catch(() => alert("Gagal validasi token"));
+    .catch(err => {
+      console.error(err);
+      alert("Gagal validasi token");
+    });
 }
 
 function loadQuestions() {
@@ -460,7 +484,10 @@ function loadQuestions() {
       startFromSaved();
       saveState();
     })
-    .catch(() => alert("Gagal load soal"));
+    .catch(err => {
+      console.error(err);
+      alert("Gagal load soal");
+    });
 }
 
 function startFromSaved() {
@@ -491,6 +518,7 @@ function toggleCalculator() {
     document.getElementById("calcDisplay").focus();
   }
 }
+
 function handleKeyboard(e) {
   let d = document.getElementById("calcDisplay");
   if (!d) return;
@@ -505,6 +533,7 @@ function handleKeyboard(e) {
   else if (key === 'Backspace') deleteLastCalc();
   else if (key === 'c' || key === 'C') clearCalc();
 }
+
 function appendToDisplay(v) {
   let d = document.getElementById("calcDisplay");
   if (d) { if (d.value === "Error") d.value = ""; d.value += v; }
@@ -519,6 +548,7 @@ function calculateResult() {
     d.value = r;
   } catch(e) { d.value = "Error"; }
 }
+
 function calcFunction(action) {
   let d = document.getElementById("calcDisplay");
   let val = parseFloat(d.value) || 0;
@@ -545,6 +575,7 @@ function calcFunction(action) {
     case 'ms': calcMemory = val; break;
   }
 }
+
 function initCalculator() {
   document.querySelectorAll('.calc-num').forEach(btn => btn.onclick = () => appendToDisplay(btn.getAttribute('data-num')));
   document.querySelectorAll('.calc-operator').forEach(btn => btn.onclick = () => appendToDisplay(btn.getAttribute('data-op')));

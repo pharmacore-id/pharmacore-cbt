@@ -268,18 +268,34 @@ function submit() {
       options: options
     });
   }
+  
+  // Simpan ke localStorage
   localStorage.setItem("cbt_submitted", "true");
   localStorage.setItem("cbt_score", score);
   localStorage.setItem("cbt_results", JSON.stringify(results));
   localStorage.setItem("cbt_completion_time", completionTimeSeconds);
   let waktuStr = formatTimeDisplay(completionTimeSeconds);
+  
+  // Kirim ke server
   fetch(API, {
     method: "POST",
     mode: "no-cors",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ action: "submit", nama, token, skor: score, jawaban: answers, total: soal.length, waktu: waktuStr })
   }).catch(e => console.log);
+  
+  // Tampilkan hasil
   showResult(score);
+  
+  // Setelah hasil tampil, tawarkan download pembahasan
+  setTimeout(() => {
+    if (confirm("✅ Ujian selesai!\n\nToken ini tidak dapat digunakan lagi untuk mengerjakan ulang.\n\nApakah Anda ingin menyimpan pembahasan (PDF) sekarang?")) {
+      openDiscussionModal();
+      setTimeout(() => {
+        exportDiscussionPDF();
+      }, 500);
+    }
+  }, 500);
 }
 
 function showResult(score) {
@@ -312,8 +328,33 @@ function showResult(score) {
 function openDiscussionModal() {
   let results = JSON.parse(localStorage.getItem("cbt_results") || "[]");
   let soalData = JSON.parse(localStorage.getItem("cbt_soal") || "[]");
+  let score = parseInt(localStorage.getItem("cbt_score") || "0");
+  let completionSeconds = parseInt(localStorage.getItem("cbt_completion_time") || "0");
+  let totalSoal = soalData.length;
+  
   if (!results.length) { alert("Tidak ada data."); return; }
-  let html = "";
+  
+  let mins = Math.floor(completionSeconds / 60);
+  let secs = completionSeconds % 60;
+  let durasiStr = `${mins} menit ${secs} detik`;
+  let persenSkor = Math.round((score / totalSoal) * 100);
+  
+  // Header informasi untuk print
+  let printHeader = `
+    <div class="print-header" style="text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #ddd;">
+      <h2 style="margin: 5px 0;">📝 Hasil Ujian PHARMACORE CBT</h2>
+      <div class="print-score" style="font-size: 28px; font-weight: bold; color: #10b981; margin: 10px 0;">${score} / ${totalSoal} (${persenSkor}%)</div>
+      <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-top: 20px; font-size: 14px;">
+        <div><strong>👤 Nama:</strong> ${nama}</div>
+        <div><strong>⏱️ Durasi:</strong> ${durasiStr}</div>
+        <div><strong>✅ Benar:</strong> ${score}</div>
+        <div><strong>❌ Salah:</strong> ${totalSoal - score}</div>
+        <div><strong>🏆 Peringkat:</strong> Menunggu data leaderboard</div>
+      </div>
+    </div>
+  `;
+  
+  let html = printHeader;
   for (let i = 0; i < results.length; i++) {
     const r = results[i];
     const s = soalData[i];
@@ -344,10 +385,26 @@ function openDiscussionModal() {
     }
     html += `</div><div style="margin-top: 12px; padding: 12px; background: #f3f4f6; border-radius: 12px;"><strong>📘 Pembahasan:</strong> ${r.pembahasan}</div></div>`;
   }
+  
   const discussionContent = document.getElementById("discussionContent");
   const discussionModal = document.getElementById("discussionModal");
   if (discussionContent) discussionContent.innerHTML = html;
   if (discussionModal) discussionModal.style.display = "flex";
+  
+  // Update peringkat dari leaderboard
+  setTimeout(() => {
+    fetch(API + "?action=leaderboard&token=" + token)
+      .then(r => r.json())
+      .then(res => {
+        if (res.leaderboard) {
+          const idx = res.leaderboard.findIndex(item => item.nama === nama);
+          if (idx !== -1) {
+            const rankSpan = document.querySelector("#discussionModal .print-header div:last-child");
+            if (rankSpan) rankSpan.innerHTML = `<strong>🏆 Peringkat:</strong> #${idx + 1}`;
+          }
+        }
+      });
+  }, 100);
 }
 
 function closeDiscussionModal() { 
@@ -365,6 +422,7 @@ function loadLeaderboard() {
     .then(r => r.json())
     .then(res => {
       if (res.leaderboard && res.leaderboard.length) {
+        window.leaderboardData = res.leaderboard;
         let data = res.leaderboard.map(item => ({ nama: item.nama, skor: item.skor, total: soal.length, waktu: item.waktu || "00:00" }));
         data.sort((a, b) => b.skor - a.skor);
         let podiumHtml = `<div class="podium-container">`;
@@ -434,63 +492,22 @@ function login() {
   fetch(API + "?action=validateToken&token=" + token)
     .then(r => r.json())
     .then(res => {
-      console.log("Response validateToken:", res);
-      
+      console.log("Response:", res);
       if (!res.valid) {
         alert("Token tidak valid!");
         return;
       }
       
-      // JIKA TOKEN SUDAH PERNAH DIGUNAKAN (used = true)
-      if (res.used === true) {
-        alert("Token ini sudah digunakan. Mengambil data hasil ujian...");
-        
-        // Coba ambil dari localStorage dulu
-        const savedScore = localStorage.getItem("cbt_score");
-        const savedResults = localStorage.getItem("cbt_results");
-        const savedSoal = localStorage.getItem("cbt_soal");
-        
-        if (savedScore && savedResults && savedSoal) {
-          soal = JSON.parse(savedSoal);
-          document.getElementById("login").style.display = "none";
-          showResult(parseInt(savedScore));
-        } else {
-          // Ambil dari server (Spreadsheet)
-          fetch(API + "?action=getResult&token=" + encodeURIComponent(token) + "&nama=" + encodeURIComponent(nama))
-            .then(r => r.json())
-            .then(result => {
-              console.log("Response getResult:", result);
-              if (result.success && result.score !== undefined) {
-                // Simpan ke localStorage agar下次 tidak perlu ambil lagi
-                localStorage.setItem("cbt_submitted", "true");
-                localStorage.setItem("cbt_score", result.score);
-                localStorage.setItem("cbt_completion_time", result.waktu || "0");
-                
-                // Untuk pembahasan, kita butuh data soal
-                fetch(API + "?action=getSoal&sheet=" + encodeURIComponent(res.sheetSoal || "SOAL A"))
-                  .then(r => r.json())
-                  .then(soalRes => {
-                    if (soalRes.soal) {
-                      soal = soalRes.soal;
-                      // Simpan soal ke localStorage
-                      localStorage.setItem("cbt_soal", JSON.stringify(soal));
-                    }
-                    document.getElementById("login").style.display = "none";
-                    showResult(parseInt(result.score));
-                  });
-              } else {
-                alert("Tidak dapat menemukan hasil ujian untuk token ini. Error: " + (result.error || "Unknown"));
-              }
-            })
-            .catch(err => {
-              console.error(err);
-              alert("Gagal mengambil data hasil ujian dari server");
-            });
-        }
+      // Jika token sudah pernah digunakan
+      if (res.used) {
+        alert("Token ini sudah digunakan. Token hanya dapat digunakan SEKALI untuk mengerjakan ujian.\nAnda tidak dapat mengerjakan ulang dengan token ini.");
         return;
       }
       
-      // JIKA TOKEN BARU (used = false), MULAI UJIAN BARU
+      // Peringatan token sekali pakai
+      alert("⚠️ PERINGATAN!\n\nToken ini hanya dapat digunakan SEKALI.\n\nSetelah Anda menyelesaikan ujian, token akan hangus dan tidak bisa digunakan lagi untuk mengerjakan ulang.\n\nPastikan Anda menyimpan pembahasan (PDF) setelah submit!");
+      
+      // Mulai ujian baru
       currentDurasi = res.durasi || 3600;
       currentSheetSoal = res.sheetSoal || "SOAL A";
       timeLeft = currentDurasi;
@@ -505,6 +522,7 @@ function login() {
       alert("Gagal validasi token");
     });
 }
+
 function loadQuestions() {
   if (soal.length) { startFromSaved(); return; }
   fetch(API + "?action=getSoal&sheet=" + encodeURIComponent(currentSheetSoal))
@@ -563,112 +581,4 @@ function handleKeyboard(e) {
     appendToDisplay(op);
   } else if (key === 'Enter' || key === '=') calculateResult();
   else if (key === 'Escape') toggleCalculator();
-  else if (key === 'Backspace') deleteLastCalc();
-  else if (key === 'c' || key === 'C') clearCalc();
-}
-
-function appendToDisplay(v) {
-  let d = document.getElementById("calcDisplay");
-  if (d) { if (d.value === "Error") d.value = ""; d.value += v; }
-}
-function clearCalc() { document.getElementById("calcDisplay").value = ""; }
-function deleteLastCalc() { let d = document.getElementById("calcDisplay"); d.value = d.value.slice(0, -1); }
-function calculateResult() {
-  let d = document.getElementById("calcDisplay");
-  try {
-    let expr = d.value.replace(/×/g, '*').replace(/÷/g, '/');
-    let r = Function('"use strict"; return (' + expr + ')')();
-    d.value = r;
-  } catch(e) { d.value = "Error"; }
-}
-
-function calcFunction(action) {
-  let d = document.getElementById("calcDisplay");
-  let val = parseFloat(d.value) || 0;
-  switch(action) {
-    case 'sin': d.value = Math.sin(val * Math.PI / 180); break;
-    case 'cos': d.value = Math.cos(val * Math.PI / 180); break;
-    case 'tan': d.value = Math.tan(val * Math.PI / 180); break;
-    case 'log': d.value = Math.log10(val); break;
-    case 'ln': d.value = Math.log(val); break;
-    case 'sqrt': d.value = Math.sqrt(val); break;
-    case 'pow2': d.value = val * val; break;
-    case 'pow3': d.value = val * val * val; break;
-    case 'reciprocal': d.value = 1 / val; break;
-    case 'pi': d.value = Math.PI; break;
-    case 'e': d.value = Math.E; break;
-    case 'percent': d.value = val / 100; break;
-    case 'equal': calculateResult(); break;
-    case 'clear': clearCalc(); break;
-    case 'backspace': deleteLastCalc(); break;
-    case 'mplus': calcMemory += val; break;
-    case 'mminus': calcMemory -= val; break;
-    case 'mr': d.value = calcMemory; break;
-    case 'mc': calcMemory = 0; break;
-    case 'ms': calcMemory = val; break;
-  }
-}
-
-function initCalculator() {
-  document.querySelectorAll('.calc-num').forEach(btn => btn.onclick = () => appendToDisplay(btn.getAttribute('data-num')));
-  document.querySelectorAll('.calc-operator').forEach(btn => btn.onclick = () => appendToDisplay(btn.getAttribute('data-op')));
-  document.querySelectorAll('.calc-func, .calc-mem, .calc-clear').forEach(btn => btn.onclick = () => calcFunction(btn.getAttribute('data-action')));
-}
-
-// ========== CEK SESSION ==========
-function checkExistingSession() {
-  loadSavedState();
-  loadDarkMode();
-  
-  if (localStorage.getItem("cbt_submitted") === "true") {
-    let savedScore = localStorage.getItem("cbt_score");
-    if (savedScore) {
-      document.getElementById("login").style.display = "none";
-      completionTimeSeconds = parseInt(localStorage.getItem("cbt_completion_time") || "0");
-      if (soal.length) {
-        showResult(parseInt(savedScore));
-      } else if (currentSheetSoal) {
-        fetch(API + "?action=getSoal&sheet=" + encodeURIComponent(currentSheetSoal))
-          .then(r => r.json())
-          .then(res => { if (res.soal) soal = res.soal; showResult(parseInt(savedScore)); });
-      }
-    }
-    return;
-  }
-  
-  if (isLoggedIn) {
-    document.getElementById("login").style.display = "none";
-    document.getElementById("app").style.display = "block";
-    if (soal.length) {
-      document.getElementById("totalCount").innerText = soal.length;
-      renderQuestion();
-      updateNavGrid();
-      updateStats();
-      startTimer();
-    } else if (currentSheetSoal) {
-      loadQuestions();
-    }
-  }
-}
-
-// ========== EKSPOR FUNGSI GLOBAL ==========
-window.login = login;
-window.toggleDarkMode = toggleDarkMode;
-window.goHome = goHome;
-window.prevQuestion = prevQuestion;
-window.nextQuestion = nextQuestion;
-window.toggleRagu = toggleRagu;
-window.showReviewModal = showReviewModal;
-window.closeReviewModal = closeReviewModal;
-window.confirmSubmit = confirmSubmit;
-window.openDiscussionModal = openDiscussionModal;
-window.closeDiscussionModal = closeDiscussionModal;
-window.exportDiscussionPDF = exportDiscussionPDF;
-window.restartExam = restartExam;
-window.toggleCalculator = toggleCalculator;
-
-// ========== INIT ==========
-document.addEventListener("DOMContentLoaded", function() {
-  initCalculator();
-  checkExistingSession();
-});
+  else if (key === 'Backspace

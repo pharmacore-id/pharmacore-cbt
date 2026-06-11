@@ -16,14 +16,14 @@
     </div>
     <div class="login-right">
       <div class="login-header-right">
-        <button class="darkmode-btn" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+        <button class="darkmode-btn" onclick="window.toggleDarkMode()">🌙 Dark Mode</button>
       </div>
       <div class="badge">✨ TRY OUT UKMPPAI</div>
       <h1>PHARMACORE CBT</h1>
       <p class="subtitle">Simulasi dan Prediksi UKMPPAI untuk Calon Apoteker Indonesia</p>
       <div class="form-group"><label>Nama Peserta</label><input id="nama" placeholder="Masukkan nama lengkap"></div>
       <div class="form-group"><label>Token Ujian</label><input id="token" placeholder="Masukkan token ujian"></div>
-      <button class="start-btn" onclick="login()">Mulai Ujian</button>
+      <button class="start-btn" onclick="window.login()">Mulai Ujian</button>
       <div class="exam-info">Soal • Durasi bervariasi • CBT Online</div>
     </div>
   </div>
@@ -37,8 +37,8 @@
       <div class="brand">PHARMACORE CBT</div>
     </div>
     <div class="top-right">
-      <button class="homepage-btn" onclick="goHome()">🏠 Homepage</button>
-      <button class="darkmode-btn" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+      <button class="homepage-btn" onclick="window.goHome()">🏠 Homepage</button>
+      <button class="darkmode-btn" onclick="window.toggleDarkMode()">🌙 Dark Mode</button>
       <div class="progress-text"><span id="answeredCount">0</span>/<span id="totalCount">0</span> dijawab</div>
       <div class="timer" id="timer">60:00</div>
     </div>
@@ -50,9 +50,9 @@
       <div id="q"></div>
       <div id="opt"></div>
       <div class="action-row">
-        <button class="secondary-btn" onclick="prevQuestion()">← Sebelumnya</button>
-        <button class="ragu-btn" id="raguBtn" onclick="toggleRagu()">🚩 Ragu</button>
-        <button class="secondary-btn" onclick="nextQuestion()">Berikutnya →</button>
+        <button class="secondary-btn" onclick="window.prevQuestion()">← Sebelumnya</button>
+        <button class="ragu-btn" id="raguBtn" onclick="window.toggleRagu()">🚩 Ragu</button>
+        <button class="secondary-btn" onclick="window.nextQuestion()">Berikutnya →</button>
       </div>
     </div>
     <div class="side">
@@ -68,8 +68,8 @@
         <div><span class="dot ragu-dot"></span> Ditandai Ragu</div>
         <div><span class="dot empty-dot"></span> Belum Dijawab</div>
       </div>
-      <button class="submit-btn" onclick="showReviewModal()">📋 Kumpulkan Jawaban</button>
-      <button class="secondary-btn calc-btn" onclick="toggleCalculator()">🧮 Kalkulator Scientific</button>
+      <button class="submit-btn" onclick="window.showReviewModal()">📋 Kumpulkan Jawaban</button>
+      <button class="secondary-btn calc-btn" onclick="window.toggleCalculator()">🧮 Kalkulator Scientific</button>
     </div>
   </div>
 </div>
@@ -77,7 +77,7 @@
 <!-- MODAL REVIEW SEBELUM SUBMIT -->
 <div id="reviewModal" class="modal" style="display:none;">
   <div class="modal-content">
-    <div class="modal-header"><h2>📋 Review Jawaban</h2><button class="close-modal" onclick="closeReviewModal()">✕</button></div>
+    <div class="modal-header"><h2>📋 Review Jawaban</h2><button class="close-modal" onclick="window.closeReviewModal()">✕</button></div>
     <div class="modal-body">
       <div class="review-stats">
         <div class="review-stat"><div class="review-stat-value" id="reviewTotal">0</div><div class="review-stat-label">Total Soal</div></div>
@@ -89,8 +89,8 @@
       <div class="review-warning">⚠️ Soal yang tidak dijawab akan dianggap salah!</div>
     </div>
     <div class="modal-footer">
-      <button class="secondary-btn" onclick="closeReviewModal()">Kembali ke Ujian</button>
-      <button class="submit-btn" onclick="confirmSubmit()">✅ Ya, Kumpulkan Jawaban</button>
+      <button class="secondary-btn" onclick="window.closeReviewModal()">Kembali ke Ujian</button>
+      <button class="submit-btn" onclick="window.confirmSubmit()">✅ Ya, Kumpulkan Jawaban</button>
     </div>
   </div>
 </div>
@@ -101,8 +101,8 @@
     <div class="modal-header">
       <h2>📖 Review & Pembahasan Jawaban</h2>
       <div>
-        <button class="secondary-btn" onclick="exportDiscussionPDF()">📄 Export PDF</button>
-        <button class="close-modal" onclick="closeDiscussionModal()">✕</button>
+        <button class="secondary-btn" onclick="window.exportDiscussionPDF()">📄 Export PDF</button>
+        <button class="close-modal" onclick="window.closeDiscussionModal()">✕</button>
       </div>
     </div>
     <div class="modal-body" id="discussionContent"></div>
@@ -114,8 +114,8 @@
   <div class="result-card">
     <div class="result-left">
       <div class="result-left-header">
-        <button class="homepage-btn" onclick="goHome()">🏠 Homepage</button>
-        <button class="darkmode-btn" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+        <button class="homepage-btn" onclick="window.goHome()">🏠 Homepage</button>
+        <button class="darkmode-btn" onclick="window.toggleDarkMode()">🌙 Dark Mode</button>
       </div>
       <h2>📝 Hasil Ujian</h2>
       <div class="score-circle"><span id="scoreNumber">0</span></div>
@@ -126,8 +126,8 @@
         <div><span>Salah</span><strong id="resultSalah">0</strong></div>
         <div><span>Waktu</span><strong id="resultWaktu">00:00</strong></div>
       </div>
-      <button class="secondary-btn" onclick="openDiscussionModal()">📋 Review & Pembahasan</button>
-      <button class="submit-btn" onclick="restartExam()">🔄 Ujian Baru</button>
+      <button class="secondary-btn" onclick="window.openDiscussionModal()">📋 Review & Pembahasan</button>
+      <button class="submit-btn" onclick="window.restartExam()">🔄 Ujian Baru</button>
     </div>
     <div class="result-right">
       <h3>🏆 Leaderboard</h3>
@@ -137,10 +137,10 @@
   </div>
 </div>
 
-<!-- CALCULATOR MODAL (layout rapi, close dengan klik luar) -->
+<!-- CALCULATOR MODAL -->
 <div id="calculatorModal" class="calculator-modal" style="display:none;">
   <div class="calculator-box">
-    <div class="calculator-header"><span>🧮 Kalkulator Scientific</span><button class="close-calc" onclick="toggleCalculator()">✕</button></div>
+    <div class="calculator-header"><span>🧮 Kalkulator Scientific</span><button class="close-calc" onclick="window.toggleCalculator()">✕</button></div>
     <input type="text" id="calcDisplay" readonly placeholder="0">
     <div class="calc-grid">
       <button class="calc-func" data-action="sin">sin</button>
@@ -148,37 +148,31 @@
       <button class="calc-func" data-action="tan">tan</button>
       <button class="calc-func" data-action="log">log</button>
       <button class="calc-func" data-action="ln">ln</button>
-      
       <button class="calc-func" data-action="sqrt">√</button>
       <button class="calc-func" data-action="pow2">x²</button>
       <button class="calc-func" data-action="pow3">x³</button>
       <button class="calc-func" data-action="reciprocal">1/x</button>
       <button class="calc-func" data-action="pi">π</button>
-      
       <button class="calc-mem" data-action="mc">MC</button>
       <button class="calc-mem" data-action="mplus">M+</button>
       <button class="calc-mem" data-action="mminus">M-</button>
       <button class="calc-mem" data-action="mr">MR</button>
       <button class="calc-mem" data-action="ms">MS</button>
-      
       <button class="calc-num" data-num="7">7</button>
       <button class="calc-num" data-num="8">8</button>
       <button class="calc-num" data-num="9">9</button>
       <button class="calc-operator" data-op="/">÷</button>
       <button class="calc-clear" data-action="clear">C</button>
-      
       <button class="calc-num" data-num="4">4</button>
       <button class="calc-num" data-num="5">5</button>
       <button class="calc-num" data-num="6">6</button>
       <button class="calc-operator" data-op="*">×</button>
       <button class="calc-clear" data-action="backspace">⌫</button>
-      
       <button class="calc-num" data-num="1">1</button>
       <button class="calc-num" data-num="2">2</button>
       <button class="calc-num" data-num="3">3</button>
       <button class="calc-operator" data-op="-">-</button>
       <button class="calc-operator" data-op="(">(</button>
-      
       <button class="calc-num" data-num="0">0</button>
       <button class="calc-num" data-num=".">.</button>
       <button class="calc-func" data-action="equal">=</button>

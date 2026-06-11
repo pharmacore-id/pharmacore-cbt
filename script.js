@@ -1,5 +1,5 @@
 // ========== KONFIGURASI ==========
-const API = "https://script.google.com/macros/s/AKfycbx9AH3tu0CCMItBJimHobEqBYezxRVZm_lwJ-9h8s1Bk0NHOu0igf_jUl1GSzY1Obyl/exec"; // GANTI DENGAN URL WEB APP ANDA
+const API = "https://script.google.com/macros/s/AKfycbx9AH3tu0CCMItBJimHobEqBYezxRVZm_lwJ-9h8s1Bk0NHOu0igf_jUl1GSzY1Obyl/exec";
 const OPTIONS = ['A', 'B', 'C', 'D', 'E'];
 
 let currentQuestion = 0, answers = {}, ragu = {}, soal = [], token = "", nama = "";
@@ -95,14 +95,12 @@ function renderQuestion() {
   }
   document.getElementById("opt").innerHTML = optHtml;
   const raguBtn = document.getElementById("raguBtn");
-  if (raguBtn) {
-    if (ragu[currentQuestion]) {
-      raguBtn.classList.add("active");
-      raguBtn.innerHTML = "🚩 Ditandai Ragu";
-    } else {
-      raguBtn.classList.remove("active");
-      raguBtn.innerHTML = "🚩 Ragu";
-    }
+  if (ragu[currentQuestion]) {
+    raguBtn.classList.add("active");
+    raguBtn.innerHTML = "🚩 Ditandai Ragu";
+  } else {
+    raguBtn.classList.remove("active");
+    raguBtn.innerHTML = "🚩 Ragu";
   }
   updateProgress();
 }
@@ -268,30 +266,30 @@ function openDiscussionModal() {
     const s = soalData[i];
     const userAnswer = r.jawabanUser;
     const correctKey = r.kunci;
-    html += `<div class="discussion-question" style="margin-bottom: 20px; border-radius: 20px; border-left: 6px solid #8b5cf6; background: #f9fafb; padding: 16px;">
-      <h4 style="margin-top: 0; margin-bottom: 12px;">Soal ${r.nomor}. ${r.pertanyaan}</h4>
-      <div>`;
+    html += `<div class="discussion-question">
+      <h4>Soal ${r.nomor}. ${r.pertanyaan}</h4>
+      <div class="options-list">`;
     for (let opt of OPTIONS) {
       let optText = s[opt] || '';
       let isUser = (userAnswer === opt);
       let isCorrectKey = (correctKey === opt);
-      let bgColor = "#ffffff";
+      let additionalClass = "";
       let indicator = "";
       if (isUser && isCorrectKey) {
-        bgColor = "#d1fae5";
+        additionalClass = "user-correct";
         indicator = " ✓ (jawaban Anda benar)";
       } else if (isUser && !isCorrectKey) {
-        bgColor = "#fee2e2";
+        additionalClass = "wrong-option";
         indicator = " ✗ (jawaban Anda salah)";
       } else if (!isUser && isCorrectKey) {
-        bgColor = "#fef9c3";
+        additionalClass = "correct-option";
         indicator = " ★ (kunci jawaban)";
       }
-      html += `<div style="padding: 8px 12px; margin: 6px 0; border-radius: 12px; background: ${bgColor}; border: 1px solid #e5e7eb;">
+      html += `<div class="option-item ${additionalClass}">
         <strong>${opt}.</strong> ${optText} ${indicator}
       </div>`;
     }
-    html += `</div><div style="margin-top: 12px; padding: 12px; background: #f3f4f6; border-radius: 12px;"><strong>📘 Pembahasan:</strong> ${r.pembahasan}</div></div>`;
+    html += `</div><div class="discussion-pembahasan"><strong>📘 Pembahasan:</strong> ${r.pembahasan}</div></div>`;
   }
   document.getElementById("discussionContent").innerHTML = html;
   document.getElementById("discussionModal").style.display = "flex";
@@ -329,7 +327,7 @@ function loadLeaderboard() {
         }
         podiumHtml += `</div>`;
         
-        // Daftar peringkat selanjutnya (4 ke atas)
+        // Daftar peringkat selanjutnya
         let listHtml = `<div class="leaderboard-list"><div class="leaderboard-header">
           <div class="rank">#</div><div class="name">Peserta</div><div class="score">Skor</div><div class="time">Waktu</div>
         </div>`;
@@ -368,14 +366,13 @@ function loadLeaderboard() {
     .catch(() => board.innerHTML = '<div style="text-align:center; padding:20px;">⚠️ Gagal memuat leaderboard.</div>');
 }
 
-// ========== FUNGSI RESTART & HOME ==========
+// ========== RESTART & HOME ==========
 function restartExam() {
   if (confirm("Ujian baru akan menghapus semua jawaban. Lanjutkan?")) {
     clearSession();
     location.reload();
   }
 }
-
 function goHome() {
   if (confirm("Kembali ke halaman login? Semua kemajuan ujian akan hilang.")) {
     clearSession();

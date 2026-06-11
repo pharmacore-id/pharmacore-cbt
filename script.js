@@ -383,23 +383,38 @@ function goHome() {
 
 // ========== LOGIN & LOAD SOAL (dengan one-time token) ==========
 function login() {
-  // HAPUS SESSION LAMA SEBELUM VALIDASI
-  clearSession();
-  
   nama = document.getElementById("nama").value.trim();
   token = document.getElementById("token").value.trim();
   if (!nama || !token) { alert("Lengkapi data!"); return; }
   
+  // Cek apakah ada session ujian yang belum selesai
+  const savedToken = localStorage.getItem("cbt_token");
+  const savedAnswers = localStorage.getItem("cbt_answers");
+  
+  if (savedToken === token && savedAnswers) {
+    if (confirm("Anda memiliki ujian yang belum selesai. Lanjutkan?")) {
+      // Lanjutkan ujian dari session yang tersimpan
+      loadSavedState();
+      renderQuestion();
+      updateNavGrid();
+      updateStats();
+      startTimer();
+      document.getElementById("login").style.display = "none";
+      document.getElementById("app").style.display = "block";
+      return;
+    }
+  }
+  
+  // Jika tidak ada session atau user memilih baru, validasi token ke server
   fetch(API + "?action=validateToken&token=" + token)
     .then(r => r.json())
     .then(res => {
-      // JIKA TOKEN TIDAK VALID (sudah digunakan atau salah)
       if (!res.valid) {
         alert("Token tidak valid atau sudah digunakan!");
-        return; // HENTIKAN PROSES, TIDAK BOLEH LANJUT
+        return;
       }
       
-      // TOKEN VALID, LANJUTKAN UJIAN
+      // Mulai ujian baru
       currentDurasi = res.durasi || 3600;
       currentSheetSoal = res.sheetSoal || "SOAL A";
       timeLeft = currentDurasi;
@@ -409,32 +424,37 @@ function login() {
       document.getElementById("app").style.display = "block";
       loadQuestions();
     })
-    .catch(err => {
-      console.error(err);
-      alert("Gagal validasi token");
-    });
+    .catch(() => alert("Gagal validasi token"));
 }
 
-function loadQuestions() {
-  if (soal.length) { startFromSaved(); return; }
-  fetch(API + "?action=getSoal&sheet=" + encodeURIComponent(currentSheetSoal))
-    .then(r => r.json())
-    .then(res => {
-      if (res.error) { alert("Error: " + res.error); return; }
-      if (!res.soal || !res.soal.length) { alert("Soal tidak ditemukan di sheet " + currentSheetSoal); return; }
-      soal = res.soal;
-      document.getElementById("totalCount").innerText = soal.length;
-      startFromSaved();
-      saveState();
-    })
-    .catch(() => alert("Gagal load soal"));
-}
-
-function startFromSaved() {
-  renderQuestion();
-  updateNavGrid();
-  updateStats();
-  startTimer();
+// Tambahkan fungsi ini untuk melanjutkan ujian
+function loadSavedState() {
+  const savedAnswers = localStorage.getItem("cbt_answers");
+  const savedRagu = localStorage.getItem("cbt_ragu");
+  const savedCurrent = localStorage.getItem("cbt_current");
+  const savedTime = localStorage.getItem("cbt_time");
+  const savedSheet = localStorage.getItem("cbt_sheetSoal");
+  const savedDurasi = localStorage.getItem("cbt_durasi");
+  
+  if (savedAnswers) answers = JSON.parse(savedAnswers);
+  if (savedRagu) ragu = JSON.parse(savedRagu);
+  if (savedCurrent) currentQuestion = parseInt(savedCurrent);
+  if (savedTime) timeLeft = parseInt(savedTime);
+  if (savedSheet) currentSheetSoal = savedSheet;
+  if (savedDurasi) currentDurasi = parseInt(savedDurasi);
+  
+  // Muat ulang data soal jika perlu
+  if (soal.length === 0 && currentSheetSoal) {
+    fetch(API + "?action=getSoal&sheet=" + encodeURIComponent(currentSheetSoal))
+      .then(r => r.json())
+      .then(res => {
+        if (res.soal) soal = res.soal;
+        renderQuestion();
+        updateNavGrid();
+        updateStats();
+      });
+  }
+  isLoggedIn = true;
 }
 
 // ========== DARK MODE ==========

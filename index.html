@@ -132,12 +132,12 @@
     <div class="result-right">
       <h3>🏆 Leaderboard</h3>
       <div id="board"></div>
+      <div class="footer-copyright">PHARMACORE CBT © 2026</div>
     </div>
-    <div class="footer-copyright">PHARMACORE CBT © 2026</div>
   </div>
 </div>
 
-<!-- CALCULATOR MODAL (gaya Apple, lengkap) -->
+<!-- CALCULATOR MODAL (layout rapi, close dengan klik luar) -->
 <div id="calculatorModal" class="calculator-modal" style="display:none;">
   <div class="calculator-box">
     <div class="calculator-header"><span>🧮 Kalkulator Scientific</span><button class="close-calc" onclick="toggleCalculator()">✕</button></div>
@@ -165,27 +165,25 @@
       <button class="calc-num" data-num="8">8</button>
       <button class="calc-num" data-num="9">9</button>
       <button class="calc-operator" data-op="/">÷</button>
-      <button class="calc-operator" data-op="(">(</button>
+      <button class="calc-clear" data-action="clear">C</button>
       
       <button class="calc-num" data-num="4">4</button>
       <button class="calc-num" data-num="5">5</button>
       <button class="calc-num" data-num="6">6</button>
       <button class="calc-operator" data-op="*">×</button>
-      <button class="calc-operator" data-op=")">)</button>
+      <button class="calc-clear" data-action="backspace">⌫</button>
       
       <button class="calc-num" data-num="1">1</button>
       <button class="calc-num" data-num="2">2</button>
       <button class="calc-num" data-num="3">3</button>
       <button class="calc-operator" data-op="-">-</button>
-      <button class="calc-func" data-action="percent">%</button>
+      <button class="calc-operator" data-op="(">(</button>
       
       <button class="calc-num" data-num="0">0</button>
       <button class="calc-num" data-num=".">.</button>
       <button class="calc-func" data-action="equal">=</button>
       <button class="calc-operator" data-op="+">+</button>
-      <button class="calc-clear" data-action="clear">C</button>
-      
-      <button class="calc-clear" data-action="backspace">⌫</button>
+      <button class="calc-operator" data-op=")">)</button>
     </div>
   </div>
 </div>

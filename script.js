@@ -45,6 +45,7 @@ function clearSession() {
   localStorage.clear();
   answers = {}; ragu = {}; currentQuestion = 0; isDone = false; isLoggedIn = false; soal = []; nama = ""; token = ""; currentSheetSoal = "";
   timeLeft = currentDurasi;
+  if (timer) { clearInterval(timer); timer = null; }
 }
 
 // ========== UI HELPERS ==========
@@ -380,9 +381,9 @@ function goHome() {
   }
 }
 
-// ========== LOGIN & LOAD SOAL ==========
+// ========== LOGIN & LOAD SOAL (dengan one-time token) ==========
 function login() {
-  // Hapus session lama terlebih dahulu untuk mencegah token dipakai ulang
+  // HAPUS SESSION LAMA SEBELUM VALIDASI
   clearSession();
   
   nama = document.getElementById("nama").value.trim();
@@ -392,10 +393,13 @@ function login() {
   fetch(API + "?action=validateToken&token=" + token)
     .then(r => r.json())
     .then(res => {
-      if (!res.valid) { 
-        alert("Token tidak valid atau sudah digunakan!"); 
-        return; 
+      // JIKA TOKEN TIDAK VALID (sudah digunakan atau salah)
+      if (!res.valid) {
+        alert("Token tidak valid atau sudah digunakan!");
+        return; // HENTIKAN PROSES, TIDAK BOLEH LANJUT
       }
+      
+      // TOKEN VALID, LANJUTKAN UJIAN
       currentDurasi = res.durasi || 3600;
       currentSheetSoal = res.sheetSoal || "SOAL A";
       timeLeft = currentDurasi;
@@ -405,7 +409,10 @@ function login() {
       document.getElementById("app").style.display = "block";
       loadQuestions();
     })
-    .catch(() => alert("Gagal validasi token"));
+    .catch(err => {
+      console.error(err);
+      alert("Gagal validasi token");
+    });
 }
 
 function loadQuestions() {
@@ -515,30 +522,42 @@ function initCalculator() {
 function checkExistingSession() {
   loadSavedState();
   loadDarkMode();
-  if (isLoggedIn) {
-    if (localStorage.getItem("cbt_submitted") === "true") {
-      let savedScore = localStorage.getItem("cbt_score");
-      if (savedScore) {
-        document.getElementById("login").style.display = "none";
-        completionTimeSeconds = parseInt(localStorage.getItem("cbt_completion_time") || "0");
-        if (soal.length) showResult(parseInt(savedScore));
-        else fetch(API + "?action=getSoal&sheet=" + encodeURIComponent(currentSheetSoal)).then(r => r.json()).then(res => { if (res.soal) soal = res.soal; showResult(parseInt(savedScore)); });
-      }
-    } else {
+  
+  // Jika sudah submit, langsung tampilkan hasil
+  if (localStorage.getItem("cbt_submitted") === "true") {
+    let savedScore = localStorage.getItem("cbt_score");
+    if (savedScore) {
       document.getElementById("login").style.display = "none";
-      document.getElementById("app").style.display = "block";
+      completionTimeSeconds = parseInt(localStorage.getItem("cbt_completion_time") || "0");
       if (soal.length) {
-        document.getElementById("totalCount").innerText = soal.length;
-        renderQuestion();
-        updateNavGrid();
-        updateStats();
-        startTimer();
-      } else loadQuestions();
+        showResult(parseInt(savedScore));
+      } else if (currentSheetSoal) {
+        // Load soal dulu agar leaderboard bisa tampil
+        fetch(API + "?action=getSoal&sheet=" + encodeURIComponent(currentSheetSoal))
+          .then(r => r.json())
+          .then(res => { if (res.soal) soal = res.soal; showResult(parseInt(savedScore)); });
+      }
+    }
+    return;
+  }
+  
+  // Jika sudah login tapi belum submit, lanjutkan ujian
+  if (isLoggedIn) {
+    document.getElementById("login").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    if (soal.length) {
+      document.getElementById("totalCount").innerText = soal.length;
+      renderQuestion();
+      updateNavGrid();
+      updateStats();
+      startTimer();
+    } else if (currentSheetSoal) {
+      loadQuestions();
     }
   }
 }
 
-// ========== PASTIKAN SEMUA FUNGSI GLOBAL ==========
+// ========== EKSPOR FUNGSI GLOBAL ==========
 window.login = login;
 window.toggleDarkMode = toggleDarkMode;
 window.goHome = goHome;
@@ -554,6 +573,7 @@ window.exportDiscussionPDF = exportDiscussionPDF;
 window.restartExam = restartExam;
 window.toggleCalculator = toggleCalculator;
 
+// ========== INIT ==========
 document.addEventListener("DOMContentLoaded", function() {
   initCalculator();
   checkExistingSession();

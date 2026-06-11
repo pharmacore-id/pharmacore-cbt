@@ -585,7 +585,6 @@ hr {
   background: white;
   border: 1px solid #e5e7eb;
 }
-/* Light mode */
 .option-item.user-correct {
   background: #d1fae5 !important;
   border: 2px solid #10b981 !important;
@@ -830,7 +829,6 @@ body.dark-mode .question-badge {
   background: #2d2a5e !important;
   color: #a78bfa !important;
 }
-/* Navigasi soal dark mode */
 body.dark-mode .grid button {
   background: #2d2d3a !important;
   color: #ffffff !important;
@@ -860,14 +858,12 @@ body.dark-mode .legend .dot.empty-dot {
   background: #2d2d3a;
   border: 1px solid #a78bfa;
 }
-/* Lanjutkan link dark mode */
 body.dark-mode .review-question-item .lanjutkan-link {
   color: #a78bfa !important;
 }
 body.dark-mode .review-question-item .lanjutkan-link:hover {
   color: #c4b5fd !important;
 }
-/* Review pembahasan dark mode */
 body.dark-mode .option-item.user-correct {
   background: #10b981 !important;
   border-color: #a78bfa !important;
@@ -892,7 +888,6 @@ body.dark-mode .review-warning {
   color: #fecaca !important;
   border: 1px solid #ef4444 !important;
 }
-/* Leaderboard dark mode */
 body.dark-mode .leaderboard-item .rank {
   color: #facc15 !important;
 }
@@ -915,13 +910,10 @@ body.dark-mode .podium-time {
 body.dark-mode .podium-1 .podium-block { background: linear-gradient(135deg, #b45309, #92400e) !important; }
 body.dark-mode .podium-2 .podium-block { background: linear-gradient(135deg, #4b5563, #374151) !important; }
 body.dark-mode .podium-3 .podium-block { background: linear-gradient(135deg, #78350f, #451a03) !important; }
-/* Kalkulator dark mode */
 body.dark-mode .calculator-box { background: #1e1e2e; }
 body.dark-mode .calc-num { background: #2d2d3a; color: white; }
 body.dark-mode .calc-func { background: #3a3a4a; color: white; }
 body.dark-mode #calcDisplay { background: #0f0f1a; color: white; border-color: #3a3a4a; }
-
-/* ========== TIMER DARK MODE (DISAMAKAN DENGAN BADGE SOAL) ========== */
 body.dark-mode .timer {
   background: #2d2a5e !important;
   color: #a78bfa !important;
@@ -929,7 +921,7 @@ body.dark-mode .timer {
   box-shadow: none !important;
 }
 
-/* ========== PRINT: SEMUA SOAL TERCETAK TIDAK DIPAKSA HALAMAN BARU ========== */
+/* ========== PRINT (PDF) ========== */
 @media print {
   body * {
     visibility: hidden;
@@ -964,7 +956,7 @@ body.dark-mode .timer {
   .discussion-question {
     page-break-inside: avoid;
     break-inside: avoid;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
   }
   .close-modal, .secondary-btn, .modal-header button {
     display: none !important;

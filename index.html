@@ -3,30 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>PHARMACORE CBT</title>
+<title>PHARMACORE CBT - UKMPPAI</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- LOGIN PAGE -->
+<!-- LOGIN PAGE (2 KOLOM) -->
 <div id="login">
-  <div class="login-card">
-    <div class="badge">✨ TRY OUT UKOMNAS</div>
-    <h1>PHARMACORE CBT</h1>
-    <p class="subtitle">Soal Ingatan UKOMNAS dan TO NAS 2025 - 2026 </p>
-    <div class="form-group"><label>Nama Peserta</label><input id="nama" placeholder="Masukkan nama lengkap"></div>
-    <div class="form-group"><label>Token Ujian</label><input id="token" placeholder="Masukkan token ujian"></div>
-    <button class="start-btn" onclick="login()">Mulai Ujian</button>
-    <div class="exam-info"> 50 Soal • 60 Menit • CBT Online</div>
+  <div class="login-container">
+    <div class="login-left">
+      <img src="login-illustration.png" alt="Illustration" class="login-image">
+    </div>
+    <div class="login-right">
+      <div class="login-header-right">
+        <button class="darkmode-btn" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+      </div>
+      <div class="badge">✨ TRY OUT UKMPPAI</div>
+      <h1>PHARMACORE CBT</h1>
+      <p class="subtitle">Simulasi dan Prediksi UKMPPAI untuk Calon Apoteker Indonesia</p>
+      <div class="form-group"><label>Nama Peserta</label><input id="nama" placeholder="Masukkan nama lengkap"></div>
+      <div class="form-group"><label>Token Ujian</label><input id="token" placeholder="Masukkan token ujian"></div>
+      <button class="start-btn" onclick="login()">Mulai Ujian</button>
+      <div class="exam-info">Soal • 60 Menit • CBT Online</div>
+    </div>
   </div>
 </div>
 
 <!-- CBT APP -->
 <div id="app" style="display:none;">
   <div class="topbar">
-    <div class="brand">PHARMACORE CBT</div>
+    <div class="topbar-left">
+      <img src="logo-pharmacore.png" alt="Pharmacore Logo" class="topbar-logo">
+      <div class="brand">PHARMACORE CBT</div>
+    </div>
     <div class="top-right">
-      <button class="home-btn" onclick="goHome()">🏠</button>
+      <button class="homepage-btn" onclick="goHome()">🏠 Homepage</button>
+      <button class="darkmode-btn" onclick="toggleDarkMode()">🌙 Dark Mode</button>
       <div class="progress-text"><span id="answeredCount">0</span>/<span id="totalCount">0</span> dijawab</div>
       <div class="timer" id="timer">60:00</div>
     </div>
@@ -58,8 +70,7 @@
       </div>
       <button class="submit-btn" onclick="showReviewModal()">📋 Kumpulkan Jawaban</button>
       <hr>
-      <button class="secondary-btn" onclick="toggleDarkMode()">🌙 Dark Mode</button>
-      <button class="secondary-btn" style="margin-top:10px;" onclick="toggleCalculator()">🧮 Kalkulator Scientific</button>
+      <button class="secondary-btn" onclick="toggleCalculator()">🧮 Kalkulator Scientific</button>
     </div>
   </div>
 </div>
@@ -103,7 +114,10 @@
 <div id="result" style="display:none;">
   <div class="result-card">
     <div class="result-left">
-      <button class="home-btn" onclick="goHome()">🏠</button>
+      <div class="result-left-header">
+        <button class="homepage-btn" onclick="goHome()">🏠 Homepage</button>
+        <button class="darkmode-btn" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+      </div>
       <h2>📝 Hasil Ujian</h2>
       <div class="score-circle"><span id="scoreNumber">0</span></div>
       <p id="skor"></p>

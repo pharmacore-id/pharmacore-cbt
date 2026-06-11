@@ -1,3 +1,4 @@
+/* ========== GLOBAL ========== */
 * {
   margin: 0;
   padding: 0;
@@ -107,6 +108,10 @@ input {
   font-size: 16px;
   cursor: pointer;
   margin-top: 8px;
+  transition: 0.2s;
+}
+.start-btn:hover {
+  transform: translateY(-2px);
 }
 .exam-info {
   margin-top: 20px;
@@ -581,19 +586,17 @@ hr {
   background: white;
   border: 1px solid #e5e7eb;
 }
-/* Light mode: jawaban user benar -> hijau */
+/* Light mode */
 .option-item.user-correct {
   background: #d1fae5 !important;
   border: 2px solid #10b981 !important;
   color: #065f46 !important;
 }
-/* Light mode: jawaban user salah -> merah */
 .option-item.wrong-option {
   background: #fee2e2 !important;
   border-color: #ef4444 !important;
   color: #991b1b !important;
 }
-/* Light mode: kunci jawaban (benar, tidak dipilih user) -> KUNING */
 .option-item.correct-option {
   background: #fef9c3 !important;
   border-color: #f59e0b !important;
@@ -828,7 +831,7 @@ body.dark-mode .question-badge {
   background: #2d2a5e !important;
   color: #a78bfa !important;
 }
-/* ====== NAVIGASI SOAL DARK MODE ====== */
+/* Navigasi soal */
 body.dark-mode .grid button {
   background: #2d2d3a !important;
   color: #ffffff !important;
@@ -858,14 +861,14 @@ body.dark-mode .legend .dot.empty-dot {
   background: #2d2d3a;
   border: 1px solid #a78bfa;
 }
-/* ====== LANJUTKAN LINK DARK MODE ====== */
+/* Lanjutkan link */
 body.dark-mode .review-question-item .lanjutkan-link {
   color: #a78bfa !important;
 }
 body.dark-mode .review-question-item .lanjutkan-link:hover {
   color: #c4b5fd !important;
 }
-/* ====== REVIEW PEMBAHASAN DARK MODE ====== */
+/* Review pembahasan dark mode */
 body.dark-mode .option-item.user-correct {
   background: #10b981 !important;
   border-color: #a78bfa !important;
@@ -877,7 +880,7 @@ body.dark-mode .option-item.wrong-option {
   color: #fecaca !important;
 }
 body.dark-mode .option-item.correct-option {
-  background: #ca8a04 !important;    /* kuning gelap untuk dark mode */
+  background: #ca8a04 !important;
   border-color: #fbbf24 !important;
   color: #fef08a !important;
 }
@@ -890,7 +893,7 @@ body.dark-mode .review-warning {
   color: #fecaca !important;
   border: 1px solid #ef4444 !important;
 }
-/* ====== LEADERBOARD DARK MODE ====== */
+/* Leaderboard dark mode */
 body.dark-mode .leaderboard-item .rank {
   color: #facc15 !important;
 }
@@ -910,41 +913,19 @@ body.dark-mode .podium-score,
 body.dark-mode .podium-time {
   color: #ffffff !important;
 }
-body.dark-mode .podium-1 .podium-block {
-  background: linear-gradient(135deg, #b45309, #92400e) !important;
-}
-body.dark-mode .podium-2 .podium-block {
-  background: linear-gradient(135deg, #4b5563, #374151) !important;
-}
-body.dark-mode .podium-3 .podium-block {
-  background: linear-gradient(135deg, #78350f, #451a03) !important;
-}
-/* ====== KALKULATOR DARK MODE ====== */
-body.dark-mode .calculator-box {
-  background: #1e1e2e;
-}
-body.dark-mode .calc-num {
-  background: #2d2d3a;
-  color: white;
-}
-body.dark-mode .calc-func {
-  background: #3a3a4a;
-  color: white;
-}
-body.dark-mode #calcDisplay {
-  background: #0f0f1a;
-  color: white;
-  border-color: #3a3a4a;
-}
+body.dark-mode .podium-1 .podium-block { background: linear-gradient(135deg, #b45309, #92400e) !important; }
+body.dark-mode .podium-2 .podium-block { background: linear-gradient(135deg, #4b5563, #374151) !important; }
+body.dark-mode .podium-3 .podium-block { background: linear-gradient(135deg, #78350f, #451a03) !important; }
+/* Kalkulator dark mode */
+body.dark-mode .calculator-box { background: #1e1e2e; }
+body.dark-mode .calc-num { background: #2d2d3a; color: white; }
+body.dark-mode .calc-func { background: #3a3a4a; color: white; }
+body.dark-mode #calcDisplay { background: #0f0f1a; color: white; border-color: #3a3a4a; }
 
-/* ========== PRINT: SEMUA SOAL TERCETAK TIDAK DIPAKSA HALAMAN BARU ========== */
+/* ========== PRINT ========== */
 @media print {
-  body * {
-    visibility: hidden;
-  }
-  #discussionModal, #discussionModal * {
-    visibility: visible;
-  }
+  body * { visibility: hidden; }
+  #discussionModal, #discussionModal * { visibility: visible; }
   #discussionModal {
     position: absolute;
     top: 0;
@@ -957,90 +938,28 @@ body.dark-mode #calcDisplay {
     height: auto !important;
     max-height: none !important;
   }
-  .modal-content {
-    box-shadow: none;
-    padding: 0;
-    overflow: visible !important;
-    max-height: none !important;
-    height: auto;
-  }
-  .modal-body {
-    overflow: visible !important;
-    max-height: none !important;
-    height: auto;
-  }
-  .discussion-question {
-    page-break-inside: avoid;
-    break-inside: avoid;
-    margin-bottom: 20px;
-  }
-  .close-modal, .secondary-btn, .modal-header button {
-    display: none !important;
-  }
-  .modal-header {
-    border-bottom: 1px solid #ddd;
-    margin-bottom: 20px;
-  }
-  .user-correct {
-    background: #d1fae5 !important;
-    color: #065f46 !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  .wrong-option {
-    background: #fee2e2 !important;
-    color: #991b1b !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  .correct-option {
-    background: #fef9c3 !important;
-    color: #854d0e !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
+  .modal-content { box-shadow: none; padding: 0; overflow: visible !important; max-height: none !important; height: auto; }
+  .modal-body { overflow: visible !important; max-height: none !important; height: auto; }
+  .discussion-question { page-break-inside: avoid; break-inside: avoid; margin-bottom: 20px; }
+  .close-modal, .secondary-btn, .modal-header button { display: none !important; }
+  .modal-header { border-bottom: 1px solid #ddd; margin-bottom: 20px; }
+  .user-correct { background: #d1fae5 !important; color: #065f46 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .wrong-option { background: #fee2e2 !important; color: #991b1b !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .correct-option { background: #fef9c3 !important; color: #854d0e !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 
 /* ========== RESPONSIF ========== */
 @media (max-width: 860px) {
-  .wrapper {
-    flex-direction: column;
-    padding: 0 16px;
-  }
-  .side {
-    position: static;
-  }
-  .login-container {
-    flex-direction: column;
-  }
-  .login-left {
-    padding: 20px;
-  }
-  .login-image {
-    max-width: 250px;
-  }
-  .brand {
-    font-size: 16px;
-    white-space: normal;
-  }
-  .top-right {
-    gap: 8px;
-  }
-  .homepage-btn, .darkmode-btn {
-    padding: 4px 12px;
-    font-size: 11px;
-  }
-  .result-card {
-    flex-direction: column;
-  }
-  .review-stats {
-    flex-direction: column;
-  }
-  .calc-grid {
-    gap: 6px;
-  }
-  .calc-grid button {
-    padding: 12px 0;
-    font-size: 14px;
-  }
+  .wrapper { flex-direction: column; padding: 0 16px; }
+  .side { position: static; }
+  .login-container { flex-direction: column; }
+  .login-left { padding: 20px; }
+  .login-image { max-width: 250px; }
+  .brand { font-size: 16px; white-space: normal; }
+  .top-right { gap: 8px; }
+  .homepage-btn, .darkmode-btn { padding: 4px 12px; font-size: 11px; }
+  .result-card { flex-direction: column; }
+  .review-stats { flex-direction: column; }
+  .calc-grid { gap: 6px; }
+  .calc-grid button { padding: 12px 0; font-size: 14px; }
 }

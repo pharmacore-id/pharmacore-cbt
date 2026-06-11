@@ -434,16 +434,18 @@ function login() {
   fetch(API + "?action=validateToken&token=" + token)
     .then(r => r.json())
     .then(res => {
+      console.log("Response dari server:", res); // CEK DI CONSOLE BROWSER
+      
       if (!res.valid) {
         alert("Token tidak valid!");
         return;
       }
       
       // JIKA TOKEN SUDAH PERNAH DIGUNAKAN (used = true)
-      if (res.used) {
+      if (res.used === true) {
         alert("Token ini sudah digunakan. Menampilkan hasil ujian...");
         
-        // Coba ambil data hasil dari localStorage terlebih dahulu
+        // Coba ambil data hasil dari localStorage
         const savedScore = localStorage.getItem("cbt_score");
         const savedResults = localStorage.getItem("cbt_results");
         const savedSoal = localStorage.getItem("cbt_soal");
@@ -453,9 +455,9 @@ function login() {
           document.getElementById("login").style.display = "none";
           showResult(parseInt(savedScore));
         } else {
-          alert("Tidak dapat menemukan hasil ujian untuk token ini. Silakan hubungi admin.");
+          alert("Tidak dapat menemukan hasil ujian untuk token ini.");
         }
-        return; // PENTING: HENTIKAN EKSEKUSI DI SINI, JANGAN LANJUTKAN KE UJIAN BARU
+        return; // PENTING: HENTIKAN EKSEKUSI
       }
       
       // JIKA TOKEN BARU (used = false), MULAI UJIAN BARU

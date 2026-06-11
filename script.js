@@ -1,5 +1,5 @@
 // ========== KONFIGURASI ==========
-const API = "https://script.google.com/macros/s/AKfycbx9AH3tu0CCMItBJimHobEqBYezxRVZm_lwJ-9h8s1Bk0NHOu0igf_jUl1GSzY1Obyl/exec";
+const API = "https://script.google.com/macros/s/AKfycbx9AH3tu0CCMItBJimHobEqBYezxRVZm_lwJ-9h8s1Bk0NHOu0igf_jUl1GSzY1Obyl/exec"; // GANTI DENGAN URL WEB APP ANDA
 const OPTIONS = ['A', 'B', 'C', 'D', 'E'];
 
 let currentQuestion = 0, answers = {}, ragu = {}, soal = [], token = "", nama = "";
@@ -255,7 +255,7 @@ function showResult(score) {
   loadLeaderboard();
 }
 
-// ========== MODAL PEMBAHASAN & EXPORT PDF ==========
+// ========== MODAL PEMBAHASAN ==========
 function openDiscussionModal() {
   let results = JSON.parse(localStorage.getItem("cbt_results") || "[]");
   let soalData = JSON.parse(localStorage.getItem("cbt_soal") || "[]");
@@ -294,7 +294,9 @@ function openDiscussionModal() {
   document.getElementById("discussionContent").innerHTML = html;
   document.getElementById("discussionModal").style.display = "flex";
 }
-function closeDiscussionModal() { document.getElementById("discussionModal").style.display = "none"; }
+function closeDiscussionModal() {
+  document.getElementById("discussionModal").style.display = "none";
+}
 function exportDiscussionPDF() { window.print(); }
 
 // ========== LEADERBOARD ==========
@@ -309,7 +311,6 @@ function loadLeaderboard() {
         let data = res.leaderboard.map(item => ({ nama: item.nama, skor: item.skor, total: soal.length, waktu: item.waktu || "00:00" }));
         data.sort((a, b) => b.skor - a.skor);
         
-        // Podium 3 besar
         let podiumHtml = `<div class="podium-container">`;
         const medals = ["🥇", "🥈", "🥉"];
         const colors = ["podium-1", "podium-2", "podium-3"];
@@ -327,7 +328,6 @@ function loadLeaderboard() {
         }
         podiumHtml += `</div>`;
         
-        // Daftar peringkat selanjutnya
         let listHtml = `<div class="leaderboard-list"><div class="leaderboard-header">
           <div class="rank">#</div><div class="name">Peserta</div><div class="score">Skor</div><div class="time">Waktu</div>
         </div>`;
@@ -493,12 +493,29 @@ function calcFunction(action) {
     case 'mminus': calcMemory -= val; break;
     case 'mr': d.value = calcMemory; break;
     case 'mc': calcMemory = 0; break;
+    case 'ms': calcMemory = val; break;
   }
 }
 function initCalculator() {
   document.querySelectorAll('.calc-num').forEach(btn => btn.onclick = () => appendToDisplay(btn.getAttribute('data-num')));
   document.querySelectorAll('.calc-operator').forEach(btn => btn.onclick = () => appendToDisplay(btn.getAttribute('data-op')));
   document.querySelectorAll('.calc-func, .calc-mem, .calc-clear').forEach(btn => btn.onclick = () => calcFunction(btn.getAttribute('data-action')));
+}
+
+// ========== CLOSE MODAL DENGAN KLIK DI LUAR (untuk kalkulator & discussion) ==========
+function initModalCloseOnOutsideClick() {
+  const calcModal = document.getElementById('calculatorModal');
+  const discussionModal = document.getElementById('discussionModal');
+  
+  window.addEventListener('click', function(e) {
+    if (calcModal && e.target === calcModal) {
+      calcModal.style.display = 'none';
+      document.removeEventListener('keydown', handleKeyboard);
+    }
+    if (discussionModal && e.target === discussionModal) {
+      discussionModal.style.display = 'none';
+    }
+  });
 }
 
 // ========== CEK SESSION ==========
@@ -527,7 +544,9 @@ function checkExistingSession() {
     }
   }
 }
+
 document.addEventListener("DOMContentLoaded", function() {
   initCalculator();
+  initModalCloseOnOutsideClick();
   checkExistingSession();
 });

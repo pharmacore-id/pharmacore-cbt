@@ -1,5 +1,5 @@
 // ========== KONFIGURASI ==========
-const API = "https://script.google.com/macros/s/AKfycbx1cJwxeDtobo8CHFQkwObnss9SfIRNdBC8REVy1MVwsFi1GQDGf1PgQYRFIXRvop1HtA/exec"; // GANTI DENGAN URL WEB APP ANDA
+const API = "https://script.google.com/macros/s/AKfycby0kMo7ooyAlkH1xCBVajFGcgaUsSCCmZsXjHXGTbPnakAh5kQ4R87NNUxk_VSRIBXztw/exec"; // GANTI DENGAN URL WEB APP ANDA
 const OPTIONS = ['A', 'B', 'C', 'D', 'E'];
 
 let currentQuestion = 0, answers = {}, ragu = {}, soal = [], token = "", nama = "";

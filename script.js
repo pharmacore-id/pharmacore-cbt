@@ -493,21 +493,22 @@ function login() {
     .then(r => r.json())
     .then(res => {
       console.log("Response:", res);
+      
       if (!res.valid) {
         alert("Token tidak valid!");
         return;
       }
       
-      // Jika token sudah pernah digunakan
-      if (res.used) {
-        alert("Token ini sudah digunakan. Token hanya dapat digunakan SEKALI untuk mengerjakan ujian.\nAnda tidak dapat mengerjakan ulang dengan token ini.");
-        return;
+      // JIKA TOKEN SUDAH PERNAH DIGUNAKAN (used = true)
+      if (res.used === true) {
+        alert("❌ Token ini sudah digunakan.\n\nToken hanya dapat digunakan SEKALI untuk mengerjakan ujian.\nAnda tidak dapat mengerjakan ulang dengan token ini.\n\nTerima kasih.");
+        return; // HENTIKAN EKSEKUSI, TIDAK BOLEH MASUK
       }
       
       // Peringatan token sekali pakai
       alert("⚠️ PERINGATAN!\n\nToken ini hanya dapat digunakan SEKALI.\n\nSetelah Anda menyelesaikan ujian, token akan hangus dan tidak bisa digunakan lagi untuk mengerjakan ulang.\n\nPastikan Anda menyimpan pembahasan (PDF) setelah submit!");
       
-      // Mulai ujian baru
+      // Mulai ujian baru (used = false)
       currentDurasi = res.durasi || 3600;
       currentSheetSoal = res.sheetSoal || "SOAL A";
       timeLeft = currentDurasi;

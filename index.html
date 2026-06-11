@@ -69,20 +69,90 @@
         <div><span class="dot empty-dot"></span> Belum Dijawab</div>
       </div>
       <button class="submit-btn" onclick="showReviewModal()">📋 Kumpulkan Jawaban</button>
-      <hr>
-      <button class="secondary-btn" onclick="toggleCalculator()">🧮 Kalkulator Scientific</button>
+      <button class="secondary-btn calc-btn" onclick="toggleCalculator()">🧮 Kalkulator Scientific</button>
     </div>
   </div>
 </div>
 
 <!-- MODAL REVIEW SEBELUM SUBMIT -->
-<div id="reviewModal" class="modal" style="display:none;">...</div>
-<!-- MODAL REVIEW PEMBAHASAN -->
-<div id="discussionModal" class="modal" style="display:none;">...</div>
-<!-- HASIL UJIAN -->
-<div id="result" style="display:none;">...</div>
-<!-- KALKULATOR MODAL -->
-<div id="calculatorModal" class="calculator-modal" style="display:none;">...</div>
+<div id="reviewModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <div class="modal-header"><h2>📋 Review Jawaban</h2><button class="close-modal" onclick="closeReviewModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="review-stats">
+        <div class="review-stat"><div class="review-stat-value" id="reviewTotal">0</div><div class="review-stat-label">Total Soal</div></div>
+        <div class="review-stat answered"><div class="review-stat-value" id="reviewAnswered">0</div><div class="review-stat-label">✅ Terjawab</div></div>
+        <div class="review-stat ragu"><div class="review-stat-value" id="reviewRagu">0</div><div class="review-stat-label">🚩 Ditandai Ragu</div></div>
+        <div class="review-stat unanswered"><div class="review-stat-value" id="reviewUnanswered">0</div><div class="review-stat-label">❌ Belum Dijawab</div></div>
+      </div>
+      <div class="review-questions"><h3>Daftar Soal</h3><div id="reviewQuestionList"></div></div>
+      <div class="review-warning">⚠️ Soal yang tidak dijawab akan dianggap salah!</div>
+    </div>
+    <div class="modal-footer">
+      <button class="secondary-btn" onclick="closeReviewModal()">Kembali ke Ujian</button>
+      <button class="submit-btn" onclick="confirmSubmit()">✅ Ya, Kumpulkan Jawaban</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REVIEW & PEMBAHASAN (setelah submit) -->
+<div id="discussionModal" class="modal" style="display:none;">
+  <div class="modal-content" style="max-width: 800px; width: 90%;">
+    <div class="modal-header">
+      <h2>📖 Review & Pembahasan Jawaban</h2>
+      <div>
+        <button class="secondary-btn" onclick="exportDiscussionPDF()">📄 Export PDF</button>
+        <button class="close-modal" onclick="closeDiscussionModal()">✕</button>
+      </div>
+    </div>
+    <div class="modal-body" id="discussionContent"></div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="result" style="display:none;">
+  <div class="result-card">
+    <div class="result-left">
+      <div class="result-left-header">
+        <button class="homepage-btn" onclick="goHome()">🏠 Homepage</button>
+        <button class="darkmode-btn" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+      </div>
+      <h2>📝 Hasil Ujian</h2>
+      <div class="score-circle"><span id="scoreNumber">0</span></div>
+      <p id="skor"></p>
+      <div class="result-summary">
+        <div><span>Nama</span><strong id="resultNama"></strong></div>
+        <div><span>Benar</span><strong id="resultBenar">0</strong></div>
+        <div><span>Salah</span><strong id="resultSalah">0</strong></div>
+        <div><span>Waktu</span><strong id="resultWaktu">00:00</strong></div>
+      </div>
+      <button class="secondary-btn" onclick="openDiscussionModal()">📋 Review & Pembahasan</button>
+      <button class="submit-btn" onclick="restartExam()">🔄 Ujian Baru</button>
+    </div>
+    <div class="result-right">
+      <h3>🏆 Leaderboard</h3>
+      <div id="board"></div>
+    </div>
+    <div class="footer-copyright">PHARMACORE CBT © 2026</div>
+  </div>
+</div>
+
+<!-- CALCULATOR MODAL -->
+<div id="calculatorModal" class="calculator-modal" style="display:none;">
+  <div class="calculator-box">
+    <div class="calculator-header"><span>🧮 Kalkulator Scientific</span><button class="close-calc" onclick="toggleCalculator()">✕</button></div>
+    <input type="text" id="calcDisplay" readonly placeholder="0">
+    <div class="calc-grid">
+      <button class="calc-func" data-action="sin">sin</button><button class="calc-func" data-action="cos">cos</button><button class="calc-func" data-action="tan">tan</button><button class="calc-func" data-action="log">log</button><button class="calc-func" data-action="ln">ln</button>
+      <button class="calc-func" data-action="sqrt">√</button><button class="calc-func" data-action="pow2">x²</button><button class="calc-func" data-action="pow3">x³</button><button class="calc-func" data-action="reciprocal">1/x</button><button class="calc-func" data-action="pi">π</button>
+      <button class="calc-mem" data-action="mplus">M+</button><button class="calc-mem" data-action="mminus">M-</button><button class="calc-mem" data-action="mr">MR</button><button class="calc-mem" data-action="mc">MC</button><button class="calc-operator" data-op="(">(</button>
+      <button class="calc-num" data-num="7">7</button><button class="calc-num" data-num="8">8</button><button class="calc-num" data-num="9">9</button><button class="calc-operator" data-op="/">÷</button><button class="calc-operator" data-op=")">)</button>
+      <button class="calc-num" data-num="4">4</button><button class="calc-num" data-num="5">5</button><button class="calc-num" data-num="6">6</button><button class="calc-operator" data-op="*">×</button><button class="calc-func" data-action="percent">%</button>
+      <button class="calc-num" data-num="1">1</button><button class="calc-num" data-num="2">2</button><button class="calc-num" data-num="3">3</button><button class="calc-operator" data-op="-">-</button><button class="calc-clear" data-action="clear">C</button>
+      <button class="calc-num" data-num="0">0</button><button class="calc-num" data-num=".">.</button><button class="calc-func" data-action="equal">=</button><button class="calc-operator" data-op="+">+</button><button class="calc-clear" data-action="backspace">⌫</button>
+    </div>
+  </div>
+</div>
 
 <script src="script.js"></script>
 </body>

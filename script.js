@@ -19,6 +19,7 @@ function saveState() {
   localStorage.setItem("cbt_sheetSoal", currentSheetSoal);
   localStorage.setItem("cbt_durasi", currentDurasi);
 }
+
 function loadSavedState() {
   const sAns = localStorage.getItem("cbt_answers");
   const sRag = localStorage.getItem("cbt_ragu");
@@ -39,6 +40,7 @@ function loadSavedState() {
   if (sSheet) currentSheetSoal = sSheet;
   if (sDurasi) currentDurasi = parseInt(sDurasi);
 }
+
 function clearSession() {
   localStorage.clear();
   answers = {}; ragu = {}; currentQuestion = 0; isDone = false; isLoggedIn = false; soal = []; nama = ""; token = ""; currentSheetSoal = "";
@@ -52,6 +54,7 @@ function updateProgress() {
   let fill = document.getElementById("progressFill");
   if (fill) fill.style.width = progress + "%";
 }
+
 function updateStats() {
   if (!soal.length) return;
   const answered = Object.keys(answers).length;
@@ -61,6 +64,7 @@ function updateStats() {
   document.getElementById("raguSummary").innerText = raguCount;
   document.getElementById("unansweredSummary").innerText = soal.length - answered;
 }
+
 function updateNavGrid() {
   if (!soal.length) return;
   let html = "";
@@ -73,6 +77,7 @@ function updateNavGrid() {
   }
   document.getElementById("nav").innerHTML = html;
 }
+
 function goToQuestion(idx) {
   currentQuestion = idx;
   renderQuestion();
@@ -81,6 +86,7 @@ function goToQuestion(idx) {
   updateProgress();
   saveState();
 }
+
 function renderQuestion() {
   if (!soal.length) return;
   const s = soal[currentQuestion];
@@ -104,6 +110,7 @@ function renderQuestion() {
   }
   updateProgress();
 }
+
 function pick(ans) {
   answers[currentQuestion] = ans;
   if (ragu[currentQuestion]) delete ragu[currentQuestion];
@@ -112,6 +119,7 @@ function pick(ans) {
   updateNavGrid();
   updateStats();
 }
+
 function nextQuestion() {
   if (currentQuestion < soal.length - 1) {
     currentQuestion++;
@@ -124,6 +132,7 @@ function nextQuestion() {
     if (confirm("Anda sudah di soal terakhir. Apakah ingin mengumpulkan jawaban?")) showReviewModal();
   }
 }
+
 function prevQuestion() {
   if (currentQuestion > 0) {
     currentQuestion--;
@@ -134,6 +143,7 @@ function prevQuestion() {
     saveState();
   }
 }
+
 function toggleRagu() {
   if (ragu[currentQuestion]) delete ragu[currentQuestion];
   else ragu[currentQuestion] = true;
@@ -190,6 +200,7 @@ function showReviewModal() {
   document.getElementById("reviewQuestionList").innerHTML = listHtml;
   document.getElementById("reviewModal").style.display = "flex";
 }
+
 function goToQuestionFromReview(idx) { closeReviewModal(); goToQuestion(idx); }
 function closeReviewModal() { document.getElementById("reviewModal").style.display = "none"; }
 function confirmSubmit() { closeReviewModal(); submit(); }
@@ -200,6 +211,7 @@ function formatTimeDisplay(seconds) {
   let secs = seconds % 60;
   return `${mins} menit ${secs} detik`;
 }
+
 function submit() {
   if (isDone) return;
   if (!soal || soal.length === 0) { alert("Soal belum dimuat."); return; }
@@ -240,6 +252,7 @@ function submit() {
   }).catch(e => console.log);
   showResult(score);
 }
+
 function showResult(score) {
   document.getElementById("app").style.display = "none";
   document.getElementById("result").style.display = "flex";
@@ -294,6 +307,7 @@ function openDiscussionModal() {
   document.getElementById("discussionContent").innerHTML = html;
   document.getElementById("discussionModal").style.display = "flex";
 }
+
 function closeDiscussionModal() { document.getElementById("discussionModal").style.display = "none"; }
 function exportDiscussionPDF() { window.print(); }
 
@@ -368,13 +382,20 @@ function goHome() {
 
 // ========== LOGIN & LOAD SOAL ==========
 function login() {
+  // Hapus session lama terlebih dahulu untuk mencegah token dipakai ulang
+  clearSession();
+  
   nama = document.getElementById("nama").value.trim();
   token = document.getElementById("token").value.trim();
   if (!nama || !token) { alert("Lengkapi data!"); return; }
+  
   fetch(API + "?action=validateToken&token=" + token)
     .then(r => r.json())
     .then(res => {
-      if (!res.valid) { alert("Token tidak valid"); return; }
+      if (!res.valid) { 
+        alert("Token tidak valid atau sudah digunakan!"); 
+        return; 
+      }
       currentDurasi = res.durasi || 3600;
       currentSheetSoal = res.sheetSoal || "SOAL A";
       timeLeft = currentDurasi;
@@ -386,6 +407,7 @@ function login() {
     })
     .catch(() => alert("Gagal validasi token"));
 }
+
 function loadQuestions() {
   if (soal.length) { startFromSaved(); return; }
   fetch(API + "?action=getSoal&sheet=" + encodeURIComponent(currentSheetSoal))
@@ -400,6 +422,7 @@ function loadQuestions() {
     })
     .catch(() => alert("Gagal load soal"));
 }
+
 function startFromSaved() {
   renderQuestion();
   updateNavGrid();
@@ -514,6 +537,22 @@ function checkExistingSession() {
     }
   }
 }
+
+// ========== PASTIKAN SEMUA FUNGSI GLOBAL ==========
+window.login = login;
+window.toggleDarkMode = toggleDarkMode;
+window.goHome = goHome;
+window.prevQuestion = prevQuestion;
+window.nextQuestion = nextQuestion;
+window.toggleRagu = toggleRagu;
+window.showReviewModal = showReviewModal;
+window.closeReviewModal = closeReviewModal;
+window.confirmSubmit = confirmSubmit;
+window.openDiscussionModal = openDiscussionModal;
+window.closeDiscussionModal = closeDiscussionModal;
+window.exportDiscussionPDF = exportDiscussionPDF;
+window.restartExam = restartExam;
+window.toggleCalculator = toggleCalculator;
 
 document.addEventListener("DOMContentLoaded", function() {
   initCalculator();

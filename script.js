@@ -1,5 +1,5 @@
 // ========== KONFIGURASI ==========
-const API = "https://script.google.com/macros/s/AKfycby0kMo7ooyAlkH1xCBVajFGcgaUsSCCmZsXjHXGTbPnakAh5kQ4R87NNUxk_VSRIBXztw/exec";
+const API = "https://script.google.com/macros/s/AKfycby0kMo7ooyAlkH1xCBVajFGcgaUsSCCmZsXjHXGTbPnakAh5kQ4R87NNUxk_VSRIBXztw/exec"; // GANTI DENGAN URL WEB APP ANDA
 const OPTIONS = ['A', 'B', 'C', 'D', 'E'];
 
 let currentQuestion = 0, answers = {}, ragu = {}, soal = [], token = "", nama = "";
@@ -39,6 +39,28 @@ function loadSavedState() {
   if (sSoal) soal = JSON.parse(sSoal);
   if (sSheet) currentSheetSoal = sSheet;
   if (sDurasi) currentDurasi = parseInt(sDurasi);
+}
+
+function clearExamData() {
+  localStorage.removeItem("cbt_answers");
+  localStorage.removeItem("cbt_ragu");
+  localStorage.removeItem("cbt_current");
+  localStorage.removeItem("cbt_time");
+  localStorage.removeItem("cbt_submitted");
+  localStorage.removeItem("cbt_score");
+  localStorage.removeItem("cbt_results");
+  localStorage.removeItem("cbt_completion_time");
+  localStorage.removeItem("cbt_soal");
+  localStorage.removeItem("cbt_sheetSoal");
+  localStorage.removeItem("cbt_durasi");
+  answers = {};
+  ragu = {};
+  currentQuestion = 0;
+  isDone = false;
+  timeLeft = currentDurasi;
+  completionTimeSeconds = 0;
+  soal = [];
+  currentSheetSoal = "";
 }
 
 function clearSession() {
@@ -158,17 +180,6 @@ function toggleRagu() {
 }
 
 // ========== TIMER ==========
-function showToast(message, type = "warning") {
-  const toast = document.createElement("div");
-  toast.className = `toast-warning ${type === "danger" ? "danger" : ""}`;
-  toast.innerText = message;
-  document.body.appendChild(toast);
-  setTimeout(() => {
-    toast.remove();
-  }, 3000);
-}
-
-// ========== TIMER ==========
 function startTimer() {
   if (localStorage.getItem("cbt_submitted") === "true") return;
   if (timer) clearInterval(timer);
@@ -185,10 +196,19 @@ function startTimer() {
       let s = timeLeft % 60;
       let timerEl = document.getElementById("timer");
       if (timerEl) timerEl.innerHTML = `${m}:${s < 10 ? '0' + s : s}`;
-      
-      // Tampilkan notifikasi toast saat 5 menit dan 1 menit tersisa (tanpa alert)
       if (timeLeft === 300) showToast("⏰ Peringatan! Waktu tersisa 5 menit.", "warning");
       if (timeLeft === 60) showToast("⏰ Peringatan! Waktu tersisa 1 menit!", "danger");
+    }
+  }, 1000);
+}
+
+function showToast(message, type = "warning") {
+  const toast = document.createElement("div");
+  toast.className = `toast-warning ${type === "danger" ? "danger" : ""}`;
+  toast.innerText = message;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
 
 // ========== REVIEW MODAL SEBELUM SUBMIT ==========
 function showReviewModal() {
@@ -260,7 +280,6 @@ function submit() {
   localStorage.setItem("cbt_completion_time", completionTimeSeconds);
   let waktuStr = formatTimeDisplay(completionTimeSeconds);
   
-  // Kirim ke server dengan menambahkan sheetSoal untuk leaderboard per paket
   fetch(API, {
     method: "POST",
     mode: "no-cors",
@@ -272,16 +291,12 @@ function submit() {
       jawaban: answers,
       total: soal.length,
       waktu: waktuStr,
-      sheetSoal: currentSheetSoal   // <-- untuk filter leaderboard
+      sheetSoal: currentSheetSoal
     })
   }).catch(e => console.log);
   
   showResult(score);
-  
-  // Buka modal pembahasan agar user bisa download PDF (tanpa popup)
-  setTimeout(() => {
-    openDiscussionModal();
-  }, 500);
+  setTimeout(() => openDiscussionModal(), 500);
 }
 
 function showResult(score) {
@@ -299,19 +314,14 @@ function showResult(score) {
   loadLeaderboard();
 }
 
-// ========== MODAL PEMBAHASAN & EXPORT PDF ==========
 function openDiscussionModal() {
   let results = JSON.parse(localStorage.getItem("cbt_results") || "[]");
   let soalData = JSON.parse(localStorage.getItem("cbt_soal") || "[]");
   let score = parseInt(localStorage.getItem("cbt_score") || "0");
   let totalSoal = soalData.length;
-  
   if (!results.length) { alert("Tidak ada data."); return; }
-  
   let persen = Math.round((score / totalSoal) * 100);
-  
-  let html = `
-    <div style="text-align:center; margin-bottom:24px; padding-bottom:16px; border-bottom:2px solid #ddd;">
+  let html = `<div style="text-align:center; margin-bottom:24px; padding-bottom:16px; border-bottom:2px solid #ddd;">
       <h2 style="margin:0 0 8px 0;">📝 Hasil Ujian</h2>
       <div style="font-size:28px; font-weight:bold; color:#10b981; margin:8px 0;">${score} / ${totalSoal} (${persen}%)</div>
       <div style="display:flex; justify-content:center; gap:24px; flex-wrap:wrap; margin-top:12px;">
@@ -319,28 +329,21 @@ function openDiscussionModal() {
         <div><strong>✅ Benar:</strong> ${score}</div>
         <div><strong>❌ Salah:</strong> ${totalSoal - score}</div>
       </div>
-    </div>
-  `;
-  
+    </div>`;
   for (let i = 0; i < results.length; i++) {
     const r = results[i];
     const s = soalData[i];
     const userAnswer = r.jawabanUser;
     const correctKey = r.kunci;
-    let additionalClass = "";
-    let indicator = "";
-    
     html += `<div class="discussion-question">
       <h4>Soal ${r.nomor}. ${r.pertanyaan}</h4>
       <div class="options-list">`;
-    
     for (let opt of OPTIONS) {
       let optText = s[opt] || '';
       let isUser = (userAnswer === opt);
       let isCorrectKey = (correctKey === opt);
-      additionalClass = "";
-      indicator = "";
-      
+      let additionalClass = "";
+      let indicator = "";
       if (isUser && isCorrectKey) {
         additionalClass = "user-correct";
         indicator = " ✓ (jawaban Anda benar)";
@@ -351,16 +354,12 @@ function openDiscussionModal() {
         additionalClass = "correct-option";
         indicator = " ★ (kunci jawaban)";
       }
-      
       html += `<div class="option-item ${additionalClass}">
         <strong>${opt}.</strong> ${optText} ${indicator}
       </div>`;
     }
-    html += `</div>
-      <div class="discussion-pembahasan"><strong>📘 Pembahasan:</strong> ${r.pembahasan}</div>
-    </div>`;
+    html += `</div><div class="discussion-pembahasan"><strong>📘 Pembahasan:</strong> ${r.pembahasan}</div></div>`;
   }
-  
   document.getElementById("discussionContent").innerHTML = html;
   document.getElementById("discussionModal").style.display = "flex";
 }
@@ -368,7 +367,6 @@ function openDiscussionModal() {
 function closeDiscussionModal() { document.getElementById("discussionModal").style.display = "none"; }
 function exportDiscussionPDF() { window.print(); }
 
-// ========== LEADERBOARD (filter per sheet_soal) ==========
 function loadLeaderboard() {
   const board = document.getElementById("board");
   if (!board) return;
@@ -423,22 +421,19 @@ function loadLeaderboard() {
     .catch(() => board.innerHTML = '<div style="text-align:center; padding:20px;">⚠️ Gagal memuat leaderboard.</div>');
 }
 
-// ========== RESTART & HOME ==========
 function restartExam() {
   if (confirm("Ujian baru akan menghapus semua jawaban. Lanjutkan?")) {
-    clearSession(); // Hapus semua data untuk ujian baru
+    clearSession();
     location.reload();
   }
 }
-
 function goHome() {
   if (confirm("Kembali ke halaman login? Anda dapat melanjutkan ujian nanti dengan token yang sama.")) {
-    // Kembali ke login tanpa menghapus session
     document.getElementById("app").style.display = "none";
     document.getElementById("login").style.display = "flex";
-    // Jangan panggil clearSession() agar progress tetap ada
   }
 }
+
 // ========== LOGIN & LOAD SOAL ==========
 function login() {
   nama = document.getElementById("nama").value.trim();
@@ -452,10 +447,55 @@ function login() {
         alert("Token tidak valid!");
         return;
       }
-      
       if (res.used) {
         alert("❌ Token ini sudah digunakan.\n\nToken hanya dapat digunakan SEKALI untuk mengerjakan ujian.\nAnda tidak dapat mengerjakan ulang dengan token ini.\n\nTerima kasih.");
         return;
+      }
+      
+      // CEK APAKAH TOKEN BERBEDA DENGAN YANG TERSIMPAN
+      const savedToken = localStorage.getItem("cbt_token");
+      if (savedToken && savedToken !== token) {
+        // Token berbeda: hapus data ujian sebelumnya
+        clearExamData();
+        localStorage.setItem("cbt_token", token);
+        localStorage.setItem("cbt_nama", nama);
+        isLoggedIn = true;
+        // Reset variabel global
+        answers = {};
+        ragu = {};
+        currentQuestion = 0;
+        isDone = false;
+        timeLeft = res.durasi || 3600;
+        currentDurasi = res.durasi || 3600;
+        currentSheetSoal = res.sheetSoal || "SOAL A";
+        soal = [];
+      } else {
+        // Token sama, coba muat state yang tersimpan
+        loadSavedState();
+        // Jika ada ujian belum selesai (belum submit dan ada jawaban)
+        if (localStorage.getItem("cbt_submitted") !== "true" && Object.keys(answers).length > 0) {
+          if (confirm("Anda memiliki ujian yang belum selesai. Lanjutkan?")) {
+            // Langsung lanjutkan tanpa reset
+            document.getElementById("login").style.display = "none";
+            document.getElementById("app").style.display = "block";
+            if (soal.length) {
+              document.getElementById("totalCount").innerText = soal.length;
+              renderQuestion();
+              updateNavGrid();
+              updateStats();
+              startTimer();
+            } else {
+              loadQuestions();
+            }
+            return;
+          } else {
+            // User memilih tidak melanjutkan, hapus data ujian
+            clearExamData();
+            currentDurasi = res.durasi || 3600;
+            currentSheetSoal = res.sheetSoal || "SOAL A";
+            timeLeft = currentDurasi;
+          }
+        }
       }
       
       // TAMPILKAN WARNING PERMANEN DI SIDEBAR
@@ -523,7 +563,6 @@ function toggleCalculator() {
     document.getElementById("calcDisplay").focus();
   }
 }
-
 function handleKeyboard(e) {
   let d = document.getElementById("calcDisplay");
   if (!d) return;
@@ -538,7 +577,6 @@ function handleKeyboard(e) {
   else if (key === 'Backspace') deleteLastCalc();
   else if (key === 'c' || key === 'C') clearCalc();
 }
-
 function appendToDisplay(v) {
   let d = document.getElementById("calcDisplay");
   if (d) { if (d.value === "Error") d.value = ""; d.value += v; }
@@ -553,7 +591,6 @@ function calculateResult() {
     d.value = r;
   } catch(e) { d.value = "Error"; }
 }
-
 function calcFunction(action) {
   let d = document.getElementById("calcDisplay");
   let val = parseFloat(d.value) || 0;
@@ -580,7 +617,6 @@ function calcFunction(action) {
     case 'ms': calcMemory = val; break;
   }
 }
-
 function initCalculator() {
   document.querySelectorAll('.calc-num').forEach(btn => btn.onclick = () => appendToDisplay(btn.getAttribute('data-num')));
   document.querySelectorAll('.calc-operator').forEach(btn => btn.onclick = () => appendToDisplay(btn.getAttribute('data-op')));
@@ -591,7 +627,6 @@ function initCalculator() {
 function checkExistingSession() {
   loadSavedState();
   loadDarkMode();
-  
   if (localStorage.getItem("cbt_submitted") === "true") {
     let savedScore = localStorage.getItem("cbt_score");
     if (savedScore) {
@@ -607,7 +642,6 @@ function checkExistingSession() {
     }
     return;
   }
-  
   if (isLoggedIn) {
     document.getElementById("login").style.display = "none";
     document.getElementById("app").style.display = "block";
@@ -623,7 +657,6 @@ function checkExistingSession() {
   }
 }
 
-// ========== EXPORT GLOBAL FUNCTIONS ==========
 window.login = login;
 window.toggleDarkMode = toggleDarkMode;
 window.goHome = goHome;
@@ -639,7 +672,6 @@ window.exportDiscussionPDF = exportDiscussionPDF;
 window.restartExam = restartExam;
 window.toggleCalculator = toggleCalculator;
 
-// ========== INIT ==========
 document.addEventListener("DOMContentLoaded", function() {
   initCalculator();
   checkExistingSession();

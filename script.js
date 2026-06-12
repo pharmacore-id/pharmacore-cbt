@@ -143,20 +143,8 @@ function pick(ans) {
   updateStats();
 }
 
-function nextQuestion() {
-  if (currentQuestion < soal.length - 1) {
-    currentQuestion++;
-    renderQuestion();
-    updateNavGrid();
-    updateStats();
-    updateProgress();
-    saveState();
-  } else {
-    if (confirm("Anda sudah di soal terakhir. Apakah ingin mengumpulkan jawaban?")) showReviewModal();
-  }
-}
-
-function prevQuestion() {
+// ========== NAVIGASI (DIPANGGIL DARI HTML) ==========
+function doPrevQuestion() {
   if (currentQuestion > 0) {
     currentQuestion--;
     renderQuestion();
@@ -167,7 +155,20 @@ function prevQuestion() {
   }
 }
 
-function toggleRagu() {
+function doNextQuestion() {
+  if (currentQuestion < soal.length - 1) {
+    currentQuestion++;
+    renderQuestion();
+    updateNavGrid();
+    updateStats();
+    updateProgress();
+    saveState();
+  } else {
+    if (confirm("Anda sudah di soal terakhir. Apakah ingin mengumpulkan jawaban?")) doShowReviewModal();
+  }
+}
+
+function doToggleRagu() {
   if (ragu[currentQuestion]) {
     delete ragu[currentQuestion];
   } else {
@@ -188,7 +189,7 @@ function startTimer() {
     if (timeLeft <= 0) {
       clearInterval(timer);
       alert("⏰ Waktu habis! Jawaban akan dikumpulkan otomatis.");
-      submit();
+      doSubmit();
     } else {
       timeLeft--;
       saveState();
@@ -211,7 +212,7 @@ function showToast(message, type = "warning") {
 }
 
 // ========== REVIEW MODAL SEBELUM SUBMIT ==========
-function showReviewModal() {
+function doShowReviewModal() {
   if (!soal.length) return;
   const answered = Object.keys(answers).length;
   const raguCount = Object.keys(ragu).length;
@@ -235,9 +236,9 @@ function showReviewModal() {
   document.getElementById("reviewModal").style.display = "flex";
 }
 
-function goToQuestionFromReview(idx) { closeReviewModal(); goToQuestion(idx); }
-function closeReviewModal() { document.getElementById("reviewModal").style.display = "none"; }
-function confirmSubmit() { closeReviewModal(); submit(); }
+function goToQuestionFromReview(idx) { doCloseReviewModal(); goToQuestion(idx); }
+function doCloseReviewModal() { document.getElementById("reviewModal").style.display = "none"; }
+function doConfirmSubmit() { doCloseReviewModal(); doSubmit(); }
 
 // ========== SUBMIT ==========
 function formatTimeDisplay(seconds) {
@@ -246,7 +247,7 @@ function formatTimeDisplay(seconds) {
   return `${mins} menit ${secs} detik`;
 }
 
-function submit() {
+function doSubmit() {
   if (isDone) return;
   if (!soal || soal.length === 0) { alert("Soal belum dimuat."); return; }
   let unanswered = soal.length - Object.keys(answers).length;
@@ -293,7 +294,10 @@ function submit() {
       waktu: waktuStr,
       sheetSoal: currentSheetSoal
     })
-    }).catch(e => console.log);
+  }).catch(e => console.log);
+  
+  showResult(score);
+}
 
 function showResult(score) {
   document.getElementById("app").style.display = "none";
@@ -310,17 +314,17 @@ function showResult(score) {
   loadLeaderboard();
 }
 
-function openDiscussionModal() {
+function doOpenDiscussionModal() {
   let results = JSON.parse(localStorage.getItem("cbt_results") || "[]");
   let soalData = JSON.parse(localStorage.getItem("cbt_soal") || "[]");
   let score = parseInt(localStorage.getItem("cbt_score") || "0");
   let totalSoal = soalData.length;
   if (!results.length) { alert("Tidak ada data."); return; }
   let persen = Math.round((score / totalSoal) * 100);
-  let html = `<div style="text-align:center; margin-bottom:24px; padding-bottom:16px; border-bottom:2px solid #ddd;">
-      <h2 style="margin:0 0 8px 0;">📝 Hasil Ujian</h2>
-      <div style="font-size:28px; font-weight:bold; color:#10b981; margin:8px 0;">${score} / ${totalSoal} (${persen}%)</div>
-      <div style="display:flex; justify-content:center; gap:24px; flex-wrap:wrap; margin-top:12px;">
+  let html = `<div class="discussion-header">
+      <h2>📝 Hasil Ujian</h2>
+      <div class="discussion-score">${score} / ${totalSoal} (${persen}%)</div>
+      <div class="discussion-info">
         <div><strong>👤 Nama:</strong> ${nama}</div>
         <div><strong>✅ Benar:</strong> ${score}</div>
         <div><strong>❌ Salah:</strong> ${totalSoal - score}</div>
@@ -360,8 +364,8 @@ function openDiscussionModal() {
   document.getElementById("discussionModal").style.display = "flex";
 }
 
-function closeDiscussionModal() { document.getElementById("discussionModal").style.display = "none"; }
-function exportDiscussionPDF() { window.print(); }
+function doCloseDiscussionModal() { document.getElementById("discussionModal").style.display = "none"; }
+function doExportDiscussionPDF() { window.print(); }
 
 function loadLeaderboard() {
   const board = document.getElementById("board");
@@ -417,14 +421,19 @@ function loadLeaderboard() {
     .catch(() => board.innerHTML = '<div style="text-align:center; padding:20px;">⚠️ Gagal memuat leaderboard.</div>');
 }
 
+function doRestartExam() {
+  if (confirm("Ujian baru akan menghapus semua jawaban. Lanjutkan?")) {
+    clearSession();
+    location.reload();
+  }
+}
 
-function goHome() {
+function doGoHome() {
   if (confirm("Yakin kembali ke halaman login?")) {
     if (timer) clearInterval(timer);
     document.getElementById("app").style.display = "none";
     document.getElementById("result").style.display = "none";
-    document.getElementById("login").style.display = "flex";
-    // Reset state
+    document.getElementById("loginPage").style.display = "flex";
     isLoggedIn = false;
     isDone = false;
     soal = [];
@@ -432,7 +441,7 @@ function goHome() {
 }
 
 // ========== LOGIN & LOAD SOAL ==========
-function login() {
+function doLogin() {
   console.log("Login function called");
   nama = document.getElementById("nama").value.trim();
   token = document.getElementById("token").value.trim();
@@ -459,7 +468,7 @@ function login() {
       isLoggedIn = true;
       saveState();
       
-      document.getElementById("login").style.display = "none";
+      document.getElementById("loginPage").style.display = "none";
       document.getElementById("app").style.display = "block";
       loadQuestions();
     })
@@ -494,193 +503,4 @@ function checkExistingSession() {
   
   const submitted = localStorage.getItem("cbt_submitted") === "true";
   
-  if (submitted && soal.length > 0) {
-    const savedScore = localStorage.getItem("cbt_score");
-    if (savedScore) {
-      document.getElementById("login").style.display = "none";
-      document.getElementById("app").style.display = "none";
-      document.getElementById("result").style.display = "flex";
-      showResult(parseInt(savedScore));
-      return;
-    }
-  }
-  
-  if (isLoggedIn && soal.length > 0) {
-    document.getElementById("login").style.display = "none";
-    document.getElementById("app").style.display = "block";
-    startFromSaved();
-  }
-}
-
-// ========== DARK MODE ==========
-function toggleDarkMode() {
-  document.body.classList.toggle("dark-mode");
-  localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
-}
-function loadDarkMode() {
-  if (localStorage.getItem("darkMode") === "true") document.body.classList.add("dark-mode");
-}
-
-// ========== FUNGSI KALKULATOR ==========
-function toggleCalculator() {
-  let modal = document.getElementById("calculatorModal");
-  if (modal.style.display === "flex") {
-    modal.style.display = "none";
-    document.removeEventListener("keydown", handleKeyboard);
-  } else {
-    modal.style.display = "flex";
-    document.addEventListener("keydown", handleKeyboard);
-    document.getElementById("calcDisplay").focus();
-  }
-}
-
-function handleKeyboard(e) {
-  let d = document.getElementById("calcDisplay");
-  if (!d) return;
-  let key = e.key;
-  if (key >= '0' && key <= '9') appendToDisplay(key);
-  else if (key === '.') appendToDisplay('.');
-  else if (key === '+' || key === '-' || key === '*' || key === '/') {
-    let op = key === '*' ? '×' : (key === '/' ? '÷' : key);
-    appendToDisplay(op);
-  } else if (key === 'Enter' || key === '=') calculateResult();
-  else if (key === 'Escape') toggleCalculator();
-  else if (key === 'Backspace') deleteLastCalc();
-  else if (key === 'c' || key === 'C') clearCalc();
-}
-
-function appendToDisplay(v) {
-  let d = document.getElementById("calcDisplay");
-  if (d) {
-    if (d.value === "Error") d.value = "";
-    d.value += v;
-  }
-}
-
-function clearCalc() {
-  document.getElementById("calcDisplay").value = "";
-}
-
-function deleteLastCalc() {
-  let d = document.getElementById("calcDisplay");
-  if (d) d.value = d.value.slice(0, -1);
-}
-
-function calculateResult() {
-  let d = document.getElementById("calcDisplay");
-  try {
-    let expr = d.value.replace(/×/g, '*').replace(/÷/g, '/');
-    let result = Function('"use strict"; return (' + expr + ')')();
-    d.value = result;
-  } catch(e) {
-    d.value = "Error";
-  }
-}
-
-function calcFunction(action) {
-  let d = document.getElementById("calcDisplay");
-  let val = parseFloat(d.value) || 0;
-  
-  switch(action) {
-    // Scientific functions
-    case 'sin': d.value = Math.sin(val * Math.PI / 180); break;
-    case 'cos': d.value = Math.cos(val * Math.PI / 180); break;
-    case 'tan': d.value = Math.tan(val * Math.PI / 180); break;
-    case 'log': d.value = Math.log10(val); break;
-    case 'ln': d.value = Math.log(val); break;
-    case 'sqrt': d.value = Math.sqrt(val); break;
-    case 'pow2': d.value = val * val; break;
-    case 'pow3': d.value = val * val * val; break;
-    case 'reciprocal': d.value = 1 / val; break;
-    case 'pi': d.value = Math.PI; break;
-    case 'e': d.value = Math.E; break;
-    case 'percent': d.value = val / 100; break;
-    case 'equal': calculateResult(); break;
-    case 'clear': clearCalc(); break;
-    case 'backspace': deleteLastCalc(); break;
-    
-    // Memory functions
-    case 'mplus': 
-      calcMemory += val;
-      break;
-    case 'mminus': 
-      calcMemory -= val;
-      break;
-    case 'mc': 
-      calcMemory = 0;
-      break;
-    case 'mr': 
-      d.value += calcMemory;
-      break;
-    case 'ms':
-      calcMemory = val;
-      break;
-  }
-}
-
-function initCalculator() {
-  // Tombol angka
-  document.querySelectorAll('.calc-num').forEach(btn => {
-    btn.onclick = () => appendToDisplay(btn.getAttribute('data-num'));
-  });
-  // Tombol operator
-  document.querySelectorAll('.calc-operator').forEach(btn => {
-    btn.onclick = () => appendToDisplay(btn.getAttribute('data-op'));
-  });
-  // Tombol fungsi, memori, dan clear
-  document.querySelectorAll('.calc-func, .calc-mem, .calc-clear').forEach(btn => {
-    btn.onclick = () => calcFunction(btn.getAttribute('data-action'));
-  });
-}
-
-// ========== EXPORT GLOBAL FUNCTIONS ==========
-window.login = login;
-window.toggleDarkMode = toggleDarkMode;
-window.goHome = goHome;
-window.prevQuestion = prevQuestion;
-window.nextQuestion = nextQuestion;
-window.toggleRagu = toggleRagu;
-window.showReviewModal = showReviewModal;
-window.closeReviewModal = closeReviewModal;
-window.confirmSubmit = confirmSubmit;
-window.openDiscussionModal = openDiscussionModal;
-window.closeDiscussionModal = closeDiscussionModal;
-window.exportDiscussionPDF = exportDiscussionPDF;
-window.toggleCalculator = toggleCalculator;
-
-// ========== PERBAIKAN CLOSE MODAL DENGAN KLIK DI LUAR ==========
-window.onclick = function(event) {
-  const reviewModal = document.getElementById("reviewModal");
-  const discussionModal = document.getElementById("discussionModal");
-  const calculatorModal = document.getElementById("calculatorModal");
-  
-  if (event.target === reviewModal) {
-    reviewModal.style.display = "none";
-  }
-  if (event.target === discussionModal) {
-    discussionModal.style.display = "none";
-  }
-  if (event.target === calculatorModal) {
-    calculatorModal.style.display = "none";
-    document.removeEventListener("keydown", handleKeyboard);
-  }
-}
-
-// ========== INIT ==========
-document.addEventListener("DOMContentLoaded", function() {
-  initCalculator();
-  loadDarkMode();  // Ganti checkExistingSession dengan loadDarkMode saja
-  
-  // Pastikan state awal yang benar
-  document.getElementById("login").style.display = "flex";
-  document.getElementById("app").style.display = "none";
-  document.getElementById("result").style.display = "none";
-  
-  // Isi form jika ada data tersimpan
-  const savedToken = localStorage.getItem("cbt_token");
-  const savedNama = localStorage.getItem("cbt_nama");
-  if (savedToken && savedNama) {
-    document.getElementById("nama").value = savedNama;
-    document.getElementById("token").value = savedToken;
-  }
-});
+  if (

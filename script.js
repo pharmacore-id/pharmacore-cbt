@@ -293,10 +293,7 @@ function submit() {
       waktu: waktuStr,
       sheetSoal: currentSheetSoal
     })
-  }).catch(e => console.log);
-  
-  showResult(score);
-}
+    }).catch(e => console.log);
 
 function showResult(score) {
   document.getElementById("app").style.display = "none";
@@ -320,10 +317,10 @@ function openDiscussionModal() {
   let totalSoal = soalData.length;
   if (!results.length) { alert("Tidak ada data."); return; }
   let persen = Math.round((score / totalSoal) * 100);
-  let html = `<div class="discussion-header">
-      <h2>📝 Hasil Ujian</h2>
-      <div class="discussion-score">${score} / ${totalSoal} (${persen}%)</div>
-      <div class="discussion-info">
+  let html = `<div style="text-align:center; margin-bottom:24px; padding-bottom:16px; border-bottom:2px solid #ddd;">
+      <h2 style="margin:0 0 8px 0;">📝 Hasil Ujian</h2>
+      <div style="font-size:28px; font-weight:bold; color:#10b981; margin:8px 0;">${score} / ${totalSoal} (${persen}%)</div>
+      <div style="display:flex; justify-content:center; gap:24px; flex-wrap:wrap; margin-top:12px;">
         <div><strong>👤 Nama:</strong> ${nama}</div>
         <div><strong>✅ Benar:</strong> ${score}</div>
         <div><strong>❌ Salah:</strong> ${totalSoal - score}</div>
@@ -420,27 +417,22 @@ function loadLeaderboard() {
     .catch(() => board.innerHTML = '<div style="text-align:center; padding:20px;">⚠️ Gagal memuat leaderboard.</div>');
 }
 
-function restartExam() {
-  if (confirm("Ujian baru akan menghapus semua jawaban. Lanjutkan?")) {
-    clearSession();
-    location.reload();
-  }
-}
 
 function goHome() {
-  if (confirm("Kembali ke halaman login? Anda dapat melanjutkan ujian nanti dengan token yang sama.")) {
+  if (confirm("Yakin kembali ke halaman login?")) {
     if (timer) clearInterval(timer);
     document.getElementById("app").style.display = "none";
     document.getElementById("result").style.display = "none";
-    document.getElementById("loginPage").style.display = "flex";
+    document.getElementById("login").style.display = "flex";
+    // Reset state
     isLoggedIn = false;
     isDone = false;
     soal = [];
   }
 }
 
-// ========== LOGIN & LOAD SOAL (GANTI NAMA JADI doLogin) ==========
-function doLogin() {
+// ========== LOGIN & LOAD SOAL ==========
+function login() {
   console.log("Login function called");
   nama = document.getElementById("nama").value.trim();
   token = document.getElementById("token").value.trim();
@@ -467,7 +459,7 @@ function doLogin() {
       isLoggedIn = true;
       saveState();
       
-      document.getElementById("loginPage").style.display = "none";
+      document.getElementById("login").style.display = "none";
       document.getElementById("app").style.display = "block";
       loadQuestions();
     })
@@ -505,7 +497,7 @@ function checkExistingSession() {
   if (submitted && soal.length > 0) {
     const savedScore = localStorage.getItem("cbt_score");
     if (savedScore) {
-      document.getElementById("loginPage").style.display = "none";
+      document.getElementById("login").style.display = "none";
       document.getElementById("app").style.display = "none";
       document.getElementById("result").style.display = "flex";
       showResult(parseInt(savedScore));
@@ -514,18 +506,17 @@ function checkExistingSession() {
   }
   
   if (isLoggedIn && soal.length > 0) {
-    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("login").style.display = "none";
     document.getElementById("app").style.display = "block";
     startFromSaved();
   }
 }
 
-// ========== DARK MODE (GANTI NAMA JADI doToggleDarkMode) ==========
-function doToggleDarkMode() {
+// ========== DARK MODE ==========
+function toggleDarkMode() {
   document.body.classList.toggle("dark-mode");
   localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
 }
-
 function loadDarkMode() {
   if (localStorage.getItem("darkMode") === "true") document.body.classList.add("dark-mode");
 }
@@ -591,6 +582,7 @@ function calcFunction(action) {
   let val = parseFloat(d.value) || 0;
   
   switch(action) {
+    // Scientific functions
     case 'sin': d.value = Math.sin(val * Math.PI / 180); break;
     case 'cos': d.value = Math.cos(val * Math.PI / 180); break;
     case 'tan': d.value = Math.tan(val * Math.PI / 180); break;
@@ -606,29 +598,44 @@ function calcFunction(action) {
     case 'equal': calculateResult(); break;
     case 'clear': clearCalc(); break;
     case 'backspace': deleteLastCalc(); break;
-    case 'mplus': calcMemory += val; break;
-    case 'mminus': calcMemory -= val; break;
-    case 'mc': calcMemory = 0; break;
-    case 'mr': d.value += calcMemory; break;
-    case 'ms': calcMemory = val; break;
+    
+    // Memory functions
+    case 'mplus': 
+      calcMemory += val;
+      break;
+    case 'mminus': 
+      calcMemory -= val;
+      break;
+    case 'mc': 
+      calcMemory = 0;
+      break;
+    case 'mr': 
+      d.value += calcMemory;
+      break;
+    case 'ms':
+      calcMemory = val;
+      break;
   }
 }
 
 function initCalculator() {
+  // Tombol angka
   document.querySelectorAll('.calc-num').forEach(btn => {
     btn.onclick = () => appendToDisplay(btn.getAttribute('data-num'));
   });
+  // Tombol operator
   document.querySelectorAll('.calc-operator').forEach(btn => {
     btn.onclick = () => appendToDisplay(btn.getAttribute('data-op'));
   });
+  // Tombol fungsi, memori, dan clear
   document.querySelectorAll('.calc-func, .calc-mem, .calc-clear').forEach(btn => {
     btn.onclick = () => calcFunction(btn.getAttribute('data-action'));
   });
 }
 
 // ========== EXPORT GLOBAL FUNCTIONS ==========
-window.doLogin = doLogin;
-window.doToggleDarkMode = doToggleDarkMode;
+window.login = login;
+window.toggleDarkMode = toggleDarkMode;
 window.goHome = goHome;
 window.prevQuestion = prevQuestion;
 window.nextQuestion = nextQuestion;
@@ -639,7 +646,6 @@ window.confirmSubmit = confirmSubmit;
 window.openDiscussionModal = openDiscussionModal;
 window.closeDiscussionModal = closeDiscussionModal;
 window.exportDiscussionPDF = exportDiscussionPDF;
-window.restartExam = restartExam;
 window.toggleCalculator = toggleCalculator;
 
 // ========== PERBAIKAN CLOSE MODAL DENGAN KLIK DI LUAR ==========
@@ -663,5 +669,18 @@ window.onclick = function(event) {
 // ========== INIT ==========
 document.addEventListener("DOMContentLoaded", function() {
   initCalculator();
-  checkExistingSession();
+  loadDarkMode();  // Ganti checkExistingSession dengan loadDarkMode saja
+  
+  // Pastikan state awal yang benar
+  document.getElementById("login").style.display = "flex";
+  document.getElementById("app").style.display = "none";
+  document.getElementById("result").style.display = "none";
+  
+  // Isi form jika ada data tersimpan
+  const savedToken = localStorage.getItem("cbt_token");
+  const savedNama = localStorage.getItem("cbt_nama");
+  if (savedToken && savedNama) {
+    document.getElementById("nama").value = savedNama;
+    document.getElementById("token").value = savedToken;
+  }
 });

@@ -240,6 +240,12 @@ function closeReviewModal() { document.getElementById("reviewModal").style.displ
 function confirmSubmit() { closeReviewModal(); submit(); }
 
 // ========== SUBMIT ==========
+function formatTimeDisplay(seconds) {
+  let mins = Math.floor(seconds / 60);
+  let secs = seconds % 60;
+  return `${mins} menit ${secs} detik`;
+}
+
 function submit() {
   if (isDone) return;
   if (!soal || soal.length === 0) { alert("Soal belum dimuat."); return; }
@@ -287,7 +293,143 @@ function submit() {
       waktu: waktuStr,
       sheetSoal: currentSheetSoal
     })
-  }).catch(e => console.log);
+    }).catch(e => console.log);
+} 
+
+function showResult(score) {
+  document.getElementById("app").style.display = "none";
+  document.getElementById("result").style.display = "flex";
+  let persen = Math.round((score / soal.length) * 100);
+  document.getElementById("scoreNumber").innerHTML = persen + "%";
+  let grade = persen >= 90 ? "🏆 Luar Biasa!" : persen >= 75 ? "✅ Sangat Baik" : persen >= 60 ? "📚 Cukup" : "📖 Perlu Belajar Lebih Lanjut";
+  document.getElementById("skor").innerHTML = `<strong>${grade}</strong><br>${score} dari ${soal.length} benar (${persen}%)`;
+  document.getElementById("resultNama").innerText = nama;
+  document.getElementById("resultBenar").innerText = score;
+  document.getElementById("resultSalah").innerText = soal.length - score;
+  let waktuStr = formatTimeDisplay(completionTimeSeconds);
+  document.getElementById("resultWaktu").innerText = waktuStr;
+  loadLeaderboard();
+}
+
+function openDiscussionModal() {
+  let results = JSON.parse(localStorage.getItem("cbt_results") || "[]");
+  let soalData = JSON.parse(localStorage.getItem("cbt_soal") || "[]");
+  let score = parseInt(localStorage.getItem("cbt_score") || "0");
+  let totalSoal = soalData.length;
+  if (!results.length) { alert("Tidak ada数据."); return; }
+  let persen = Math.round((score / totalSoal) * 100);
+  let html = `<div style="text-align:center; margin-bottom:24px; padding-bottom:16px; border-bottom:2px solid #ddd;">
+      <h2 style="margin:0 0 8px 0;">📝 Hasil Ujian</h2>
+      <div style="font-size:28px; font-weight:bold; color:#10b981; margin:8px 0;">${score} / ${totalSoal} (${persen}%)</div>
+      <div style="display:flex; justify-content:center; gap:24px; flex-wrap:wrap; margin-top:12px;">
+        <div><strong>👤 Nama:</strong> ${nama}</div>
+        <div><strong>✅ Benar:</strong> ${score}</div>
+        <div><strong>❌ Salah:</strong> ${totalSoal - score}</div>
+      </div>
+    </div>`;
+  for (let i = 0; i < results.length; i++) {
+    const r = results[i];
+    const s = soalData[i];
+    const userAnswer = r.jawabanUser;
+    const correctKey = r.kunci;
+    html += `<div class="discussion-question">
+      <h4>Soal ${r.nomor}. ${r.pertanyaan}</h4>
+      <div class="options-list">`;
+    for (let opt of OPTIONS) {
+      let optText = s[opt] || '';
+      let isUser = (userAnswer === opt);
+      let isCorrectKey = (correctKey === opt);
+      let additionalClass = "";
+      let indicator = "";
+      if (isUser && isCorrectKey) {
+        additionalClass = "user-correct";
+        indicator = " ✓ (jawaban Anda benar)";
+      } else if (isUser && !isCorrectKey) {
+        additionalClass = "wrong-option";
+        indicator = " ✗ (jawaban Anda salah)";
+      } else if (!isUser && isCorrectKey) {
+        additionalClass = "correct-option";
+        indicator = " ★ (kunci jawaban)";
+      }
+      html += `<div class="option-item ${additionalClass}">
+        <strong>${opt}.</strong> ${optText} ${indicator}
+      </div>`;
+    }
+    html += `</div><div class="discussion-pembahasan"><strong>📘 Pembahasan:</strong> ${r.pembahasan}</div></div>`;
+  }
+  document.getElementById("discussionContent").innerHTML = html;
+  document.getElementById("discussionModal").style.display = "flex";
+}
+
+function closeDiscussionModal() { document.getElementById("discussionModal").style.display = "none"; }
+function exportDiscussionPDF() { window.print(); }
+
+function loadLeaderboard() {
+  const board = document.getElementById("board");
+  if (!board) return;
+  board.innerHTML = '<div style="text-align:center; padding:20px;">Memuat leaderboard...</div>';
+  fetch(API + "?action=leaderboard&token=" + token)
+    .then(r => r.json())
+    .then(res => {
+      if (res.leaderboard && res.leaderboard.length) {
+        let data = res.leaderboard.map(item => ({ nama: item.nama, skor: item.skor, total: soal.length, waktu: item.waktu || "00:00" }));
+        data.sort((a, b) => b.skor - a.skor);
+        let podiumHtml = `<div class="podium-container">`;
+        const medals = ["🥇", "🥈", "🥉"];
+        const colors = ["podium-1", "podium-2", "podium-3"];
+        for (let i = 0; i < Math.min(3, data.length); i++) {
+          const item = data[i];
+          const persen = Math.round((item.skor / item.total) * 100);
+          podiumHtml += `
+            <div class="podium-item ${colors[i]}">
+              <div class="podium-block"><div class="medal">${medals[i]}</div></div>
+              <div class="podium-rank">#${i+1}</div>
+              <div class="podium-name">${item.nama}</div>
+              <div class="podium-score">${persen}%</div>
+              <div class="podium-time">${item.waktu}</div>
+            </div>`;
+        }
+        podiumHtml += `</div>`;
+        let listHtml = `<div class="leaderboard-list"><div class="leaderboard-header">
+          <div class="rank">#</div><div class="name">Peserta</div><div class="score">Skor</div><div class="time">Waktu</div>
+        </div>`;
+        let userRankData = null;
+        for (let i = 0; i < data.length; i++) {
+          const item = data[i];
+          const rank = i + 1;
+          const myClass = (item.nama === nama) ? "my-rank" : "";
+          const persen = Math.round((item.skor / item.total) * 100);
+          if (item.nama === nama) userRankData = { rank, persen, waktu: item.waktu };
+          listHtml += `
+            <div class="leaderboard-item ${myClass}">
+              <div class="rank">${rank}</div>
+              <div class="name">${item.nama}</div>
+              <div class="score">${persen}%</div>
+              <div class="time">${item.waktu}</div>
+            </div>`;
+        }
+        listHtml += `</div>`;
+        let yourRankHtml = userRankData ? `<div class="your-rank-card"><span>🏆</span> Peringkat Anda: #${userRankData.rank} &nbsp;|&nbsp; Skor: ${userRankData.persen}% &nbsp;|&nbsp; Waktu: ${userRankData.waktu}</div>` : `<div class="your-rank-card"><span>📊</span> Anda belum memiliki数据 di leaderboard.</div>`;
+        board.innerHTML = podiumHtml + listHtml + yourRankHtml;
+      } else {
+        board.innerHTML = '<div style="text-align:center; padding:20px;">🏆 Belum ada data leaderboard untuk paket ini.</div>';
+      }
+    })
+    .catch(() => board.innerHTML = '<div style="text-align:center; padding:20px;">⚠️ Gagal memuat leaderboard.</div>');
+}
+
+function restartExam() {
+  if (confirm("Ujian baru akan menghapus semua jawaban. Lanjutkan?")) {
+    clearSession();
+    location.reload();
+  }
+}
+function goHome() {
+  if (confirm("Kembali ke halaman login? Anda dapat melanjutkan ujian nanti dengan token yang sama.")) {
+    document.getElementById("app").style.display = "none";
+    document.getElementById("login").style.display = "flex";
+  }
+}
   
   // ⭐ TAMBAHKAN DUA BARIS INI ⭐
   showResult(score);

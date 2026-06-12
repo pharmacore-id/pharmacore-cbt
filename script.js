@@ -416,17 +416,19 @@ function loadLeaderboard() {
 // ========== RESTART & HOME ==========
 function restartExam() {
   if (confirm("Ujian baru akan menghapus semua jawaban. Lanjutkan?")) {
-    clearSession();
-    location.reload();
-  }
-}
-function goHome() {
-  if (confirm("Kembali ke halaman login? Semua kemajuan ujian akan hilang.")) {
-    clearSession();
+    clearSession(); // Hapus semua data untuk ujian baru
     location.reload();
   }
 }
 
+function goHome() {
+  if (confirm("Kembali ke halaman login? Anda dapat melanjutkan ujian nanti dengan token yang sama.")) {
+    // Kembali ke login tanpa menghapus session
+    document.getElementById("app").style.display = "none";
+    document.getElementById("login").style.display = "flex";
+    // Jangan panggil clearSession() agar progress tetap ada
+  }
+}
 // ========== LOGIN & LOAD SOAL ==========
 function login() {
   nama = document.getElementById("nama").value.trim();

@@ -196,16 +196,16 @@ function startTimer() {
       let s = timeLeft % 60;
       let timerEl = document.getElementById("timer");
       if (timerEl) timerEl.innerHTML = `${m}:${s < 10 ? '0' + s : s}`;
-      if (timeLeft === 300) showToast("⏰ Peringatan! Waktu tersisa 5 menit.", "warning");
-      if (timeLeft === 60) showToast("⏰ Peringatan! Waktu tersisa 1 menit!", "danger");
+      if (timeLeft === 300) showToast("⏰ 5 menit lagi!", "warning");
+      if (timeLeft === 60) showToast("⏰ 1 menit lagi!", "danger");
     }
   }, 1000);
 }
 
-function showToast(message, type = "warning") {
+function showToast(msg, type) {
   const toast = document.createElement("div");
   toast.className = `toast-warning ${type === "danger" ? "danger" : ""}`;
-  toast.innerText = message;
+  toast.innerText = msg;
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 3000);
 }
@@ -314,6 +314,7 @@ function showResult(score) {
   loadLeaderboard();
 }
 
+// ========== MODAL PEMBAHASAN & EXPORT PDF ==========
 function openDiscussionModal() {
   let results = JSON.parse(localStorage.getItem("cbt_results") || "[]");
   let soalData = JSON.parse(localStorage.getItem("cbt_soal") || "[]");
@@ -322,7 +323,7 @@ function openDiscussionModal() {
   if (!results.length) { alert("Tidak ada data."); return; }
   let persen = Math.round((score / totalSoal) * 100);
   let html = `<div style="text-align:center; margin-bottom:24px; padding-bottom:16px; border-bottom:2px solid #ddd;">
-      <h2 style="margin:0 0 8px 0;">📝 Hasil Ujian</h2>
+      <h2>📝 Hasil Ujian</h2>
       <div style="font-size:28px; font-weight:bold; color:#10b981; margin:8px 0;">${score} / ${totalSoal} (${persen}%)</div>
       <div style="display:flex; justify-content:center; gap:24px; flex-wrap:wrap; margin-top:12px;">
         <div><strong>👤 Nama:</strong> ${nama}</div>
@@ -363,10 +364,10 @@ function openDiscussionModal() {
   document.getElementById("discussionContent").innerHTML = html;
   document.getElementById("discussionModal").style.display = "flex";
 }
-
 function closeDiscussionModal() { document.getElementById("discussionModal").style.display = "none"; }
 function exportDiscussionPDF() { window.print(); }
 
+// ========== LEADERBOARD ==========
 function loadLeaderboard() {
   const board = document.getElementById("board");
   if (!board) return;
@@ -434,7 +435,7 @@ function goHome() {
   }
 }
 
-// ========== LOGIN & LOAD SOAL ==========
+// ========== LOGIN ==========
 function login() {
   nama = document.getElementById("nama").value.trim();
   token = document.getElementById("token").value.trim();
@@ -452,56 +453,36 @@ function login() {
         return;
       }
       
-      // CEK APAKAH TOKEN BERBEDA DENGAN YANG TERSIMPAN
+      // Cek apakah ada data ujian sebelumnya dengan token berbeda
       const savedToken = localStorage.getItem("cbt_token");
       if (savedToken && savedToken !== token) {
-        // Token berbeda: hapus data ujian sebelumnya
-        clearExamData();
-        localStorage.setItem("cbt_token", token);
-        localStorage.setItem("cbt_nama", nama);
-        isLoggedIn = true;
-        // Reset variabel global
-        answers = {};
-        ragu = {};
-        currentQuestion = 0;
-        isDone = false;
-        timeLeft = res.durasi || 3600;
-        currentDurasi = res.durasi || 3600;
-        currentSheetSoal = res.sheetSoal || "SOAL A";
-        soal = [];
-      } else {
-        // Token sama, coba muat state yang tersimpan
-        loadSavedState();
-        // Jika ada ujian belum selesai (belum submit dan ada jawaban)
-        if (localStorage.getItem("cbt_submitted") !== "true" && Object.keys(answers).length > 0) {
-          if (confirm("Anda memiliki ujian yang belum selesai. Lanjutkan?")) {
-            // Langsung lanjutkan tanpa reset
-            document.getElementById("login").style.display = "none";
-            document.getElementById("app").style.display = "block";
-            if (soal.length) {
-              document.getElementById("totalCount").innerText = soal.length;
-              renderQuestion();
-              updateNavGrid();
-              updateStats();
-              startTimer();
-            } else {
-              loadQuestions();
-            }
-            return;
+        clearExamData(); // Hapus data ujian sebelumnya jika ganti token
+      }
+      
+      // Jika ada ujian belum selesai dengan token yang sama
+      const savedAnswers = localStorage.getItem("cbt_answers");
+      const savedSubmitted = localStorage.getItem("cbt_submitted");
+      if (savedToken === token && savedAnswers && savedSubmitted !== "true") {
+        if (confirm("Anda memiliki ujian yang belum selesai. Lanjutkan?")) {
+          loadSavedState();
+          document.getElementById("login").style.display = "none";
+          document.getElementById("app").style.display = "block";
+          if (soal.length) {
+            document.getElementById("totalCount").innerText = soal.length;
+            renderQuestion();
+            updateNavGrid();
+            updateStats();
+            startTimer();
           } else {
-            // User memilih tidak melanjutkan, hapus data ujian
-            clearExamData();
-            currentDurasi = res.durasi || 3600;
-            currentSheetSoal = res.sheetSoal || "SOAL A";
-            timeLeft = currentDurasi;
+            loadQuestions();
           }
+          return;
+        } else {
+          clearExamData(); // User memilih tidak lanjut, hapus data
         }
       }
       
-      // TAMPILKAN WARNING PERMANEN DI SIDEBAR
-      const warningDiv = document.getElementById("tokenWarning");
-      if (warningDiv) warningDiv.style.display = "flex";
-      
+      // Mulai ujian baru
       currentDurasi = res.durasi || 3600;
       currentSheetSoal = res.sheetSoal || "SOAL A";
       timeLeft = currentDurasi;
@@ -657,6 +638,7 @@ function checkExistingSession() {
   }
 }
 
+// ========== EXPORT GLOBAL FUNCTIONS ==========
 window.login = login;
 window.toggleDarkMode = toggleDarkMode;
 window.goHome = goHome;
@@ -672,6 +654,7 @@ window.exportDiscussionPDF = exportDiscussionPDF;
 window.restartExam = restartExam;
 window.toggleCalculator = toggleCalculator;
 
+// ========== INIT ==========
 document.addEventListener("DOMContentLoaded", function() {
   initCalculator();
   checkExistingSession();

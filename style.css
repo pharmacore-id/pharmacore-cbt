@@ -608,7 +608,7 @@ hr {
   font-size: 14px;
 }
 
-/* ========== DARK MODE UNTUK REVIEW PEMBAHASAN (KUNCI JAWABAN) ========== */
+/* ========== DARK MODE UNTUK REVIEW PEMBAHASAN ========== */
 body.dark-mode .option-item {
   background: #2d2d3a !important;
   border-color: #3a3a4a !important;
@@ -951,32 +951,6 @@ body.dark-mode .timer {
   color: #a78bfa !important;
   border: 1px solid #a78bfa !important;
   box-shadow: none !important;
-}
-
-/* ========== PERINGATAN WAKTU 5 MENIT & 1 MENIT (TOAST) ========== */
-.toast-warning {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  background: #f59e0b;
-  color: #1e293b;
-  padding: 12px 20px;
-  border-radius: 40px;
-  font-weight: bold;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  z-index: 2000;
-  animation: fadeInOut 3s ease forwards;
-  font-size: 14px;
-}
-.toast-warning.danger {
-  background: #ef4444;
-  color: white;
-}
-@keyframes fadeInOut {
-  0% { opacity: 0; transform: translateX(50px); }
-  10% { opacity: 1; transform: translateX(0); }
-  90% { opacity: 1; transform: translateX(0); }
-  100% { opacity: 0; transform: translateX(50px); display: none; }
 }
 
 /* ========== PRINT (PDF) ========== */

@@ -1,5 +1,5 @@
 // ========== KONFIGURASI ==========
-const API = "https://script.google.com/macros/s/AKfycby0kMo7ooyAlkH1xCBVajFGcgaUsSCCmZsXjHXGTbPnakAh5kQ4R87NNUxk_VSRIBXztw/exec"; // GANTI DENGAN URL WEB APP ANDA
+const API = "https://script.google.com/macros/s/YOUR_DEPLOYED_ID/exec"; // GANTI DENGAN URL WEB APP ANDA
 const OPTIONS = ['A', 'B', 'C', 'D', 'E'];
 
 let currentQuestion = 0, answers = {}, ragu = {}, soal = [], token = "", nama = "";
@@ -196,16 +196,16 @@ function startTimer() {
       let s = timeLeft % 60;
       let timerEl = document.getElementById("timer");
       if (timerEl) timerEl.innerHTML = `${m}:${s < 10 ? '0' + s : s}`;
-      if (timeLeft === 300) showToast("⏰ 5 menit lagi!", "warning");
-      if (timeLeft === 60) showToast("⏰ 1 menit lagi!", "danger");
+      if (timeLeft === 300) showToast("⏰ Peringatan! Waktu tersisa 5 menit.", "warning");
+      if (timeLeft === 60) showToast("⏰ Peringatan! Waktu tersisa 1 menit!", "danger");
     }
   }, 1000);
 }
 
-function showToast(msg, type) {
+function showToast(message, type = "warning") {
   const toast = document.createElement("div");
   toast.className = `toast-warning ${type === "danger" ? "danger" : ""}`;
-  toast.innerText = msg;
+  toast.innerText = message;
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 3000);
 }
@@ -314,7 +314,6 @@ function showResult(score) {
   loadLeaderboard();
 }
 
-// ========== MODAL PEMBAHASAN & EXPORT PDF ==========
 function openDiscussionModal() {
   let results = JSON.parse(localStorage.getItem("cbt_results") || "[]");
   let soalData = JSON.parse(localStorage.getItem("cbt_soal") || "[]");
@@ -323,7 +322,7 @@ function openDiscussionModal() {
   if (!results.length) { alert("Tidak ada data."); return; }
   let persen = Math.round((score / totalSoal) * 100);
   let html = `<div style="text-align:center; margin-bottom:24px; padding-bottom:16px; border-bottom:2px solid #ddd;">
-      <h2>📝 Hasil Ujian</h2>
+      <h2 style="margin:0 0 8px 0;">📝 Hasil Ujian</h2>
       <div style="font-size:28px; font-weight:bold; color:#10b981; margin:8px 0;">${score} / ${totalSoal} (${persen}%)</div>
       <div style="display:flex; justify-content:center; gap:24px; flex-wrap:wrap; margin-top:12px;">
         <div><strong>👤 Nama:</strong> ${nama}</div>
@@ -364,10 +363,10 @@ function openDiscussionModal() {
   document.getElementById("discussionContent").innerHTML = html;
   document.getElementById("discussionModal").style.display = "flex";
 }
+
 function closeDiscussionModal() { document.getElementById("discussionModal").style.display = "none"; }
 function exportDiscussionPDF() { window.print(); }
 
-// ========== LEADERBOARD ==========
 function loadLeaderboard() {
   const board = document.getElementById("board");
   if (!board) return;
@@ -431,11 +430,11 @@ function restartExam() {
 function goHome() {
   if (confirm("Kembali ke halaman login? Anda dapat melanjutkan ujian nanti dengan token yang sama.")) {
     document.getElementById("app").style.display = "none";
-    document.getElementById("login").style.display = "flex";
+    document.getElementById("loginPage").style.display = "flex";
   }
 }
 
-// ========== LOGIN ==========
+// ========== LOGIN & LOAD SOAL ==========
 function login() {
   nama = document.getElementById("nama").value.trim();
   token = document.getElementById("token").value.trim();
@@ -444,58 +443,28 @@ function login() {
   fetch(API + "?action=validateToken&token=" + token)
     .then(r => r.json())
     .then(res => {
-      if (!res.valid) {
-        alert("Token tidak valid!");
-        return;
-      }
-      if (res.used) {
-        alert("❌ Token ini sudah digunakan.\n\nToken hanya dapat digunakan SEKALI untuk mengerjakan ujian.\nAnda tidak dapat mengerjakan ulang dengan token ini.\n\nTerima kasih.");
-        return;
-      }
+      if (!res.valid) { alert("Token tidak valid!"); return; }
+      if (res.used) { alert("Token sudah digunakan."); return; }
       
-      // Cek apakah ada data ujian sebelumnya dengan token berbeda
       const savedToken = localStorage.getItem("cbt_token");
       if (savedToken && savedToken !== token) {
-        clearExamData(); // Hapus data ujian sebelumnya jika ganti token
+        clearExamData();
       }
       
-      // Jika ada ujian belum selesai dengan token yang sama
-      const savedAnswers = localStorage.getItem("cbt_answers");
-      const savedSubmitted = localStorage.getItem("cbt_submitted");
-      if (savedToken === token && savedAnswers && savedSubmitted !== "true") {
-        if (confirm("Anda memiliki ujian yang belum selesai. Lanjutkan?")) {
-          loadSavedState();
-          document.getElementById("login").style.display = "none";
-          document.getElementById("app").style.display = "block";
-          if (soal.length) {
-            document.getElementById("totalCount").innerText = soal.length;
-            renderQuestion();
-            updateNavGrid();
-            updateStats();
-            startTimer();
-          } else {
-            loadQuestions();
-          }
-          return;
-        } else {
-          clearExamData(); // User memilih tidak lanjut, hapus data
-        }
-      }
+      const warningDiv = document.getElementById("tokenWarning");
+      if (warningDiv) warningDiv.style.display = "flex";
       
-      // Mulai ujian baru
       currentDurasi = res.durasi || 3600;
       currentSheetSoal = res.sheetSoal || "SOAL A";
       timeLeft = currentDurasi;
       isLoggedIn = true;
       saveState();
-      document.getElementById("login").style.display = "none";
+      
+      document.getElementById("loginPage").style.display = "none";
       document.getElementById("app").style.display = "block";
       loadQuestions();
     })
-    .catch(err => {
-      console.error(err);
-      alert("Gagal validasi token");
-    });
+    .catch(err => { console.error(err); alert("Gagal validasi token"); });
 }
 
 function loadQuestions() {
@@ -510,10 +479,7 @@ function loadQuestions() {
       startFromSaved();
       saveState();
     })
-    .catch(err => {
-      console.error(err);
-      alert("Gagal load soal");
-    });
+    .catch(err => { console.error(err); alert("Gagal load soal"); });
 }
 
 function startFromSaved() {
@@ -558,10 +524,7 @@ function handleKeyboard(e) {
   else if (key === 'Backspace') deleteLastCalc();
   else if (key === 'c' || key === 'C') clearCalc();
 }
-function appendToDisplay(v) {
-  let d = document.getElementById("calcDisplay");
-  if (d) { if (d.value === "Error") d.value = ""; d.value += v; }
-}
+function appendToDisplay(v) { let d = document.getElementById("calcDisplay"); if (d) { if (d.value === "Error") d.value = ""; d.value += v; } }
 function clearCalc() { document.getElementById("calcDisplay").value = ""; }
 function deleteLastCalc() { let d = document.getElementById("calcDisplay"); d.value = d.value.slice(0, -1); }
 function calculateResult() {
@@ -604,14 +567,13 @@ function initCalculator() {
   document.querySelectorAll('.calc-func, .calc-mem, .calc-clear').forEach(btn => btn.onclick = () => calcFunction(btn.getAttribute('data-action')));
 }
 
-// ========== CEK SESSION ==========
 function checkExistingSession() {
   loadSavedState();
   loadDarkMode();
   if (localStorage.getItem("cbt_submitted") === "true") {
     let savedScore = localStorage.getItem("cbt_score");
     if (savedScore) {
-      document.getElementById("login").style.display = "none";
+      document.getElementById("loginPage").style.display = "none";
       completionTimeSeconds = parseInt(localStorage.getItem("cbt_completion_time") || "0");
       if (soal.length) {
         showResult(parseInt(savedScore));
@@ -624,7 +586,7 @@ function checkExistingSession() {
     return;
   }
   if (isLoggedIn) {
-    document.getElementById("login").style.display = "none";
+    document.getElementById("loginPage").style.display = "none";
     document.getElementById("app").style.display = "block";
     if (soal.length) {
       document.getElementById("totalCount").innerText = soal.length;

@@ -60,14 +60,10 @@ function updateStats() {
   if (!soal.length) return;
   const answered = Object.keys(answers).length;
   const raguCount = Object.keys(ragu).length;
-  const ansEl = document.getElementById("answeredCount");
-  const ansSum = document.getElementById("answeredSummary");
-  const ragSum = document.getElementById("raguSummary");
-  const unansSum = document.getElementById("unansweredSummary");
-  if (ansEl) ansEl.innerText = answered;
-  if (ansSum) ansSum.innerText = answered;
-  if (ragSum) ragSum.innerText = raguCount;
-  if (unansSum) unansSum.innerText = soal.length - answered;
+  document.getElementById("answeredCount").innerText = answered;
+  document.getElementById("answeredSummary").innerText = answered;
+  document.getElementById("raguSummary").innerText = raguCount;
+  document.getElementById("unansweredSummary").innerText = soal.length - answered;
 }
 
 function updateNavGrid() {
@@ -80,8 +76,7 @@ function updateNavGrid() {
     if (i === currentQuestion) cls.push("activeQ");
     html += `<button class="${cls.join(' ')}" onclick="goToQuestion(${i})">${i + 1}</button>`;
   }
-  const navEl = document.getElementById("nav");
-  if (navEl) navEl.innerHTML = html;
+  document.getElementById("nav").innerHTML = html;
 }
 
 function goToQuestion(idx) {
@@ -94,16 +89,10 @@ function goToQuestion(idx) {
 }
 
 function renderQuestion() {
-  if (!soal.length || !soal[currentQuestion]) return;
+  if (!soal.length) return;
   const s = soal[currentQuestion];
-  const qLabel = document.getElementById("questionLabel");
-  const qEl = document.getElementById("q");
-  const optEl = document.getElementById("opt");
-  const raguBtn = document.getElementById("raguBtn");
-  
-  if (qLabel) qLabel.innerHTML = "Soal " + (currentQuestion + 1);
-  if (qEl) qEl.innerHTML = s.Pertanyaan || "Soal tidak tersedia";
-  
+  document.getElementById("questionLabel").innerHTML = "Soal " + (currentQuestion + 1);
+  document.getElementById("q").innerHTML = s.Pertanyaan || "Soal tidak tersedia";
   let optHtml = "";
   for (let opt of OPTIONS) {
     let optText = s[opt] || '';
@@ -111,16 +100,14 @@ function renderQuestion() {
     optHtml += `<div class="opt ${answers[currentQuestion] == opt ? 'active' : ''}" onclick="pick('${opt}')">
       <div class="letter">${opt}</div><div>${optText}</div></div>`;
   }
-  if (optEl) optEl.innerHTML = optHtml;
-  
-  if (raguBtn) {
-    if (ragu[currentQuestion]) {
-      raguBtn.classList.add("active");
-      raguBtn.innerHTML = "🚩 Ditandai Ragu";
-    } else {
-      raguBtn.classList.remove("active");
-      raguBtn.innerHTML = "🚩 Ragu";
-    }
+  document.getElementById("opt").innerHTML = optHtml;
+  const raguBtn = document.getElementById("raguBtn");
+  if (ragu[currentQuestion]) {
+    raguBtn.classList.add("active");
+    raguBtn.innerHTML = "🚩 Ditandai Ragu";
+  } else {
+    raguBtn.classList.remove("active");
+    raguBtn.innerHTML = "🚩 Ragu";
   }
   updateProgress();
 }
@@ -198,17 +185,10 @@ function showReviewModal() {
   if (!soal.length) return;
   const answered = Object.keys(answers).length;
   const raguCount = Object.keys(ragu).length;
-  const reviewTotal = document.getElementById("reviewTotal");
-  const reviewAnswered = document.getElementById("reviewAnswered");
-  const reviewRagu = document.getElementById("reviewRagu");
-  const reviewUnanswered = document.getElementById("reviewUnanswered");
-  const reviewList = document.getElementById("reviewQuestionList");
-  
-  if (reviewTotal) reviewTotal.innerText = soal.length;
-  if (reviewAnswered) reviewAnswered.innerText = answered;
-  if (reviewRagu) reviewRagu.innerText = raguCount;
-  if (reviewUnanswered) reviewUnanswered.innerText = soal.length - answered;
-  
+  document.getElementById("reviewTotal").innerText = soal.length;
+  document.getElementById("reviewAnswered").innerText = answered;
+  document.getElementById("reviewRagu").innerText = raguCount;
+  document.getElementById("reviewUnanswered").innerText = soal.length - answered;
   let listHtml = "";
   for (let i = 0; i < soal.length; i++) {
     let status = "", cls = "";
@@ -221,17 +201,12 @@ function showReviewModal() {
       <button class="secondary-btn lanjutkan-link" onclick="goToQuestionFromReview(${i})">Lanjutkan</button>
     </div>`;
   }
-  if (reviewList) reviewList.innerHTML = listHtml;
-  
-  const reviewModal = document.getElementById("reviewModal");
-  if (reviewModal) reviewModal.style.display = "flex";
+  document.getElementById("reviewQuestionList").innerHTML = listHtml;
+  document.getElementById("reviewModal").style.display = "flex";
 }
 
 function goToQuestionFromReview(idx) { closeReviewModal(); goToQuestion(idx); }
-function closeReviewModal() { 
-  const modal = document.getElementById("reviewModal");
-  if (modal) modal.style.display = "none";
-}
+function closeReviewModal() { document.getElementById("reviewModal").style.display = "none"; }
 function confirmSubmit() { closeReviewModal(); submit(); }
 
 // ========== SUBMIT ==========
@@ -269,14 +244,12 @@ function submit() {
     });
   }
   
-  // Simpan ke localStorage
   localStorage.setItem("cbt_submitted", "true");
   localStorage.setItem("cbt_score", score);
   localStorage.setItem("cbt_results", JSON.stringify(results));
   localStorage.setItem("cbt_completion_time", completionTimeSeconds);
   let waktuStr = formatTimeDisplay(completionTimeSeconds);
   
-  // Kirim ke server
   fetch(API, {
     method: "POST",
     mode: "no-cors",
@@ -284,43 +257,31 @@ function submit() {
     body: JSON.stringify({ action: "submit", nama, token, skor: score, jawaban: answers, total: soal.length, waktu: waktuStr })
   }).catch(e => console.log);
   
-  // Tampilkan hasil
   showResult(score);
   
-  // Tawarkan download pembahasan
+  // Tawarkan download PDF setelah submit
   setTimeout(() => {
-    if (confirm("✅ Ujian selesai!\n\nToken ini tidak dapat digunakan lagi untuk mengerjakan ulang.\n\nApakah Anda ingin menyimpan pembahasan (PDF) sekarang?")) {
-      openDiscussionModal();
-      setTimeout(() => {
+    openDiscussionModal();
+    setTimeout(() => {
+      if (confirm("✅ Ujian selesai!\n\nApakah Anda ingin menyimpan pembahasan (PDF) sekarang?")) {
         exportDiscussionPDF();
-      }, 500);
-    }
+      }
+    }, 500);
   }, 500);
 }
 
 function showResult(score) {
-  const app = document.getElementById("app");
-  const resultDiv = document.getElementById("result");
-  const scoreNum = document.getElementById("scoreNumber");
-  const skorEl = document.getElementById("skor");
-  const resultNama = document.getElementById("resultNama");
-  const resultBenar = document.getElementById("resultBenar");
-  const resultSalah = document.getElementById("resultSalah");
-  const resultWaktu = document.getElementById("resultWaktu");
-  
-  if (app) app.style.display = "none";
-  if (resultDiv) resultDiv.style.display = "flex";
-  
+  document.getElementById("app").style.display = "none";
+  document.getElementById("result").style.display = "flex";
   let persen = Math.round((score / soal.length) * 100);
-  if (scoreNum) scoreNum.innerHTML = persen + "%";
-  
+  document.getElementById("scoreNumber").innerHTML = persen + "%";
   let grade = persen >= 90 ? "🏆 Luar Biasa!" : persen >= 75 ? "✅ Sangat Baik" : persen >= 60 ? "📚 Cukup" : "📖 Perlu Belajar Lebih Lanjut";
-  if (skorEl) skorEl.innerHTML = `<strong>${grade}</strong><br>${score} dari ${soal.length} benar (${persen}%)`;
-  if (resultNama) resultNama.innerText = nama;
-  if (resultBenar) resultBenar.innerText = score;
-  if (resultSalah) resultSalah.innerText = soal.length - score;
+  document.getElementById("skor").innerHTML = `<strong>${grade}</strong><br>${score} dari ${soal.length} benar (${persen}%)`;
+  document.getElementById("resultNama").innerText = nama;
+  document.getElementById("resultBenar").innerText = score;
+  document.getElementById("resultSalah").innerText = soal.length - score;
   let waktuStr = formatTimeDisplay(completionTimeSeconds);
-  if (resultWaktu) resultWaktu.innerText = waktuStr;
+  document.getElementById("resultWaktu").innerText = waktuStr;
   loadLeaderboard();
 }
 
@@ -378,16 +339,11 @@ function openDiscussionModal() {
     html += `</div><div style="margin-top: 12px; padding: 12px; background: #f3f4f6; border-radius: 12px;"><strong>📘 Pembahasan:</strong> ${r.pembahasan}</div></div>`;
   }
   
-  const discussionContent = document.getElementById("discussionContent");
-  const discussionModal = document.getElementById("discussionModal");
-  if (discussionContent) discussionContent.innerHTML = html;
-  if (discussionModal) discussionModal.style.display = "flex";
+  document.getElementById("discussionContent").innerHTML = html;
+  document.getElementById("discussionModal").style.display = "flex";
 }
 
-function closeDiscussionModal() { 
-  const modal = document.getElementById("discussionModal");
-  if (modal) modal.style.display = "none";
-}
+function closeDiscussionModal() { document.getElementById("discussionModal").style.display = "none"; }
 function exportDiscussionPDF() { window.print(); }
 
 // ========== LEADERBOARD ==========
@@ -473,16 +429,15 @@ function login() {
         return;
       }
       
-      // Jika token sudah pernah digunakan
       if (res.used) {
         alert("❌ Token ini sudah digunakan.\n\nToken hanya dapat digunakan SEKALI untuk mengerjakan ujian.\nAnda tidak dapat mengerjakan ulang dengan token ini.\n\nTerima kasih.");
         return;
       }
       
-      // Peringatan token sekali pakai
-      alert("⚠️ PERINGATAN!\n\nToken ini hanya dapat digunakan SEKALI.\n\nSetelah Anda menyelesaikan ujian, token akan hangus dan tidak bisa digunakan lagi untuk mengerjakan ulang.\n\nPastikan Anda menyimpan pembahasan (PDF) setelah submit!");
+      // TAMPILKAN WARNING PERMANEN DI SIDEBAR
+      const warningDiv = document.getElementById("tokenWarning");
+      if (warningDiv) warningDiv.style.display = "flex";
       
-      // Mulai ujian baru
       currentDurasi = res.durasi || 3600;
       currentSheetSoal = res.sheetSoal || "SOAL A";
       timeLeft = currentDurasi;
@@ -523,7 +478,7 @@ function startFromSaved() {
   startTimer();
 }
 
-// ========== DARK MODE & CALCULATOR ==========
+// ========== DARK MODE ==========
 function toggleDarkMode() {
   document.body.classList.toggle("dark-mode");
   localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
@@ -532,6 +487,7 @@ function loadDarkMode() {
   if (localStorage.getItem("darkMode") === "true") document.body.classList.add("dark-mode");
 }
 
+// ========== CALCULATOR ==========
 function toggleCalculator() {
   let modal = document.getElementById("calculatorModal");
   if (modal.style.display === "flex") {

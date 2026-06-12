@@ -57,12 +57,12 @@
     </div>
     <div class="side">
       <h3>📊 Navigasi Soal</h3>
-      
-      <!-- WARNING TOKEN SEKALI PAKAI (TAMPIL PERMANEN) -->
+
+      <!-- WARNING TOKEN SEKALI PAKAI DI SIDEBAR -->
       <div id="tokenWarning" class="token-warning" style="display: none;">
         <span>⚠️</span> Token ini hanya dapat digunakan SEKALI! Setelah submit, token akan hangus.
       </div>
-      
+
       <div class="summary">
         <div class="summary-item"><span>✅ Terjawab</span><strong id="answeredSummary">0</strong></div>
         <div class="summary-item"><span>🚩 Ragu</span><strong id="raguSummary">0</strong></div>
@@ -124,6 +124,12 @@
         <button class="homepage-btn" onclick="goHome()">🏠 Homepage</button>
         <button class="darkmode-btn" onclick="toggleDarkMode()">🌙 Dark Mode</button>
       </div>
+
+      <!-- WARNING TOKEN SEKALI PAKAI DI HALAMAN HASIL -->
+      <div id="resultWarning" class="token-warning" style="display: flex; margin-bottom: 20px;">
+        <span>⚠️</span> Token ini hanya dapat digunakan SEKALI! Anda tidak dapat kembali ke halaman ujian. Harap download pembahasan sekarang.
+      </div>
+
       <h2>📝 Hasil Ujian</h2>
       <div class="score-circle"><span id="scoreNumber">0</span></div>
       <p id="skor"></p>

@@ -294,7 +294,10 @@ function submit() {
       sheetSoal: currentSheetSoal
     })
     }).catch(e => console.log);
-} 
+  
+  showResult(score);
+  setTimeout(() => openDiscussionModal(), 500);
+}
 
 function showResult(score) {
   document.getElementById("app").style.display = "none";
@@ -316,7 +319,7 @@ function openDiscussionModal() {
   let soalData = JSON.parse(localStorage.getItem("cbt_soal") || "[]");
   let score = parseInt(localStorage.getItem("cbt_score") || "0");
   let totalSoal = soalData.length;
-  if (!results.length) { alert("Tidak ada数据."); return; }
+  if (!results.length) { alert("Tidak ada data."); return; }
   let persen = Math.round((score / totalSoal) * 100);
   let html = `<div style="text-align:center; margin-bottom:24px; padding-bottom:16px; border-bottom:2px solid #ddd;">
       <h2 style="margin:0 0 8px 0;">📝 Hasil Ujian</h2>
@@ -409,7 +412,7 @@ function loadLeaderboard() {
             </div>`;
         }
         listHtml += `</div>`;
-        let yourRankHtml = userRankData ? `<div class="your-rank-card"><span>🏆</span> Peringkat Anda: #${userRankData.rank} &nbsp;|&nbsp; Skor: ${userRankData.persen}% &nbsp;|&nbsp; Waktu: ${userRankData.waktu}</div>` : `<div class="your-rank-card"><span>📊</span> Anda belum memiliki数据 di leaderboard.</div>`;
+        let yourRankHtml = userRankData ? `<div class="your-rank-card"><span>🏆</span> Peringkat Anda: #${userRankData.rank} &nbsp;|&nbsp; Skor: ${userRankData.persen}% &nbsp;|&nbsp; Waktu: ${userRankData.waktu}</div>` : `<div class="your-rank-card"><span>📊</span> Anda belum memiliki data di leaderboard.</div>`;
         board.innerHTML = podiumHtml + listHtml + yourRankHtml;
       } else {
         board.innerHTML = '<div style="text-align:center; padding:20px;">🏆 Belum ada data leaderboard untuk paket ini.</div>';
@@ -430,11 +433,7 @@ function goHome() {
     document.getElementById("login").style.display = "flex";
   }
 }
-  
-  // ⭐ TAMBAHKAN DUA BARIS INI ⭐
-  showResult(score);
-  setTimeout(() => openDiscussionModal(), 500);
-}
+
 // ========== LOGIN & LOAD SOAL ==========
 function login() {
   console.log("Login function called");
@@ -490,6 +489,30 @@ function startFromSaved() {
   updateNavGrid();
   updateStats();
   startTimer();
+}
+
+function checkExistingSession() {
+  loadSavedState();
+  loadDarkMode();
+  
+  const submitted = localStorage.getItem("cbt_submitted") === "true";
+  
+  if (submitted && soal.length > 0) {
+    const savedScore = localStorage.getItem("cbt_score");
+    if (savedScore) {
+      showResult(parseInt(savedScore));
+      return;
+    }
+  }
+  
+  if (isLoggedIn && soal.length > 0) {
+    document.getElementById("login").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    startFromSaved();
+  } else if (token) {
+    document.getElementById("token").value = token;
+    if (nama) document.getElementById("nama").value = nama;
+  }
 }
 
 // ========== DARK MODE ==========
@@ -590,11 +613,9 @@ function calcFunction(action) {
       calcMemory = 0;
       break;
     case 'mr': 
-      // MR: menambahkan nilai memori ke tampilan (APPEND, bukan replace)
       d.value += calcMemory;
       break;
     case 'ms':
-      // MS: menyimpan nilai yang sedang tampil ke memori
       calcMemory = val;
       break;
   }
@@ -632,7 +653,6 @@ window.restartExam = restartExam;
 window.toggleCalculator = toggleCalculator;
 
 // ========== PERBAIKAN CLOSE MODAL DENGAN KLIK DI LUAR ==========
-// Hapus event listener lama jika ada, lalu tambahkan yang baru
 window.onclick = function(event) {
   const reviewModal = document.getElementById("reviewModal");
   const discussionModal = document.getElementById("discussionModal");
@@ -648,36 +668,6 @@ window.onclick = function(event) {
     calculatorModal.style.display = "none";
     document.removeEventListener("keydown", handleKeyboard);
   }
-}
-
-// ========== PERBAIKAN FUNGSI YANG MUNGKIN HILANG ==========
-if (typeof formatTimeDisplay !== 'function') {
-  function formatTimeDisplay(seconds) {
-    let mins = Math.floor(seconds / 60);
-    let secs = seconds % 60;
-    return `${mins} menit ${secs} detik`;
-  }
-}
-
-if (typeof goHome !== 'function') {
-  function goHome() {
-    if (confirm("Kembali ke halaman login? Anda dapat melanjutkan ujian nanti dengan token yang sama.")) {
-      if (timer) clearInterval(timer);
-      document.getElementById("app").style.display = "none";
-      document.getElementById("login").style.display = "flex";
-    }
-  }
-  window.goHome = goHome;
-}
-
-if (typeof restartExam !== 'function') {
-  function restartExam() {
-    if (confirm("Ujian baru akan menghapus semua jawaban. Lanjutkan?")) {
-      clearSession();
-      location.reload();
-    }
-  }
-  window.restartExam = restartExam;
 }
 
 // ========== INIT ==========

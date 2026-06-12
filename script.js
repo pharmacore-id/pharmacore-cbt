@@ -250,16 +250,25 @@ function submit() {
   localStorage.setItem("cbt_completion_time", completionTimeSeconds);
   let waktuStr = formatTimeDisplay(completionTimeSeconds);
   
+  // Kirim ke server dengan menambahkan sheetSoal untuk leaderboard per paket
   fetch(API, {
     method: "POST",
     mode: "no-cors",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ action: "submit", nama, token, skor: score, jawaban: answers, total: soal.length, waktu: waktuStr })
+    body: JSON.stringify({
+      action: "submit",
+      nama, token,
+      skor: score,
+      jawaban: answers,
+      total: soal.length,
+      waktu: waktuStr,
+      sheetSoal: currentSheetSoal   // <-- untuk filter leaderboard
+    })
   }).catch(e => console.log);
   
   showResult(score);
   
-  // BUKA MODAL PEMBAHASAN AGAR USER BISA DOWNLOAD MANUAL (TANPA POPUP)
+  // Buka modal pembahasan agar user bisa download PDF (tanpa popup)
   setTimeout(() => {
     openDiscussionModal();
   }, 500);
@@ -349,7 +358,7 @@ function openDiscussionModal() {
 function closeDiscussionModal() { document.getElementById("discussionModal").style.display = "none"; }
 function exportDiscussionPDF() { window.print(); }
 
-// ========== LEADERBOARD ==========
+// ========== LEADERBOARD (filter per sheet_soal) ==========
 function loadLeaderboard() {
   const board = document.getElementById("board");
   if (!board) return;
@@ -398,7 +407,7 @@ function loadLeaderboard() {
         let yourRankHtml = userRankData ? `<div class="your-rank-card"><span>🏆</span> Peringkat Anda: #${userRankData.rank} &nbsp;|&nbsp; Skor: ${userRankData.persen}% &nbsp;|&nbsp; Waktu: ${userRankData.waktu}</div>` : `<div class="your-rank-card"><span>📊</span> Anda belum memiliki data di leaderboard.</div>`;
         board.innerHTML = podiumHtml + listHtml + yourRankHtml;
       } else {
-        board.innerHTML = '<div style="text-align:center; padding:20px;">🏆 Belum ada data leaderboard.</div>';
+        board.innerHTML = '<div style="text-align:center; padding:20px;">🏆 Belum ada data leaderboard untuk paket ini.</div>';
       }
     })
     .catch(() => board.innerHTML = '<div style="text-align:center; padding:20px;">⚠️ Gagal memuat leaderboard.</div>');

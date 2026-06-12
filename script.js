@@ -1,5 +1,5 @@
 // ========== KONFIGURASI ==========
-const API = "https://script.google.com/macros/s/AKfycby0kMo7ooyAlkH1xCBVajFGcgaUsSCCmZsXjHXGTbPnakAh5kQ4R87NNUxk_VSRIBXztw/exec"; // GANTI DENGAN URL WEB APP ANDA
+const API = "https://script.google.com/macros/s/AKfycby0kMo7ooyAlkH1xCBVajFGcgaUsSCCmZsXjHXGTbPnakAh5kQ4R87NNUxk_VSRIBXztw/exec";
 const OPTIONS = ['A', 'B', 'C', 'D', 'E'];
 
 let currentQuestion = 0, answers = {}, ragu = {}, soal = [], token = "", nama = "";
@@ -21,24 +21,26 @@ function saveState() {
 }
 
 function loadSavedState() {
-  const sAns = localStorage.getItem("cbt_answers");
-  const sRag = localStorage.getItem("cbt_ragu");
-  const sCur = localStorage.getItem("cbt_current");
-  const sTime = localStorage.getItem("cbt_time");
-  const sLogged = localStorage.getItem("cbt_isLoggedIn");
-  const sNama = localStorage.getItem("cbt_nama");
-  const sToken = localStorage.getItem("cbt_token");
-  const sSoal = localStorage.getItem("cbt_soal");
-  const sSheet = localStorage.getItem("cbt_sheetSoal");
-  const sDurasi = localStorage.getItem("cbt_durasi");
-  if (sAns) answers = JSON.parse(sAns);
-  if (sRag) ragu = JSON.parse(sRag);
-  if (sCur) currentQuestion = parseInt(sCur);
-  if (sTime) timeLeft = parseInt(sTime);
-  if (sLogged === "true") { isLoggedIn = true; nama = sNama || ""; token = sToken || ""; }
-  if (sSoal) soal = JSON.parse(sSoal);
-  if (sSheet) currentSheetSoal = sSheet;
-  if (sDurasi) currentDurasi = parseInt(sDurasi);
+  const saved = localStorage.getItem("cbt_answers");
+  if (saved) answers = JSON.parse(saved);
+  const savedRagu = localStorage.getItem("cbt_ragu");
+  if (savedRagu) ragu = JSON.parse(savedRagu);
+  const savedCur = localStorage.getItem("cbt_current");
+  if (savedCur) currentQuestion = parseInt(savedCur);
+  const savedTime = localStorage.getItem("cbt_time");
+  if (savedTime) timeLeft = parseInt(savedTime);
+  const savedLogged = localStorage.getItem("cbt_isLoggedIn");
+  if (savedLogged === "true") isLoggedIn = true;
+  const savedNama = localStorage.getItem("cbt_nama");
+  if (savedNama) nama = savedNama;
+  const savedToken = localStorage.getItem("cbt_token");
+  if (savedToken) token = savedToken;
+  const savedSoal = localStorage.getItem("cbt_soal");
+  if (savedSoal) soal = JSON.parse(savedSoal);
+  const savedSheet = localStorage.getItem("cbt_sheetSoal");
+  if (savedSheet) currentSheetSoal = savedSheet;
+  const savedDurasi = localStorage.getItem("cbt_durasi");
+  if (savedDurasi) currentDurasi = parseInt(savedDurasi);
 }
 
 function clearSession() {
@@ -60,14 +62,10 @@ function updateStats() {
   if (!soal.length) return;
   const answered = Object.keys(answers).length;
   const raguCount = Object.keys(ragu).length;
-  const ansEl = document.getElementById("answeredCount");
-  const ansSum = document.getElementById("answeredSummary");
-  const ragSum = document.getElementById("raguSummary");
-  const unansSum = document.getElementById("unansweredSummary");
-  if (ansEl) ansEl.innerText = answered;
-  if (ansSum) ansSum.innerText = answered;
-  if (ragSum) ragSum.innerText = raguCount;
-  if (unansSum) unansSum.innerText = soal.length - answered;
+  document.getElementById("answeredCount").innerText = answered;
+  document.getElementById("answeredSummary").innerText = answered;
+  document.getElementById("raguSummary").innerText = raguCount;
+  document.getElementById("unansweredSummary").innerText = soal.length - answered;
 }
 
 function updateNavGrid() {
@@ -80,8 +78,7 @@ function updateNavGrid() {
     if (i === currentQuestion) cls.push("activeQ");
     html += `<button class="${cls.join(' ')}" onclick="goToQuestion(${i})">${i + 1}</button>`;
   }
-  const navEl = document.getElementById("nav");
-  if (navEl) navEl.innerHTML = html;
+  document.getElementById("nav").innerHTML = html;
 }
 
 function goToQuestion(idx) {
@@ -96,14 +93,8 @@ function goToQuestion(idx) {
 function renderQuestion() {
   if (!soal.length || !soal[currentQuestion]) return;
   const s = soal[currentQuestion];
-  const qLabel = document.getElementById("questionLabel");
-  const qEl = document.getElementById("q");
-  const optEl = document.getElementById("opt");
-  const raguBtn = document.getElementById("raguBtn");
-  
-  if (qLabel) qLabel.innerHTML = "Soal " + (currentQuestion + 1);
-  if (qEl) qEl.innerHTML = s.Pertanyaan || "Soal tidak tersedia";
-  
+  document.getElementById("questionLabel").innerHTML = "Soal " + (currentQuestion + 1);
+  document.getElementById("q").innerHTML = s.Pertanyaan || "Soal tidak tersedia";
   let optHtml = "";
   for (let opt of OPTIONS) {
     let optText = s[opt] || '';
@@ -111,16 +102,14 @@ function renderQuestion() {
     optHtml += `<div class="opt ${answers[currentQuestion] == opt ? 'active' : ''}" onclick="pick('${opt}')">
       <div class="letter">${opt}</div><div>${optText}</div></div>`;
   }
-  if (optEl) optEl.innerHTML = optHtml;
-  
-  if (raguBtn) {
-    if (ragu[currentQuestion]) {
-      raguBtn.classList.add("active");
-      raguBtn.innerHTML = "🚩 Ditandai Ragu";
-    } else {
-      raguBtn.classList.remove("active");
-      raguBtn.innerHTML = "🚩 Ragu";
-    }
+  document.getElementById("opt").innerHTML = optHtml;
+  const raguBtn = document.getElementById("raguBtn");
+  if (ragu[currentQuestion]) {
+    raguBtn.classList.add("active");
+    raguBtn.innerHTML = "🚩 Ditandai Ragu";
+  } else {
+    raguBtn.classList.remove("active");
+    raguBtn.innerHTML = "🚩 Ragu";
   }
   updateProgress();
 }
@@ -198,17 +187,10 @@ function showReviewModal() {
   if (!soal.length) return;
   const answered = Object.keys(answers).length;
   const raguCount = Object.keys(ragu).length;
-  const reviewTotal = document.getElementById("reviewTotal");
-  const reviewAnswered = document.getElementById("reviewAnswered");
-  const reviewRagu = document.getElementById("reviewRagu");
-  const reviewUnanswered = document.getElementById("reviewUnanswered");
-  const reviewList = document.getElementById("reviewQuestionList");
-  
-  if (reviewTotal) reviewTotal.innerText = soal.length;
-  if (reviewAnswered) reviewAnswered.innerText = answered;
-  if (reviewRagu) reviewRagu.innerText = raguCount;
-  if (reviewUnanswered) reviewUnanswered.innerText = soal.length - answered;
-  
+  document.getElementById("reviewTotal").innerText = soal.length;
+  document.getElementById("reviewAnswered").innerText = answered;
+  document.getElementById("reviewRagu").innerText = raguCount;
+  document.getElementById("reviewUnanswered").innerText = soal.length - answered;
   let listHtml = "";
   for (let i = 0; i < soal.length; i++) {
     let status = "", cls = "";
@@ -218,20 +200,15 @@ function showReviewModal() {
     listHtml += `<div class="review-question-item ${cls}">
       <span><strong>Soal ${i + 1}</strong></span>
       <span>${status}</span>
-      <button class="secondary-btn lanjutkan-link" onclick="goToQuestionFromReview(${i})">Lanjutkan</button>
+      <button class="secondary-btn" onclick="goToQuestionFromReview(${i})">Lanjutkan</button>
     </div>`;
   }
-  if (reviewList) reviewList.innerHTML = listHtml;
-  
-  const reviewModal = document.getElementById("reviewModal");
-  if (reviewModal) reviewModal.style.display = "flex";
+  document.getElementById("reviewQuestionList").innerHTML = listHtml;
+  document.getElementById("reviewModal").style.display = "flex";
 }
 
 function goToQuestionFromReview(idx) { closeReviewModal(); goToQuestion(idx); }
-function closeReviewModal() { 
-  const modal = document.getElementById("reviewModal");
-  if (modal) modal.style.display = "none";
-}
+function closeReviewModal() { document.getElementById("reviewModal").style.display = "none"; }
 function confirmSubmit() { closeReviewModal(); submit(); }
 
 // ========== SUBMIT ==========
@@ -245,7 +222,7 @@ function submit() {
   if (isDone) return;
   if (!soal || soal.length === 0) { alert("Soal belum dimuat."); return; }
   let unanswered = soal.length - Object.keys(answers).length;
-  if (!confirm(`Yakin kumpul? ${Object.keys(answers).length}/${soal.length} terjawab, ${unanswered} belum. Lanjutkan?`)) return;
+  if (!confirm(`Yakin kumpul? ${Object.keys(answers).length}/${soal.length} terjawab, ${unanswered} belum.`)) return;
   isDone = true;
   clearInterval(timer);
   completionTimeSeconds = currentDurasi - timeLeft;
@@ -256,162 +233,79 @@ function submit() {
     let correctAns = soal[i].Kunci ? String(soal[i].Kunci).trim() : "";
     let isCorrect = (userAns === correctAns);
     if (isCorrect) score++;
-    let options = {};
-    for (let opt of OPTIONS) options[opt] = soal[i][opt] || '';
     results.push({
-      nomor: i + 1,
+      nomor: i+1,
       pertanyaan: soal[i].Pertanyaan,
       jawabanUser: userAns || "(Tidak dijawab)",
       kunci: correctAns,
       benar: isCorrect,
-      pembahasan: soal[i].Pembahasan || "Tidak ada pembahasan",
-      options: options
+      pembahasan: soal[i].Pembahasan || "Tidak ada pembahasan"
     });
   }
-  
-  // Simpan ke localStorage
   localStorage.setItem("cbt_submitted", "true");
   localStorage.setItem("cbt_score", score);
   localStorage.setItem("cbt_results", JSON.stringify(results));
   localStorage.setItem("cbt_completion_time", completionTimeSeconds);
   let waktuStr = formatTimeDisplay(completionTimeSeconds);
-  
-  // Kirim ke server
   fetch(API, {
     method: "POST",
     mode: "no-cors",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ action: "submit", nama, token, skor: score, jawaban: answers, total: soal.length, waktu: waktuStr })
   }).catch(e => console.log);
-  
-  // Tampilkan hasil
   showResult(score);
   
-  // Setelah hasil tampil, tawarkan download pembahasan
   setTimeout(() => {
-    if (confirm("✅ Ujian selesai!\n\nToken ini tidak dapat digunakan lagi untuk mengerjakan ulang.\n\nApakah Anda ingin menyimpan pembahasan (PDF) sekarang?")) {
+    if (confirm("✅ Ujian selesai!\n\nToken ini tidak dapat digunakan lagi.\n\nSimpan pembahasan (PDF) sekarang?")) {
       openDiscussionModal();
-      setTimeout(() => {
-        exportDiscussionPDF();
-      }, 500);
+      setTimeout(() => window.print(), 500);
     }
   }, 500);
 }
 
 function showResult(score) {
-  const app = document.getElementById("app");
-  const resultDiv = document.getElementById("result");
-  const scoreNum = document.getElementById("scoreNumber");
-  const skorEl = document.getElementById("skor");
-  const resultNama = document.getElementById("resultNama");
-  const resultBenar = document.getElementById("resultBenar");
-  const resultSalah = document.getElementById("resultSalah");
-  const resultWaktu = document.getElementById("resultWaktu");
-  
-  if (app) app.style.display = "none";
-  if (resultDiv) resultDiv.style.display = "flex";
-  
+  document.getElementById("app").style.display = "none";
+  document.getElementById("result").style.display = "flex";
   let persen = Math.round((score / soal.length) * 100);
-  if (scoreNum) scoreNum.innerHTML = persen + "%";
-  
+  document.getElementById("scoreNumber").innerHTML = persen + "%";
   let grade = persen >= 90 ? "🏆 Luar Biasa!" : persen >= 75 ? "✅ Sangat Baik" : persen >= 60 ? "📚 Cukup" : "📖 Perlu Belajar Lebih Lanjut";
-  if (skorEl) skorEl.innerHTML = `<strong>${grade}</strong><br>${score} dari ${soal.length} benar (${persen}%)`;
-  if (resultNama) resultNama.innerText = nama;
-  if (resultBenar) resultBenar.innerText = score;
-  if (resultSalah) resultSalah.innerText = soal.length - score;
+  document.getElementById("skor").innerHTML = `<strong>${grade}</strong><br>${score} dari ${soal.length} benar (${persen}%)`;
+  document.getElementById("resultNama").innerText = nama;
+  document.getElementById("resultBenar").innerText = score;
+  document.getElementById("resultSalah").innerText = soal.length - score;
   let waktuStr = formatTimeDisplay(completionTimeSeconds);
-  if (resultWaktu) resultWaktu.innerText = waktuStr;
+  document.getElementById("resultWaktu").innerText = waktuStr;
   loadLeaderboard();
 }
 
-// ========== MODAL PEMBAHASAN & EXPORT PDF ==========
 function openDiscussionModal() {
   let results = JSON.parse(localStorage.getItem("cbt_results") || "[]");
   let soalData = JSON.parse(localStorage.getItem("cbt_soal") || "[]");
-  let score = parseInt(localStorage.getItem("cbt_score") || "0");
-  let completionSeconds = parseInt(localStorage.getItem("cbt_completion_time") || "0");
-  let totalSoal = soalData.length;
-  
   if (!results.length) { alert("Tidak ada data."); return; }
-  
-  let mins = Math.floor(completionSeconds / 60);
-  let secs = completionSeconds % 60;
-  let durasiStr = `${mins} menit ${secs} detik`;
-  let persenSkor = Math.round((score / totalSoal) * 100);
-  
-  // Header informasi untuk print
-  let printHeader = `
-    <div class="print-header" style="text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #ddd;">
-      <h2 style="margin: 5px 0;">📝 Hasil Ujian PHARMACORE CBT</h2>
-      <div class="print-score" style="font-size: 28px; font-weight: bold; color: #10b981; margin: 10px 0;">${score} / ${totalSoal} (${persenSkor}%)</div>
-      <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-top: 20px; font-size: 14px;">
-        <div><strong>👤 Nama:</strong> ${nama}</div>
-        <div><strong>⏱️ Durasi:</strong> ${durasiStr}</div>
-        <div><strong>✅ Benar:</strong> ${score}</div>
-        <div><strong>❌ Salah:</strong> ${totalSoal - score}</div>
-        <div><strong>🏆 Peringkat:</strong> Menunggu data leaderboard</div>
-      </div>
-    </div>
-  `;
-  
-  let html = printHeader;
+  let html = `<div style="text-align:center; margin-bottom:20px;"><h2>📝 Hasil Ujian</h2><p>Skor: ${localStorage.getItem("cbt_score")}/${soalData.length}</p></div>`;
   for (let i = 0; i < results.length; i++) {
     const r = results[i];
     const s = soalData[i];
     const userAnswer = r.jawabanUser;
     const correctKey = r.kunci;
-    html += `<div class="discussion-question" style="margin-bottom: 20px; border-radius: 20px; border-left: 6px solid #8b5cf6; background: #f9fafb; padding: 16px;">
-      <h4 style="margin-top: 0; margin-bottom: 12px;">Soal ${r.nomor}. ${r.pertanyaan}</h4>
-      <div class="options-list">`;
+    html += `<div style="border:1px solid #ddd; border-radius:12px; padding:12px; margin-bottom:12px;">
+      <h4>Soal ${r.nomor}. ${r.pertanyaan}</h4>`;
     for (let opt of OPTIONS) {
       let optText = s[opt] || '';
       let isUser = (userAnswer === opt);
       let isCorrectKey = (correctKey === opt);
-      let bgColor = "#ffffff";
+      let bgColor = "#fff";
       let indicator = "";
-      if (isUser && isCorrectKey) {
-        bgColor = "#d1fae5";
-        indicator = " ✓ (jawaban Anda benar)";
-      } else if (isUser && !isCorrectKey) {
-        bgColor = "#fee2e2";
-        indicator = " ✗ (jawaban Anda salah)";
-      } else if (!isUser && isCorrectKey) {
-        bgColor = "#fef9c3";
-        indicator = " ★ (kunci jawaban)";
-      }
-      html += `<div style="padding: 8px 12px; margin: 6px 0; border-radius: 12px; background: ${bgColor}; border: 1px solid #e5e7eb;">
-        <strong>${opt}.</strong> ${optText} ${indicator}
-      </div>`;
+      if (isUser && isCorrectKey) { bgColor = "#d1fae5"; indicator = " ✓ (jawaban Anda benar)"; }
+      else if (isUser && !isCorrectKey) { bgColor = "#fee2e2"; indicator = " ✗ (jawaban Anda salah)"; }
+      else if (!isUser && isCorrectKey) { bgColor = "#fef9c3"; indicator = " ★ (kunci jawaban)"; }
+      html += `<div style="padding:6px 10px; margin:4px 0; border-radius:8px; background:${bgColor};">${opt}. ${optText} ${indicator}</div>`;
     }
-    html += `</div><div style="margin-top: 12px; padding: 12px; background: #f3f4f6; border-radius: 12px;"><strong>📘 Pembahasan:</strong> ${r.pembahasan}</div></div>`;
+    html += `<div style="margin-top:8px; padding:8px; background:#f3f4f6; border-radius:8px;"><strong>Pembahasan:</strong> ${r.pembahasan}</div></div>`;
   }
-  
-  const discussionContent = document.getElementById("discussionContent");
-  const discussionModal = document.getElementById("discussionModal");
-  if (discussionContent) discussionContent.innerHTML = html;
-  if (discussionModal) discussionModal.style.display = "flex";
-  
-  // Update peringkat dari leaderboard
-  setTimeout(() => {
-    fetch(API + "?action=leaderboard&token=" + token)
-      .then(r => r.json())
-      .then(res => {
-        if (res.leaderboard) {
-          const idx = res.leaderboard.findIndex(item => item.nama === nama);
-          if (idx !== -1) {
-            const rankSpan = document.querySelector("#discussionModal .print-header div:last-child");
-            if (rankSpan) rankSpan.innerHTML = `<strong>🏆 Peringkat:</strong> #${idx + 1}`;
-          }
-        }
-      });
-  }, 100);
+  document.getElementById("discussionContent").innerHTML = html;
+  document.getElementById("discussionModal").style.display = "flex";
 }
-
-function closeDiscussionModal() { 
-  const modal = document.getElementById("discussionModal");
-  if (modal) modal.style.display = "none";
-}
-function exportDiscussionPDF() { window.print(); }
+function closeDiscussionModal() { document.getElementById("discussionModal").style.display = "none"; }
 
 // ========== LEADERBOARD ==========
 function loadLeaderboard() {
@@ -422,45 +316,34 @@ function loadLeaderboard() {
     .then(r => r.json())
     .then(res => {
       if (res.leaderboard && res.leaderboard.length) {
-        window.leaderboardData = res.leaderboard;
         let data = res.leaderboard.map(item => ({ nama: item.nama, skor: item.skor, total: soal.length, waktu: item.waktu || "00:00" }));
-        data.sort((a, b) => b.skor - a.skor);
+        data.sort((a,b) => b.skor - a.skor);
         let podiumHtml = `<div class="podium-container">`;
-        const medals = ["🥇", "🥈", "🥉"];
-        const colors = ["podium-1", "podium-2", "podium-3"];
         for (let i = 0; i < Math.min(3, data.length); i++) {
-          const item = data[i];
-          const persen = Math.round((item.skor / item.total) * 100);
-          podiumHtml += `
-            <div class="podium-item ${colors[i]}">
-              <div class="podium-block"><div class="medal">${medals[i]}</div></div>
-              <div class="podium-rank">#${i+1}</div>
-              <div class="podium-name">${item.nama}</div>
-              <div class="podium-score">${persen}%</div>
-              <div class="podium-time">${item.waktu}</div>
-            </div>`;
+          let persen = Math.round((data[i].skor / data[i].total) * 100);
+          podiumHtml += `<div class="podium-item podium-${i+1}">
+            <div class="podium-block"><div class="medal">${i===0?"🥇":i===1?"🥈":"🥉"}</div></div>
+            <div class="podium-name">${data[i].nama}</div>
+            <div class="podium-score">${persen}%</div>
+            <div class="podium-time">${data[i].waktu}</div>
+          </div>`;
         }
         podiumHtml += `</div>`;
         let listHtml = `<div class="leaderboard-list"><div class="leaderboard-header">
           <div class="rank">#</div><div class="name">Peserta</div><div class="score">Skor</div><div class="time">Waktu</div>
         </div>`;
-        let userRankData = null;
+        let userRank = null;
         for (let i = 0; i < data.length; i++) {
-          const item = data[i];
-          const rank = i + 1;
-          const myClass = (item.nama === nama) ? "my-rank" : "";
-          const persen = Math.round((item.skor / item.total) * 100);
-          if (item.nama === nama) userRankData = { rank, persen, waktu: item.waktu };
-          listHtml += `
-            <div class="leaderboard-item ${myClass}">
-              <div class="rank">${rank}</div>
-              <div class="name">${item.nama}</div>
-              <div class="score">${persen}%</div>
-              <div class="time">${item.waktu}</div>
-            </div>`;
+          let persen = Math.round((data[i].skor / data[i].total) * 100);
+          let myClass = (data[i].nama === nama) ? "my-rank" : "";
+          if (data[i].nama === nama) userRank = i+1;
+          listHtml += `<div class="leaderboard-item ${myClass}">
+            <div class="rank">${i+1}</div><div class="name">${data[i].nama}</div>
+            <div class="score">${persen}%</div><div class="time">${data[i].waktu}</div>
+          </div>`;
         }
         listHtml += `</div>`;
-        let yourRankHtml = userRankData ? `<div class="your-rank-card"><span>🏆</span> Peringkat Anda: #${userRankData.rank} &nbsp;|&nbsp; Skor: ${userRankData.persen}% &nbsp;|&nbsp; Waktu: ${userRankData.waktu}</div>` : `<div class="your-rank-card"><span>📊</span> Anda belum memiliki data di leaderboard.</div>`;
+        let yourRankHtml = userRank ? `<div class="your-rank-card">🏆 Peringkat Anda: #${userRank}</div>` : `<div class="your-rank-card">📊 Anda belum memiliki data.</div>`;
         board.innerHTML = podiumHtml + listHtml + yourRankHtml;
       } else {
         board.innerHTML = '<div style="text-align:center; padding:20px;">🏆 Belum ada data leaderboard.</div>';
@@ -469,46 +352,20 @@ function loadLeaderboard() {
     .catch(() => board.innerHTML = '<div style="text-align:center; padding:20px;">⚠️ Gagal memuat leaderboard.</div>');
 }
 
-// ========== RESTART & HOME ==========
-function restartExam() {
-  if (confirm("Ujian baru akan menghapus semua jawaban. Lanjutkan?")) {
-    clearSession();
-    location.reload();
-  }
-}
-function goHome() {
-  if (confirm("Kembali ke halaman login? Semua kemajuan ujian akan hilang.")) {
-    clearSession();
-    location.reload();
-  }
-}
+function restartExam() { if (confirm("Ujian baru?")) { clearSession(); location.reload(); } }
+function goHome() { if (confirm("Kembali ke login?")) { clearSession(); location.reload(); } }
 
-// ========== LOGIN & LOAD SOAL ==========
+// ========== LOGIN ==========
 function login() {
   nama = document.getElementById("nama").value.trim();
   token = document.getElementById("token").value.trim();
   if (!nama || !token) { alert("Lengkapi data!"); return; }
-  
   fetch(API + "?action=validateToken&token=" + token)
     .then(r => r.json())
     .then(res => {
-      console.log("Response:", res);
-      
-      if (!res.valid) {
-        alert("Token tidak valid!");
-        return;
-      }
-      
-      // JIKA TOKEN SUDAH PERNAH DIGUNAKAN (used = true)
-      if (res.used === true) {
-        alert("❌ Token ini sudah digunakan.\n\nToken hanya dapat digunakan SEKALI untuk mengerjakan ujian.\nAnda tidak dapat mengerjakan ulang dengan token ini.\n\nTerima kasih.");
-        return; // HENTIKAN EKSEKUSI, TIDAK BOLEH MASUK
-      }
-      
-      // Peringatan token sekali pakai
-      alert("⚠️ PERINGATAN!\n\nToken ini hanya dapat digunakan SEKALI.\n\nSetelah Anda menyelesaikan ujian, token akan hangus dan tidak bisa digunakan lagi untuk mengerjakan ulang.\n\nPastikan Anda menyimpan pembahasan (PDF) setelah submit!");
-      
-      // Mulai ujian baru (used = false)
+      if (!res.valid) { alert("Token tidak valid!"); return; }
+      if (res.used) { alert("Token sudah digunakan! Token hanya sekali pakai."); return; }
+      alert("⚠️ Token hanya bisa digunakan SEKALI. Simpan pembahasan setelah submit!");
       currentDurasi = res.durasi || 3600;
       currentSheetSoal = res.sheetSoal || "SOAL A";
       timeLeft = currentDurasi;
@@ -518,10 +375,7 @@ function login() {
       document.getElementById("app").style.display = "block";
       loadQuestions();
     })
-    .catch(err => {
-      console.error(err);
-      alert("Gagal validasi token");
-    });
+    .catch(() => alert("Gagal validasi token"));
 }
 
 function loadQuestions() {
@@ -529,17 +383,13 @@ function loadQuestions() {
   fetch(API + "?action=getSoal&sheet=" + encodeURIComponent(currentSheetSoal))
     .then(r => r.json())
     .then(res => {
-      if (res.error) { alert("Error: " + res.error); return; }
-      if (!res.soal || !res.soal.length) { alert("Soal tidak ditemukan di sheet " + currentSheetSoal); return; }
+      if (!res.soal || !res.soal.length) { alert("Soal tidak ditemukan"); return; }
       soal = res.soal;
       document.getElementById("totalCount").innerText = soal.length;
       startFromSaved();
       saveState();
     })
-    .catch(err => {
-      console.error(err);
-      alert("Gagal load soal");
-    });
+    .catch(() => alert("Gagal load soal"));
 }
 
 function startFromSaved() {
@@ -549,37 +399,83 @@ function startFromSaved() {
   startTimer();
 }
 
-// ========== DARK MODE ==========
+// ========== DARK MODE & CALCULATOR ==========
 function toggleDarkMode() {
   document.body.classList.toggle("dark-mode");
   localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
 }
-function loadDarkMode() {
-  if (localStorage.getItem("darkMode") === "true") document.body.classList.add("dark-mode");
-}
+function loadDarkMode() { if (localStorage.getItem("darkMode") === "true") document.body.classList.add("dark-mode"); }
 
-// ========== CALCULATOR ==========
 function toggleCalculator() {
   let modal = document.getElementById("calculatorModal");
-  if (modal.style.display === "flex") {
-    modal.style.display = "none";
-    document.removeEventListener("keydown", handleKeyboard);
-  } else {
-    modal.style.display = "flex";
-    document.addEventListener("keydown", handleKeyboard);
-    document.getElementById("calcDisplay").focus();
+  modal.style.display = modal.style.display === "flex" ? "none" : "flex";
+}
+function initCalculator() {
+  document.querySelectorAll(".calc-grid button").forEach(btn => {
+    btn.onclick = () => {
+      let display = document.getElementById("calcDisplay");
+      if (btn.hasAttribute("data-num")) display.value += btn.getAttribute("data-num");
+      else if (btn.hasAttribute("data-op")) display.value += btn.getAttribute("data-op");
+      else if (btn.getAttribute("data-action") === "equal") {
+        try { display.value = Function('return (' + display.value.replace(/×/g,'*').replace(/÷/g,'/') + ')')(); } catch(e) { display.value = "Error"; }
+      } else if (btn.getAttribute("data-action") === "clear") display.value = "";
+      else if (btn.getAttribute("data-action") === "backspace") display.value = display.value.slice(0,-1);
+      else if (btn.getAttribute("data-action") === "sin") display.value = Math.sin(parseFloat(display.value) * Math.PI/180);
+      else if (btn.getAttribute("data-action") === "cos") display.value = Math.cos(parseFloat(display.value) * Math.PI/180);
+      else if (btn.getAttribute("data-action") === "tan") display.value = Math.tan(parseFloat(display.value) * Math.PI/180);
+      else if (btn.getAttribute("data-action") === "log") display.value = Math.log10(parseFloat(display.value));
+      else if (btn.getAttribute("data-action") === "ln") display.value = Math.log(parseFloat(display.value));
+      else if (btn.getAttribute("data-action") === "sqrt") display.value = Math.sqrt(parseFloat(display.value));
+      else if (btn.getAttribute("data-action") === "pow2") display.value = Math.pow(parseFloat(display.value), 2);
+      else if (btn.getAttribute("data-action") === "pow3") display.value = Math.pow(parseFloat(display.value), 3);
+      else if (btn.getAttribute("data-action") === "reciprocal") display.value = 1 / parseFloat(display.value);
+      else if (btn.getAttribute("data-action") === "pi") display.value = Math.PI;
+      else if (btn.getAttribute("data-action") === "percent") display.value = parseFloat(display.value) / 100;
+      else if (btn.getAttribute("data-action") === "mc") calcMemory = 0;
+      else if (btn.getAttribute("data-action") === "mplus") calcMemory += parseFloat(display.value);
+      else if (btn.getAttribute("data-action") === "mminus") calcMemory -= parseFloat(display.value);
+      else if (btn.getAttribute("data-action") === "mr") display.value = calcMemory;
+      else if (btn.getAttribute("data-action") === "ms") calcMemory = parseFloat(display.value);
+    };
+  });
+}
+
+function checkExistingSession() {
+  loadSavedState();
+  loadDarkMode();
+  if (localStorage.getItem("cbt_submitted") === "true") {
+    let savedScore = localStorage.getItem("cbt_score");
+    if (savedScore) {
+      document.getElementById("login").style.display = "none";
+      showResult(parseInt(savedScore));
+    }
+  } else if (isLoggedIn) {
+    document.getElementById("login").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    if (soal.length) {
+      document.getElementById("totalCount").innerText = soal.length;
+      renderQuestion(); updateNavGrid(); updateStats(); startTimer();
+    } else if (currentSheetSoal) loadQuestions();
   }
 }
 
-function handleKeyboard(e) {
-  let d = document.getElementById("calcDisplay");
-  if (!d) return;
-  let key = e.key;
-  if (key >= '0' && key <= '9') appendToDisplay(key);
-  else if (key === '.') appendToDisplay('.');
-  else if (key === '+' || key === '-' || key === '*' || key === '/') {
-    let op = key === '*' ? '×' : (key === '/' ? '÷' : key);
-    appendToDisplay(op);
-  } else if (key === 'Enter' || key === '=') calculateResult();
-  else if (key === 'Escape') toggleCalculator();
-  else if (key === 'Backspace
+// ========== INIT EVENT LISTENERS ==========
+document.addEventListener("DOMContentLoaded", function() {
+  initCalculator();
+  document.getElementById("startBtn").onclick = login;
+  document.getElementById("prevBtn").onclick = prevQuestion;
+  document.getElementById("nextBtn").onclick = nextQuestion;
+  document.getElementById("raguBtn").onclick = toggleRagu;
+  document.getElementById("submitBtn").onclick = showReviewModal;
+  document.getElementById("darkModeBtn").onclick = toggleDarkMode;
+  document.getElementById("calcBtn").onclick = toggleCalculator;
+  document.getElementById("closeReviewModal").onclick = closeReviewModal;
+  document.getElementById("backToExamBtn").onclick = closeReviewModal;
+  document.getElementById("confirmSubmitBtn").onclick = confirmSubmit;
+  document.getElementById("closeDiscussionModal").onclick = closeDiscussionModal;
+  document.getElementById("exportPDFBtn").onclick = () => window.print();
+  document.getElementById("reviewResultBtn").onclick = openDiscussionModal;
+  document.getElementById("restartExamBtn").onclick = restartExam;
+  document.getElementById("closeCalcBtn").onclick = toggleCalculator;
+  checkExistingSession();
+});

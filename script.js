@@ -259,14 +259,9 @@ function submit() {
   
   showResult(score);
   
-  // Tawarkan download PDF setelah submit
+  // BUKA MODAL PEMBAHASAN AGAR USER BISA DOWNLOAD MANUAL (TANPA POPUP)
   setTimeout(() => {
     openDiscussionModal();
-    setTimeout(() => {
-      if (confirm("✅ Ujian selesai!\n\nApakah Anda ingin menyimpan pembahasan (PDF) sekarang?")) {
-        exportDiscussionPDF();
-      }
-    }, 500);
   }, 500);
 }
 
@@ -313,30 +308,38 @@ function openDiscussionModal() {
     const s = soalData[i];
     const userAnswer = r.jawabanUser;
     const correctKey = r.kunci;
-    html += `<div class="discussion-question" style="margin-bottom: 20px; border-radius: 20px; border-left: 6px solid #8b5cf6; background: #f9fafb; padding: 16px;">
-      <h4 style="margin-top: 0; margin-bottom: 12px;">Soal ${r.nomor}. ${r.pertanyaan}</h4>
+    let additionalClass = "";
+    let indicator = "";
+    
+    html += `<div class="discussion-question">
+      <h4>Soal ${r.nomor}. ${r.pertanyaan}</h4>
       <div class="options-list">`;
+    
     for (let opt of OPTIONS) {
       let optText = s[opt] || '';
       let isUser = (userAnswer === opt);
       let isCorrectKey = (correctKey === opt);
-      let bgColor = "#ffffff";
-      let indicator = "";
+      additionalClass = "";
+      indicator = "";
+      
       if (isUser && isCorrectKey) {
-        bgColor = "#d1fae5";
+        additionalClass = "user-correct";
         indicator = " ✓ (jawaban Anda benar)";
       } else if (isUser && !isCorrectKey) {
-        bgColor = "#fee2e2";
+        additionalClass = "wrong-option";
         indicator = " ✗ (jawaban Anda salah)";
       } else if (!isUser && isCorrectKey) {
-        bgColor = "#fef9c3";
+        additionalClass = "correct-option";
         indicator = " ★ (kunci jawaban)";
       }
-      html += `<div style="padding: 8px 12px; margin: 6px 0; border-radius: 12px; background: ${bgColor}; border: 1px solid #e5e7eb;">
+      
+      html += `<div class="option-item ${additionalClass}">
         <strong>${opt}.</strong> ${optText} ${indicator}
       </div>`;
     }
-    html += `</div><div style="margin-top: 12px; padding: 12px; background: #f3f4f6; border-radius: 12px;"><strong>📘 Pembahasan:</strong> ${r.pembahasan}</div></div>`;
+    html += `</div>
+      <div class="discussion-pembahasan"><strong>📘 Pembahasan:</strong> ${r.pembahasan}</div>
+    </div>`;
   }
   
   document.getElementById("discussionContent").innerHTML = html;

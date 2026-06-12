@@ -158,20 +158,13 @@ function toggleRagu() {
 }
 
 // ========== TIMER ==========
-// Fungsi untuk menampilkan notifikasi toast
-function showToast(message, isWarning = false) {
-  // Hapus notifikasi yang sudah ada sebelumnya (jika ada)
-  const existingToast = document.querySelector('.notification-toast');
-  if (existingToast) existingToast.remove();
-  
-  const toast = document.createElement('div');
-  toast.className = `notification-toast ${isWarning ? 'warning' : ''}`;
+function showToast(message, type = "warning") {
+  const toast = document.createElement("div");
+  toast.className = `toast-warning ${type === "danger" ? "danger" : ""}`;
   toast.innerText = message;
   document.body.appendChild(toast);
-  
-  // Hapus notifikasi setelah 3 detik
   setTimeout(() => {
-    if (toast && toast.parentNode) toast.remove();
+    toast.remove();
   }, 3000);
 }
 
@@ -194,18 +187,8 @@ function startTimer() {
       if (timerEl) timerEl.innerHTML = `${m}:${s < 10 ? '0' + s : s}`;
       
       // Tampilkan notifikasi toast saat 5 menit dan 1 menit tersisa (tanpa alert)
-      if (timeLeft === 300) {
-        showToast("⏰ Peringatan! Waktu tersisa 5 menit lagi.", true);
-        if (timerEl) timerEl.style.color = "#f59e0b";
-      }
-      if (timeLeft === 60) {
-        showToast("⏰ Peringatan! Waktu tersisa 1 menit!", true);
-        if (timerEl) timerEl.style.color = "#ef4444";
-        if (timerEl) timerEl.style.fontWeight = "bold";
-      }
-    }
-  }, 1000);
-}
+      if (timeLeft === 300) showToast("⏰ Peringatan! Waktu tersisa 5 menit.", "warning");
+      if (timeLeft === 60) showToast("⏰ Peringatan! Waktu tersisa 1 menit!", "danger");
 
 // ========== REVIEW MODAL SEBELUM SUBMIT ==========
 function showReviewModal() {

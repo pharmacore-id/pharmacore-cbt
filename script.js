@@ -183,7 +183,12 @@ function toggleRagu() {
 function startTimer() {
   if (localStorage.getItem("cbt_submitted") === "true") return;
   if (timer) clearInterval(timer);
-  timer = setInterval(() => {
+  
+  if (isNaN(timeLeft) || timeLeft <= 0) {
+    timeLeft = currentDurasi;
+  }
+  
+  timer = setInterval(function() {
     if (isDone) return;
     if (timeLeft <= 0) {
       clearInterval(timer);
@@ -195,7 +200,9 @@ function startTimer() {
       let m = Math.floor(timeLeft / 60);
       let s = timeLeft % 60;
       let timerEl = document.getElementById("timer");
-      if (timerEl) timerEl.innerHTML = `${m}:${s < 10 ? '0' + s : s}`;
+      if (timerEl) {
+        timerEl.innerHTML = m + ":" + (s < 10 ? '0' + s : s);
+      }
       if (timeLeft === 300) showToast("⏰ Peringatan! Waktu tersisa 5 menit.", "warning");
       if (timeLeft === 60) showToast("⏰ Peringatan! Waktu tersisa 1 menit!", "danger");
     }
@@ -239,13 +246,14 @@ function goToQuestionFromReview(idx) { closeReviewModal(); goToQuestion(idx); }
 function closeReviewModal() { document.getElementById("reviewModal").style.display = "none"; }
 function confirmSubmit() { closeReviewModal(); submit(); }
 
-// ========== SUBMIT ==========
+// ========== FORMAT WAKTU ==========
 function formatTimeDisplay(seconds) {
   let mins = Math.floor(seconds / 60);
   let secs = seconds % 60;
   return `${mins} menit ${secs} detik`;
 }
 
+// ========== SUBMIT ==========
 function submit() {
   if (isDone) return;
   if (!soal || soal.length === 0) { alert("Soal belum dimuat."); return; }
@@ -294,7 +302,11 @@ function submit() {
       sheetSoal: currentSheetSoal
     })
   }).catch(e => console.log);
+  
+  showResult(score);
+}
 
+// ========== SHOW RESULT ==========
 function showResult(score) {
   document.getElementById("app").style.display = "none";
   document.getElementById("result").style.display = "flex";
@@ -310,36 +322,51 @@ function showResult(score) {
   loadLeaderboard();
 }
 
+// ========== OPEN DISCUSSION MODAL (PEMBAHASAN) ==========
 function openDiscussionModal() {
   let results = JSON.parse(localStorage.getItem("cbt_results") || "[]");
   let soalData = JSON.parse(localStorage.getItem("cbt_soal") || "[]");
   let score = parseInt(localStorage.getItem("cbt_score") || "0");
   let totalSoal = soalData.length;
-  if (!results.length) { alert("Tidak ada数据."); return; }
+  let completionSeconds = parseInt(localStorage.getItem("cbt_completion_time") || "0");
+  
+  if (!results.length) { alert("Tidak ada data."); return; }
+  
   let persen = Math.round((score / totalSoal) * 100);
-  let html = `<div style="text-align:center; margin-bottom:24px; padding-bottom:16px; border-bottom:2px solid #ddd;">
-      <h2 style="margin:0 0 8px 0;">📝 Hasil Ujian</h2>
-      <div style="font-size:28px; font-weight:bold; color:#10b981; margin:8px 0;">${score} / ${totalSoal} (${persen}%)</div>
-      <div style="display:flex; justify-content:center; gap:24px; flex-wrap:wrap; margin-top:12px;">
-        <div><strong>👤 Nama:</strong> ${nama}</div>
-        <div><strong>✅ Benar:</strong> ${score}</div>
-        <div><strong>❌ Salah:</strong> ${totalSoal - score}</div>
+  let mins = Math.floor(completionSeconds / 60);
+  let secs = completionSeconds % 60;
+  let durasiStr = `${mins} menit ${secs} detik`;
+  
+  let html = `
+    <div class="discussion-header">
+      <h2>📝 Hasil Ujian</h2>
+      <div class="discussion-score">${score} / ${totalSoal} (${persen}%)</div>
+      <div class="discussion-info">
+        <div>👤 Nama: ${nama}</div>
+        <div>✅ Benar: ${score}</div>
+        <div>❌ Salah: ${totalSoal - score}</div>
+        <div>⏱️ Waktu: ${durasiStr}</div>
       </div>
-    </div>`;
+    </div>
+  `;
+  
   for (let i = 0; i < results.length; i++) {
     const r = results[i];
     const s = soalData[i];
     const userAnswer = r.jawabanUser;
     const correctKey = r.kunci;
+    
     html += `<div class="discussion-question">
       <h4>Soal ${r.nomor}. ${r.pertanyaan}</h4>
       <div class="options-list">`;
+    
     for (let opt of OPTIONS) {
       let optText = s[opt] || '';
       let isUser = (userAnswer === opt);
       let isCorrectKey = (correctKey === opt);
       let additionalClass = "";
       let indicator = "";
+      
       if (isUser && isCorrectKey) {
         additionalClass = "user-correct";
         indicator = " ✓ (jawaban Anda benar)";
@@ -350,19 +377,30 @@ function openDiscussionModal() {
         additionalClass = "correct-option";
         indicator = " ★ (kunci jawaban)";
       }
+      
       html += `<div class="option-item ${additionalClass}">
         <strong>${opt}.</strong> ${optText} ${indicator}
       </div>`;
     }
-    html += `</div><div class="discussion-pembahasan"><strong>📘 Pembahasan:</strong> ${r.pembahasan}</div></div>`;
+    
+    html += `</div>
+      <div class="discussion-pembahasan"><strong>📘 Pembahasan:</strong> ${r.pembahasan}</div>
+    </div>`;
   }
+  
   document.getElementById("discussionContent").innerHTML = html;
   document.getElementById("discussionModal").style.display = "flex";
 }
 
-function closeDiscussionModal() { document.getElementById("discussionModal").style.display = "none"; }
-function exportDiscussionPDF() { window.print(); }
+function closeDiscussionModal() { 
+  document.getElementById("discussionModal").style.display = "none"; 
+}
 
+function exportDiscussionPDF() { 
+  window.print(); 
+}
+
+// ========== LEADERBOARD ==========
 function loadLeaderboard() {
   const board = document.getElementById("board");
   if (!board) return;
@@ -408,7 +446,7 @@ function loadLeaderboard() {
             </div>`;
         }
         listHtml += `</div>`;
-        let yourRankHtml = userRankData ? `<div class="your-rank-card"><span>🏆</span> Peringkat Anda: #${userRankData.rank} &nbsp;|&nbsp; Skor: ${userRankData.persen}% &nbsp;|&nbsp; Waktu: ${userRankData.waktu}</div>` : `<div class="your-rank-card"><span>📊</span> Anda belum memiliki数据 di leaderboard.</div>`;
+        let yourRankHtml = userRankData ? `<div class="your-rank-card"><span>🏆</span> Peringkat Anda: #${userRankData.rank} &nbsp;|&nbsp; Skor: ${userRankData.persen}% &nbsp;|&nbsp; Waktu: ${userRankData.waktu}</div>` : `<div class="your-rank-card"><span>📊</span> Anda belum memiliki data di leaderboard.</div>`;
         board.innerHTML = podiumHtml + listHtml + yourRankHtml;
       } else {
         board.innerHTML = '<div style="text-align:center; padding:20px;">🏆 Belum ada data leaderboard untuk paket ini.</div>';
@@ -417,22 +455,27 @@ function loadLeaderboard() {
     .catch(() => board.innerHTML = '<div style="text-align:center; padding:20px;">⚠️ Gagal memuat leaderboard.</div>');
 }
 
+// ========== RESTART & HOME ==========
 function restartExam() {
   if (confirm("Ujian baru akan menghapus semua jawaban. Lanjutkan?")) {
     clearSession();
     location.reload();
   }
 }
+
 function goHome() {
   if (confirm("Kembali ke halaman login? Anda dapat melanjutkan ujian nanti dengan token yang sama.")) {
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
     document.getElementById("app").style.display = "none";
     document.getElementById("login").style.display = "flex";
   }
-} ini fungsi submit sebelumnya, ada disini tapi kamu suruh ganti
+}
 
 // ========== LOGIN & LOAD SOAL ==========
 function login() {
-  console.log("Login function called");
   nama = document.getElementById("nama").value.trim();
   token = document.getElementById("token").value.trim();
   if (!nama || !token) { alert("Lengkapi data!"); return; }
@@ -440,7 +483,6 @@ function login() {
   fetch(API + "?action=validateToken&token=" + token)
     .then(r => r.json())
     .then(res => {
-      console.log("API Response:", res);
       if (!res.valid) { alert("Token tidak valid!"); return; }
       if (res.used) { alert("Token sudah digunakan."); return; }
       
@@ -508,6 +550,7 @@ function toggleCalculator() {
     document.getElementById("calcDisplay").focus();
   }
 }
+
 function handleKeyboard(e) {
   let d = document.getElementById("calcDisplay");
   if (!d) return;
@@ -522,20 +565,39 @@ function handleKeyboard(e) {
   else if (key === 'Backspace') deleteLastCalc();
   else if (key === 'c' || key === 'C') clearCalc();
 }
-function appendToDisplay(v) { let d = document.getElementById("calcDisplay"); if (d) { if (d.value === "Error") d.value = ""; d.value += v; } }
-function clearCalc() { document.getElementById("calcDisplay").value = ""; }
-function deleteLastCalc() { let d = document.getElementById("calcDisplay"); d.value = d.value.slice(0, -1); }
+
+function appendToDisplay(v) { 
+  let d = document.getElementById("calcDisplay"); 
+  if (d) { 
+    if (d.value === "Error") d.value = ""; 
+    d.value += v; 
+  } 
+}
+
+function clearCalc() { 
+  document.getElementById("calcDisplay").value = ""; 
+}
+
+function deleteLastCalc() { 
+  let d = document.getElementById("calcDisplay"); 
+  if (d) d.value = d.value.slice(0, -1); 
+}
+
 function calculateResult() {
   let d = document.getElementById("calcDisplay");
   try {
     let expr = d.value.replace(/×/g, '*').replace(/÷/g, '/');
     let r = Function('"use strict"; return (' + expr + ')')();
     d.value = r;
-  } catch(e) { d.value = "Error"; }
+  } catch(e) { 
+    d.value = "Error"; 
+  }
 }
+
 function calcFunction(action) {
   let d = document.getElementById("calcDisplay");
   let val = parseFloat(d.value) || 0;
+  
   switch(action) {
     case 'sin': d.value = Math.sin(val * Math.PI / 180); break;
     case 'cos': d.value = Math.cos(val * Math.PI / 180); break;
@@ -554,17 +616,19 @@ function calcFunction(action) {
     case 'backspace': deleteLastCalc(); break;
     case 'mplus': calcMemory += val; break;
     case 'mminus': calcMemory -= val; break;
-    case 'mr': d.value = calcMemory; break;
     case 'mc': calcMemory = 0; break;
+    case 'mr': d.value += calcMemory; break;
     case 'ms': calcMemory = val; break;
   }
 }
+
 function initCalculator() {
   document.querySelectorAll('.calc-num').forEach(btn => btn.onclick = () => appendToDisplay(btn.getAttribute('data-num')));
   document.querySelectorAll('.calc-operator').forEach(btn => btn.onclick = () => appendToDisplay(btn.getAttribute('data-op')));
   document.querySelectorAll('.calc-func, .calc-mem, .calc-clear').forEach(btn => btn.onclick = () => calcFunction(btn.getAttribute('data-action')));
 }
 
+// ========== CEK SESSION ==========
 function checkExistingSession() {
   loadSavedState();
   loadDarkMode();
@@ -595,6 +659,24 @@ function checkExistingSession() {
     } else if (currentSheetSoal) {
       loadQuestions();
     }
+  }
+}
+
+// ========== CLOSE MODAL DENGAN KLIK DI LUAR ==========
+window.onclick = function(event) {
+  const reviewModal = document.getElementById("reviewModal");
+  const discussionModal = document.getElementById("discussionModal");
+  const calculatorModal = document.getElementById("calculatorModal");
+  
+  if (event.target === reviewModal) {
+    reviewModal.style.display = "none";
+  }
+  if (event.target === discussionModal) {
+    discussionModal.style.display = "none";
+  }
+  if (event.target === calculatorModal) {
+    calculatorModal.style.display = "none";
+    document.removeEventListener("keydown", handleKeyboard);
   }
 }
 

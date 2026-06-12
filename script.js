@@ -421,16 +421,17 @@ function loadLeaderboard() {
     .catch(() => board.innerHTML = '<div style="text-align:center; padding:20px;">⚠️ Gagal memuat leaderboard.</div>');
 }
 
-function restartExam() {
-  if (confirm("Ujian baru akan menghapus semua jawaban. Lanjutkan?")) {
-    clearSession();
-    location.reload();
-  }
-}
+
 function goHome() {
   if (confirm("Kembali ke halaman login? Anda dapat melanjutkan ujian nanti dengan token yang sama.")) {
+    if (timer) clearInterval(timer);
     document.getElementById("app").style.display = "none";
+    document.getElementById("result").style.display = "none";
     document.getElementById("login").style.display = "flex";
+    // Reset state
+    isLoggedIn = false;
+    isDone = false;
+    soal = [];
   }
 }
 
@@ -500,6 +501,9 @@ function checkExistingSession() {
   if (submitted && soal.length > 0) {
     const savedScore = localStorage.getItem("cbt_score");
     if (savedScore) {
+      document.getElementById("login").style.display = "none";
+      document.getElementById("app").style.display = "none";
+      document.getElementById("result").style.display = "flex";
       showResult(parseInt(savedScore));
       return;
     }
@@ -509,9 +513,6 @@ function checkExistingSession() {
     document.getElementById("login").style.display = "none";
     document.getElementById("app").style.display = "block";
     startFromSaved();
-  } else if (token) {
-    document.getElementById("token").value = token;
-    if (nama) document.getElementById("nama").value = nama;
   }
 }
 
@@ -649,7 +650,6 @@ window.confirmSubmit = confirmSubmit;
 window.openDiscussionModal = openDiscussionModal;
 window.closeDiscussionModal = closeDiscussionModal;
 window.exportDiscussionPDF = exportDiscussionPDF;
-window.restartExam = restartExam;
 window.toggleCalculator = toggleCalculator;
 
 // ========== PERBAIKAN CLOSE MODAL DENGAN KLIK DI LUAR ==========

@@ -423,7 +423,7 @@ function loadLeaderboard() {
 
 
 function goHome() {
-  if (confirm("Kembali ke halaman login? Anda dapat melanjutkan ujian nanti dengan token yang sama.")) {
+  if (confirm("Yakin kembali ke halaman login?")) {
     if (timer) clearInterval(timer);
     document.getElementById("app").style.display = "none";
     document.getElementById("result").style.display = "none";

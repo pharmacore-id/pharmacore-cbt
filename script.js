@@ -293,7 +293,8 @@ function submit() {
       waktu: waktuStr,
       sheetSoal: currentSheetSoal
     })
-  }).catch(e => console.log);
+    }).catch(e => console.log);
+} 
 
 function showResult(score) {
   document.getElementById("app").style.display = "none";

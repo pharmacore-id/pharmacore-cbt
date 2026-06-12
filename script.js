@@ -158,6 +158,24 @@ function toggleRagu() {
 }
 
 // ========== TIMER ==========
+// Fungsi untuk menampilkan notifikasi toast
+function showToast(message, isWarning = false) {
+  // Hapus notifikasi yang sudah ada sebelumnya (jika ada)
+  const existingToast = document.querySelector('.notification-toast');
+  if (existingToast) existingToast.remove();
+  
+  const toast = document.createElement('div');
+  toast.className = `notification-toast ${isWarning ? 'warning' : ''}`;
+  toast.innerText = message;
+  document.body.appendChild(toast);
+  
+  // Hapus notifikasi setelah 3 detik
+  setTimeout(() => {
+    if (toast && toast.parentNode) toast.remove();
+  }, 3000);
+}
+
+// ========== TIMER ==========
 function startTimer() {
   if (localStorage.getItem("cbt_submitted") === "true") return;
   if (timer) clearInterval(timer);
@@ -174,8 +192,17 @@ function startTimer() {
       let s = timeLeft % 60;
       let timerEl = document.getElementById("timer");
       if (timerEl) timerEl.innerHTML = `${m}:${s < 10 ? '0' + s : s}`;
-      if (timeLeft === 300) alert("⏰ 5 menit lagi!");
-      if (timeLeft === 60) alert("⏰ 1 menit lagi!");
+      
+      // Tampilkan notifikasi toast saat 5 menit dan 1 menit tersisa (tanpa alert)
+      if (timeLeft === 300) {
+        showToast("⏰ Peringatan! Waktu tersisa 5 menit lagi.", true);
+        if (timerEl) timerEl.style.color = "#f59e0b";
+      }
+      if (timeLeft === 60) {
+        showToast("⏰ Peringatan! Waktu tersisa 1 menit!", true);
+        if (timerEl) timerEl.style.color = "#ef4444";
+        if (timerEl) timerEl.style.fontWeight = "bold";
+      }
     }
   }, 1000);
 }

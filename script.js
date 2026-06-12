@@ -143,8 +143,20 @@ function pick(ans) {
   updateStats();
 }
 
-// ========== NAVIGASI (DIPANGGIL DARI HTML) ==========
-function doPrevQuestion() {
+function nextQuestion() {
+  if (currentQuestion < soal.length - 1) {
+    currentQuestion++;
+    renderQuestion();
+    updateNavGrid();
+    updateStats();
+    updateProgress();
+    saveState();
+  } else {
+    if (confirm("Anda sudah di soal terakhir. Apakah ingin mengumpulkan jawaban?")) showReviewModal();
+  }
+}
+
+function prevQuestion() {
   if (currentQuestion > 0) {
     currentQuestion--;
     renderQuestion();
@@ -155,20 +167,7 @@ function doPrevQuestion() {
   }
 }
 
-function doNextQuestion() {
-  if (currentQuestion < soal.length - 1) {
-    currentQuestion++;
-    renderQuestion();
-    updateNavGrid();
-    updateStats();
-    updateProgress();
-    saveState();
-  } else {
-    if (confirm("Anda sudah di soal terakhir. Apakah ingin mengumpulkan jawaban?")) doShowReviewModal();
-  }
-}
-
-function doToggleRagu() {
+function toggleRagu() {
   if (ragu[currentQuestion]) {
     delete ragu[currentQuestion];
   } else {
@@ -189,7 +188,7 @@ function startTimer() {
     if (timeLeft <= 0) {
       clearInterval(timer);
       alert("⏰ Waktu habis! Jawaban akan dikumpulkan otomatis.");
-      doSubmit();
+      submit();
     } else {
       timeLeft--;
       saveState();
@@ -212,7 +211,7 @@ function showToast(message, type = "warning") {
 }
 
 // ========== REVIEW MODAL SEBELUM SUBMIT ==========
-function doShowReviewModal() {
+function showReviewModal() {
   if (!soal.length) return;
   const answered = Object.keys(answers).length;
   const raguCount = Object.keys(ragu).length;
@@ -236,9 +235,9 @@ function doShowReviewModal() {
   document.getElementById("reviewModal").style.display = "flex";
 }
 
-function goToQuestionFromReview(idx) { doCloseReviewModal(); goToQuestion(idx); }
-function doCloseReviewModal() { document.getElementById("reviewModal").style.display = "none"; }
-function doConfirmSubmit() { doCloseReviewModal(); doSubmit(); }
+function goToQuestionFromReview(idx) { closeReviewModal(); goToQuestion(idx); }
+function closeReviewModal() { document.getElementById("reviewModal").style.display = "none"; }
+function confirmSubmit() { closeReviewModal(); submit(); }
 
 // ========== SUBMIT ==========
 function formatTimeDisplay(seconds) {
@@ -247,7 +246,7 @@ function formatTimeDisplay(seconds) {
   return `${mins} menit ${secs} detik`;
 }
 
-function doSubmit() {
+function submit() {
   if (isDone) return;
   if (!soal || soal.length === 0) { alert("Soal belum dimuat."); return; }
   let unanswered = soal.length - Object.keys(answers).length;
@@ -314,7 +313,7 @@ function showResult(score) {
   loadLeaderboard();
 }
 
-function doOpenDiscussionModal() {
+function openDiscussionModal() {
   let results = JSON.parse(localStorage.getItem("cbt_results") || "[]");
   let soalData = JSON.parse(localStorage.getItem("cbt_soal") || "[]");
   let score = parseInt(localStorage.getItem("cbt_score") || "0");
@@ -364,8 +363,8 @@ function doOpenDiscussionModal() {
   document.getElementById("discussionModal").style.display = "flex";
 }
 
-function doCloseDiscussionModal() { document.getElementById("discussionModal").style.display = "none"; }
-function doExportDiscussionPDF() { window.print(); }
+function closeDiscussionModal() { document.getElementById("discussionModal").style.display = "none"; }
+function exportDiscussionPDF() { window.print(); }
 
 function loadLeaderboard() {
   const board = document.getElementById("board");
@@ -421,15 +420,15 @@ function loadLeaderboard() {
     .catch(() => board.innerHTML = '<div style="text-align:center; padding:20px;">⚠️ Gagal memuat leaderboard.</div>');
 }
 
-function doRestartExam() {
+function restartExam() {
   if (confirm("Ujian baru akan menghapus semua jawaban. Lanjutkan?")) {
     clearSession();
     location.reload();
   }
 }
 
-function doGoHome() {
-  if (confirm("Yakin kembali ke halaman login?")) {
+function goHome() {
+  if (confirm("Kembali ke halaman login? Anda dapat melanjutkan ujian nanti dengan token yang sama.")) {
     if (timer) clearInterval(timer);
     document.getElementById("app").style.display = "none";
     document.getElementById("result").style.display = "none";
@@ -440,7 +439,7 @@ function doGoHome() {
   }
 }
 
-// ========== LOGIN & LOAD SOAL ==========
+// ========== LOGIN & LOAD SOAL (GANTI NAMA JADI doLogin) ==========
 function doLogin() {
   console.log("Login function called");
   nama = document.getElementById("nama").value.trim();
@@ -503,4 +502,166 @@ function checkExistingSession() {
   
   const submitted = localStorage.getItem("cbt_submitted") === "true";
   
-  if (
+  if (submitted && soal.length > 0) {
+    const savedScore = localStorage.getItem("cbt_score");
+    if (savedScore) {
+      document.getElementById("loginPage").style.display = "none";
+      document.getElementById("app").style.display = "none";
+      document.getElementById("result").style.display = "flex";
+      showResult(parseInt(savedScore));
+      return;
+    }
+  }
+  
+  if (isLoggedIn && soal.length > 0) {
+    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    startFromSaved();
+  }
+}
+
+// ========== DARK MODE (GANTI NAMA JADI doToggleDarkMode) ==========
+function doToggleDarkMode() {
+  document.body.classList.toggle("dark-mode");
+  localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
+}
+
+function loadDarkMode() {
+  if (localStorage.getItem("darkMode") === "true") document.body.classList.add("dark-mode");
+}
+
+// ========== FUNGSI KALKULATOR ==========
+function toggleCalculator() {
+  let modal = document.getElementById("calculatorModal");
+  if (modal.style.display === "flex") {
+    modal.style.display = "none";
+    document.removeEventListener("keydown", handleKeyboard);
+  } else {
+    modal.style.display = "flex";
+    document.addEventListener("keydown", handleKeyboard);
+    document.getElementById("calcDisplay").focus();
+  }
+}
+
+function handleKeyboard(e) {
+  let d = document.getElementById("calcDisplay");
+  if (!d) return;
+  let key = e.key;
+  if (key >= '0' && key <= '9') appendToDisplay(key);
+  else if (key === '.') appendToDisplay('.');
+  else if (key === '+' || key === '-' || key === '*' || key === '/') {
+    let op = key === '*' ? '×' : (key === '/' ? '÷' : key);
+    appendToDisplay(op);
+  } else if (key === 'Enter' || key === '=') calculateResult();
+  else if (key === 'Escape') toggleCalculator();
+  else if (key === 'Backspace') deleteLastCalc();
+  else if (key === 'c' || key === 'C') clearCalc();
+}
+
+function appendToDisplay(v) {
+  let d = document.getElementById("calcDisplay");
+  if (d) {
+    if (d.value === "Error") d.value = "";
+    d.value += v;
+  }
+}
+
+function clearCalc() {
+  document.getElementById("calcDisplay").value = "";
+}
+
+function deleteLastCalc() {
+  let d = document.getElementById("calcDisplay");
+  if (d) d.value = d.value.slice(0, -1);
+}
+
+function calculateResult() {
+  let d = document.getElementById("calcDisplay");
+  try {
+    let expr = d.value.replace(/×/g, '*').replace(/÷/g, '/');
+    let result = Function('"use strict"; return (' + expr + ')')();
+    d.value = result;
+  } catch(e) {
+    d.value = "Error";
+  }
+}
+
+function calcFunction(action) {
+  let d = document.getElementById("calcDisplay");
+  let val = parseFloat(d.value) || 0;
+  
+  switch(action) {
+    case 'sin': d.value = Math.sin(val * Math.PI / 180); break;
+    case 'cos': d.value = Math.cos(val * Math.PI / 180); break;
+    case 'tan': d.value = Math.tan(val * Math.PI / 180); break;
+    case 'log': d.value = Math.log10(val); break;
+    case 'ln': d.value = Math.log(val); break;
+    case 'sqrt': d.value = Math.sqrt(val); break;
+    case 'pow2': d.value = val * val; break;
+    case 'pow3': d.value = val * val * val; break;
+    case 'reciprocal': d.value = 1 / val; break;
+    case 'pi': d.value = Math.PI; break;
+    case 'e': d.value = Math.E; break;
+    case 'percent': d.value = val / 100; break;
+    case 'equal': calculateResult(); break;
+    case 'clear': clearCalc(); break;
+    case 'backspace': deleteLastCalc(); break;
+    case 'mplus': calcMemory += val; break;
+    case 'mminus': calcMemory -= val; break;
+    case 'mc': calcMemory = 0; break;
+    case 'mr': d.value += calcMemory; break;
+    case 'ms': calcMemory = val; break;
+  }
+}
+
+function initCalculator() {
+  document.querySelectorAll('.calc-num').forEach(btn => {
+    btn.onclick = () => appendToDisplay(btn.getAttribute('data-num'));
+  });
+  document.querySelectorAll('.calc-operator').forEach(btn => {
+    btn.onclick = () => appendToDisplay(btn.getAttribute('data-op'));
+  });
+  document.querySelectorAll('.calc-func, .calc-mem, .calc-clear').forEach(btn => {
+    btn.onclick = () => calcFunction(btn.getAttribute('data-action'));
+  });
+}
+
+// ========== EXPORT GLOBAL FUNCTIONS ==========
+window.doLogin = doLogin;
+window.doToggleDarkMode = doToggleDarkMode;
+window.goHome = goHome;
+window.prevQuestion = prevQuestion;
+window.nextQuestion = nextQuestion;
+window.toggleRagu = toggleRagu;
+window.showReviewModal = showReviewModal;
+window.closeReviewModal = closeReviewModal;
+window.confirmSubmit = confirmSubmit;
+window.openDiscussionModal = openDiscussionModal;
+window.closeDiscussionModal = closeDiscussionModal;
+window.exportDiscussionPDF = exportDiscussionPDF;
+window.restartExam = restartExam;
+window.toggleCalculator = toggleCalculator;
+
+// ========== PERBAIKAN CLOSE MODAL DENGAN KLIK DI LUAR ==========
+window.onclick = function(event) {
+  const reviewModal = document.getElementById("reviewModal");
+  const discussionModal = document.getElementById("discussionModal");
+  const calculatorModal = document.getElementById("calculatorModal");
+  
+  if (event.target === reviewModal) {
+    reviewModal.style.display = "none";
+  }
+  if (event.target === discussionModal) {
+    discussionModal.style.display = "none";
+  }
+  if (event.target === calculatorModal) {
+    calculatorModal.style.display = "none";
+    document.removeEventListener("keydown", handleKeyboard);
+  }
+}
+
+// ========== INIT ==========
+document.addEventListener("DOMContentLoaded", function() {
+  initCalculator();
+  checkExistingSession();
+});

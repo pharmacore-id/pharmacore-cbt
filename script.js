@@ -673,5 +673,18 @@ window.onclick = function(event) {
 // ========== INIT ==========
 document.addEventListener("DOMContentLoaded", function() {
   initCalculator();
-  checkExistingSession();
+  loadDarkMode();  // Ganti checkExistingSession dengan loadDarkMode saja
+  
+  // Pastikan state awal yang benar
+  document.getElementById("login").style.display = "flex";
+  document.getElementById("app").style.display = "none";
+  document.getElementById("result").style.display = "none";
+  
+  // Isi form jika ada data tersimpan
+  const savedToken = localStorage.getItem("cbt_token");
+  const savedNama = localStorage.getItem("cbt_nama");
+  if (savedToken && savedNama) {
+    document.getElementById("nama").value = savedNama;
+    document.getElementById("token").value = savedToken;
+  }
 });

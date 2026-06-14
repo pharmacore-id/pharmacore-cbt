@@ -4,15 +4,1108 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>PHARMACORE CBT</title>
-<link rel="stylesheet" href="style.css">
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(180deg, #f7f4ff 0%, #fcfbff 100%);
+  color: #1f2937;
+  transition: background 0.2s, color 0.2s;
+  line-height: 1.5;
+}
+
+/* ========== LOGIN 2 KOLOM ========== */
+#login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.login-container {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 1100px;
+  width: 100%;
+  background: white;
+  border-radius: 48px;
+  overflow: hidden;
+  box-shadow: 0 20px 35px rgba(0, 0, 0, 0.1);
+}
+.login-left {
+  flex: 1.2;
+  background: #f3efff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+}
+.login-image {
+  width: 100%;
+  max-width: 380px;
+  height: auto;
+  border-radius: 28px;
+  object-fit: cover;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+.login-right {
+  flex: 1;
+  padding: 48px 40px;
+  background: white;
+}
+.login-header-right {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+.badge {
+  display: inline-block;
+  background: #ede9fe;
+  padding: 6px 16px;
+  border-radius: 40px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+.login-right h1 {
+  font-size: 32px;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, #8b5cf6, #c084fc);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+.subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 32px;
+}
+.form-group {
+  text-align: left;
+  margin-bottom: 20px;
+}
+.form-group label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 28px;
+  border: 1px solid #e0e0e0;
+  background: #faf9ff;
+  font-size: 15px;
+}
+.start-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 40px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: 0.2s;
+}
+.start-btn:hover {
+  transform: translateY(-2px);
+}
+.exam-info {
+  margin-top: 16px;
+  font-size: 12px;
+  color: #9ca3af;
+  text-align: center;
+}
+
+/* ========== TOPBAR ========== */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid #eee;
+  position: sticky;
+  top: 0;
+  z-index: 99;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.topbar-logo {
+  height: 36px;
+  width: auto;
+  border-radius: 8px;
+}
+.brand {
+  font-size: 20px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #8b5cf6, #c084fc);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  white-space: nowrap;
+}
+.top-right {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.homepage-btn, .darkmode-btn {
+  background: #ede9fe;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 40px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.progress-text {
+  font-size: 12px;
+  color: #6b7280;
+}
+.timer {
+  background: white;
+  border-radius: 40px;
+  padding: 4px 12px;
+  font-weight: bold;
+  font-size: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* ========== LAYOUT UJIAN ========== */
+.wrapper {
+  display: flex;
+  gap: 24px;
+  max-width: 1400px;
+  margin: 24px auto;
+  padding: 0 24px;
+}
+.card {
+  flex: 3;
+  background: white;
+  border-radius: 32px;
+  border: 1px solid #f0eaff;
+  padding: 28px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+}
+.side {
+  flex: 1;
+  background: white;
+  border-radius: 32px;
+  border: 1px solid #f0eaff;
+  padding: 24px;
+  position: sticky;
+  top: 90px;
+  height: fit-content;
+}
+.side h3 {
+  font-size: 18px;
+  margin-bottom: 16px;
+}
+.summary {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.summary-item {
+  flex: 1;
+  background: #f8f6ff;
+  border-radius: 20px;
+  padding: 12px 8px;
+  text-align: center;
+}
+.summary-item span {
+  display: block;
+  font-size: 11px;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+.summary-item strong {
+  font-size: 20px;
+  font-weight: 800;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.grid button {
+  aspect-ratio: 1/1;
+  border: none;
+  border-radius: 16px;
+  background: #f5f3ff;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 13px;
+  transition: 0.2s;
+}
+.grid button:hover {
+  transform: scale(1.02);
+}
+.done {
+  background: #10b981 !important;
+  color: white !important;
+}
+.ragu {
+  background: #fef3c7 !important;
+  border: 2px solid #f59e0b !important;
+  color: #b45309 !important;
+}
+.activeQ {
+  border: 2px solid #8b5cf6 !important;
+  transform: scale(1.02);
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 20px 0;
+  font-size: 11px;
+}
+.legend div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.done-dot { background: #10b981; }
+.ragu-dot { background: #f59e0b; }
+.empty-dot { background: #cbd5e1; }
+.submit-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 40px;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 20px 0 16px 0;
+}
+.calc-btn {
+  width: 100%;
+  margin-top: 0 !important;
+}
+hr {
+  margin: 16px 0;
+  border: none;
+  border-top: 1px solid #eae6ff;
+}
+.side .secondary-btn {
+  width: 100%;
+  margin-top: 8px;
+}
+
+/* ========== QUESTION ========== */
+.question-badge {
+  width: fit-content;
+  padding: 6px 16px;
+  border-radius: 40px;
+  background: #ede9fe;
+  color: #6d28d9;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+.progress {
+  height: 6px;
+  background: #eee8ff;
+  border-radius: 10px;
+  margin-bottom: 28px;
+}
+.fill {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, #c4b5fd);
+  border-radius: 10px;
+  transition: 0.3s;
+}
+#q {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+.opt {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: 28px;
+  border: 1px solid #e9e4ff;
+  background: white;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.opt:hover {
+  background: #faf8ff;
+  border-color: #c4b5fd;
+}
+.opt.active {
+  background: #f4f0ff;
+  border: 2px solid #8b5cf6;
+}
+.letter {
+  width: 36px;
+  height: 36px;
+  background: #ede9fe;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+.action-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 28px;
+}
+.secondary-btn, .ragu-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 40px;
+  border: none;
+  background: #f5f3ff;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ragu-btn.active {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+/* ========== HASIL UJIAN ========== */
+.result-card {
+  max-width: 1100px;
+  margin: 30px auto;
+  padding: 32px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  background: white;
+  border-radius: 48px;
+}
+.result-left {
+  flex: 1.2;
+  min-width: 280px;
+  text-align: center;
+}
+.result-right {
+  flex: 2;
+  min-width: 280px;
+}
+.result-left-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.score-circle {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 6px solid #8b5cf6;
+  background: #f3efff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 42px;
+  font-weight: 800;
+  margin: 20px auto;
+}
+.result-summary {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  background: #f8f6ff;
+  border-radius: 28px;
+  padding: 16px;
+  margin: 20px 0;
+}
+.result-summary div {
+  text-align: center;
+  flex: 1;
+}
+.result-summary span {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+.result-summary strong {
+  font-size: 18px;
+}
+.footer-copyright {
+  margin-top: 24px;
+  font-size: 12px;
+  text-align: center;
+  color: #6b7280;
+}
+
+/* ========== MODAL REVIEW SEBELUM SUBMIT ========== */
+.modal, .calculator-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-content {
+  background: white;
+  border-radius: 32px;
+  max-width: 750px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 24px;
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eee;
+}
+.modal-header h2 {
+  font-size: 20px;
+}
+.close-modal {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+.review-stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.review-stat {
+  flex: 1;
+  background: #f8f6ff;
+  border-radius: 20px;
+  padding: 12px;
+  text-align: center;
+}
+.review-stat-value {
+  font-size: 28px;
+  font-weight: 800;
+}
+.review-stat-label {
+  font-size: 12px;
+  color: #6b7280;
+}
+.review-question-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  margin-bottom: 8px;
+  background: #f9fafb;
+  border-radius: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.review-question-item .lanjutkan-link {
+  background: none;
+  border: none;
+  color: #8b5cf6;
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  padding: 0;
+}
+.review-question-item .lanjutkan-link:hover {
+  color: #6d28d9;
+  text-decoration: none;
+}
+.review-warning {
+  margin-top: 20px;
+  padding: 12px;
+  background: #fee2e2;
+  border-radius: 16px;
+  text-align: center;
+  font-size: 13px;
+}
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+/* ========== REVIEW PEMBAHASAN (SETELAH SUBMIT) ========== */
+.discussion-question {
+  background: #f9fafb;
+  border-radius: 24px;
+  padding: 20px;
+  margin-bottom: 24px;
+  border-left: 6px solid #8b5cf6;
+}
+.discussion-question h4 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 18px;
+}
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.option-item {
+  padding: 12px 16px;
+  border-radius: 20px;
+  background: white;
+  border: 1px solid #e5e7eb;
+}
+.option-item.user-correct {
+  background: #d1fae5 !important;
+  border: 2px solid #10b981 !important;
+  color: #065f46 !important;
+}
+.option-item.wrong-option {
+  background: #fee2e2 !important;
+  border-color: #ef4444 !important;
+  color: #991b1b !important;
+}
+.option-item.correct-option {
+  background: #fef9c3 !important;
+  border-color: #f59e0b !important;
+  color: #854d0e !important;
+}
+.discussion-pembahasan {
+  margin-top: 16px;
+  padding: 16px;
+  background: #f3f4f6;
+  border-radius: 20px;
+  font-size: 14px;
+}
+
+/* ========== DARK MODE UNTUK REVIEW PEMBAHASAN ========== */
+body.dark-mode .option-item {
+  background: #2d2d3a !important;
+  border-color: #3a3a4a !important;
+  color: #e2e8f0 !important;
+}
+body.dark-mode .option-item.user-correct {
+  background: #10b981 !important;
+  border: 2px solid #a78bfa !important;
+  color: #ffffff !important;
+}
+body.dark-mode .option-item.wrong-option {
+  background: #7f1d1d !important;
+  border-color: #ef4444 !important;
+  color: #fecaca !important;
+}
+body.dark-mode .option-item.correct-option {
+  background: #b45309 !important;
+  border-color: #fbbf24 !important;
+  color: #fef08a !important;
+}
+body.dark-mode .discussion-pembahasan {
+  background: #0f172a !important;
+  color: #cbd5e1 !important;
+}
+
+/* ========== LEADERBOARD ========== */
+#board {
+  margin-top: 20px;
+  max-height: 500px;
+  overflow-y: auto;
+  padding: 0;
+}
+.podium-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 20px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+.podium-item {
+  text-align: center;
+  flex: 1;
+  min-width: 100px;
+}
+.podium-block {
+  border-radius: 20px 20px 12px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.podium-1 .podium-block { background: linear-gradient(135deg, #fbbf24, #f59e0b); height: 130px; }
+.podium-2 .podium-block { background: linear-gradient(135deg, #9ca3af, #6b7280); height: 100px; }
+.podium-3 .podium-block { background: linear-gradient(135deg, #d97706, #b45309); height: 80px; }
+.podium-block .medal { font-size: 48px; }
+.podium-rank { font-size: 24px; font-weight: 800; margin: 8px 0 4px; }
+.podium-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.podium-score { font-size: 18px; font-weight: 700; margin: 4px 0; }
+.podium-time { font-size: 12px; opacity: 0.8; }
+
+.leaderboard-list {
+  margin-top: 20px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 20px;
+}
+.leaderboard-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #ede9fe;
+  border-radius: 20px;
+  margin-bottom: 12px;
+  font-weight: 700;
+  font-size: 14px;
+}
+.leaderboard-header .rank { width: 60px; text-align: center; }
+.leaderboard-header .name { flex: 2; text-align: left; padding-left: 10px; }
+.leaderboard-header .score { width: 80px; text-align: center; }
+.leaderboard-header .time { width: 110px; text-align: center; }
+
+.leaderboard-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  margin-bottom: 6px;
+  border-radius: 20px;
+  background: #f9fafb;
+  transition: 0.2s;
+}
+.leaderboard-item .rank { width: 60px; text-align: center; font-weight: 700; font-size: 16px; }
+.leaderboard-item .name { flex: 2; text-align: left; padding-left: 10px; font-weight: 500; }
+.leaderboard-item .score { width: 80px; text-align: center; font-weight: 700; color: #10b981; }
+.leaderboard-item .time { width: 110px; text-align: center; font-family: monospace; }
+.my-rank {
+  border: 2px solid #8b5cf6;
+  background: #ede9fe;
+}
+.your-rank-card {
+  margin-top: 24px;
+  padding: 16px;
+  background: linear-gradient(135deg, #ede9fe, #e0e7ff);
+  border-radius: 28px;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* ========== TOKEN WARNING (MERAH) ========== */
+.token-warning {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  color: white !important;
+  padding: 14px 20px;
+  border-radius: 16px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+  border: 1px solid #f87171;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.token-warning span {
+  font-size: 20px;
+}
+body.dark-mode .token-warning {
+  background: linear-gradient(135deg, #991b1b, #7f1d1d);
+  border-color: #ef4444;
+}
+
+/* ========== KALKULATOR SCIENTIFIC ========== */
+.calculator-box {
+  width: 450px;
+  padding: 24px;
+  border-radius: 28px;
+  background: #f0f0f0;
+}
+.calc-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-top: 16px;
+}
+.calc-grid button {
+  padding: 14px 0;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: 0.1s;
+}
+.calc-grid button:active {
+  transform: scale(0.96);
+}
+.calc-num {
+  background: #e0e0e0;
+  color: #1f2937;
+}
+.calc-operator {
+  background: #f59e0b;
+  color: white;
+}
+.calc-func {
+  background: #d1d5db;
+  color: #1f2937;
+}
+.calc-mem {
+  background: #10b981;
+  color: white;
+}
+.calc-clear {
+  background: #ef4444;
+  color: white;
+}
+#calcDisplay {
+  width: 100%;
+  padding: 16px;
+  font-size: 28px;
+  text-align: right;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  margin-bottom: 16px;
+  font-family: monospace;
+}
+.calculator-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.calculator-header span {
+  font-weight: 600;
+}
+.close-calc {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 20px;
+  transition: 0.2s;
+}
+.close-calc:hover {
+  background: rgba(0,0,0,0.1);
+}
+body.dark-mode .close-calc {
+  color: white;
+}
+body.dark-mode .close-calc:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+/* ========== TOAST NOTIFICATION ========== */
+.toast-warning {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #f59e0b;
+  color: #1f2937;
+  padding: 12px 24px;
+  border-radius: 40px;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 9999;
+  animation: fadeInUp 0.3s ease;
+}
+.toast-warning.danger {
+  background: #ef4444;
+  color: white;
+}
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ========== DARK MODE TOTAL ========== */
+body.dark-mode,
+body.dark-mode .login-container,
+body.dark-mode .login-right,
+body.dark-mode .card,
+body.dark-mode .side,
+body.dark-mode .result-card,
+body.dark-mode .modal-content,
+body.dark-mode .calculator-box,
+body.dark-mode .summary-item,
+body.dark-mode .grid button,
+body.dark-mode .review-stat,
+body.dark-mode .leaderboard-card,
+body.dark-mode .score-circle,
+body.dark-mode .result-summary,
+body.dark-mode .topbar,
+body.dark-mode .your-rank-card,
+body.dark-mode .discussion-question,
+body.dark-mode .review-question-item,
+body.dark-mode .leaderboard-header,
+body.dark-mode .leaderboard-item {
+  background: #0f0f1a !important;
+  border-color: #2a2a3a !important;
+  color: #ffffff !important;
+}
+body.dark-mode input,
+body.dark-mode .opt,
+body.dark-mode .secondary-btn,
+body.dark-mode .ragu-btn,
+body.dark-mode .submit-btn,
+body.dark-mode .start-btn {
+  background: #1e1e2e !important;
+  border-color: #3a3a4a !important;
+}
+body.dark-mode .opt.active {
+  background: #4c1d95 !important;
+  border-color: #a78bfa !important;
+}
+body.dark-mode .letter {
+  background: #4c1d95 !important;
+}
+body.dark-mode .homepage-btn,
+body.dark-mode .darkmode-btn {
+  background: #2d2a5e !important;
+}
+body.dark-mode .badge,
+body.dark-mode .question-badge {
+  background: #2d2a5e !important;
+  color: #a78bfa !important;
+}
+body.dark-mode .grid button {
+  background: #2d2d3a !important;
+  color: #ffffff !important;
+  border: 1px solid #3a3a4a !important;
+}
+body.dark-mode .grid button.done {
+  background: #10b981 !important;
+  color: white !important;
+  border: none !important;
+}
+body.dark-mode .grid button.ragu {
+  background: #f59e0b !important;
+  color: #1e1e2e !important;
+  border: 2px solid #fbbf24 !important;
+}
+body.dark-mode .grid button.activeQ {
+  border: 2px solid #a78bfa !important;
+  transform: scale(1.02);
+}
+body.dark-mode .legend .dot.done-dot {
+  background: #10b981;
+}
+body.dark-mode .legend .dot.ragu-dot {
+  background: #f59e0b;
+}
+body.dark-mode .legend .dot.empty-dot {
+  background: #2d2d3a;
+  border: 1px solid #a78bfa;
+}
+body.dark-mode .review-question-item .lanjutkan-link {
+  color: #a78bfa !important;
+}
+body.dark-mode .review-question-item .lanjutkan-link:hover {
+  color: #c4b5fd !important;
+}
+body.dark-mode .review-warning {
+  background: #7f1d1d !important;
+  color: #fecaca !important;
+  border: 1px solid #ef4444 !important;
+}
+body.dark-mode .leaderboard-item .rank {
+  color: #facc15 !important;
+}
+body.dark-mode .leaderboard-header .rank,
+body.dark-mode .leaderboard-header .name,
+body.dark-mode .leaderboard-header .score,
+body.dark-mode .leaderboard-header .time {
+  color: #a78bfa !important;
+}
+body.dark-mode .my-rank {
+  background: #2d2a5e !important;
+  border-color: #a78bfa !important;
+}
+body.dark-mode .podium-rank,
+body.dark-mode .podium-name,
+body.dark-mode .podium-score,
+body.dark-mode .podium-time {
+  color: #ffffff !important;
+}
+body.dark-mode .podium-1 .podium-block { background: linear-gradient(135deg, #b45309, #92400e) !important; }
+body.dark-mode .podium-2 .podium-block { background: linear-gradient(135deg, #4b5563, #374151) !important; }
+body.dark-mode .podium-3 .podium-block { background: linear-gradient(135deg, #78350f, #451a03) !important; }
+body.dark-mode .calculator-box { background: #1e1e2e; }
+body.dark-mode .calc-num { background: #2d2d3a; color: white; }
+body.dark-mode .calc-func { background: #3a3a4a; color: white; }
+body.dark-mode #calcDisplay { background: #0f0f1a; color: white; border-color: #3a3a4a; }
+body.dark-mode .timer {
+  background: #2d2a5e !important;
+  color: #a78bfa !important;
+  border: 1px solid #a78bfa !important;
+  box-shadow: none !important;
+}
+
+/* ========== PRINT (PDF) ========== */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #discussionModal, #discussionModal * {
+    visibility: visible;
+  }
+  #discussionModal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    margin: 0;
+    padding: 20px;
+    background: white !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+  .modal-content {
+    box-shadow: none;
+    padding: 0;
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto;
+  }
+  .modal-body {
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto;
+  }
+  .discussion-question {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    margin-bottom: 30px;
+  }
+  .close-modal, .secondary-btn, .modal-header button {
+    display: none !important;
+  }
+  .modal-header {
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+  }
+  .user-correct {
+    background: #d1fae5 !important;
+    color: #065f46 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .wrong-option {
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .correct-option {
+    background: #fef9c3 !important;
+    color: #854d0e !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+/* ========== RESPONSIF ========== */
+@media (max-width: 860px) {
+  .wrapper {
+    flex-direction: column;
+    padding: 0 16px;
+  }
+  .side {
+    position: static;
+  }
+  .login-container {
+    flex-direction: column;
+  }
+  .login-left {
+    padding: 20px;
+  }
+  .login-image {
+    max-width: 250px;
+  }
+  .brand {
+    font-size: 16px;
+    white-space: normal;
+  }
+  .top-right {
+    gap: 8px;
+  }
+  .homepage-btn, .darkmode-btn {
+    padding: 4px 12px;
+    font-size: 11px;
+  }
+  .result-card {
+    flex-direction: column;
+  }
+  .review-stats {
+    flex-direction: column;
+  }
+  .calc-grid {
+    gap: 6px;
+  }
+  .calc-grid button {
+    padding: 12px 0;
+    font-size: 14px;
+  }
+  .calculator-box {
+    width: 95%;
+  }
+}
+</style>
 </head>
 <body>
 
-<!-- LOGIN PAGE (2 KOLOM) -->
+<!-- LOGIN PAGE -->
 <div id="login">
   <div class="login-container">
     <div class="login-left">
-      <img src="login-illustration.png" alt="Ilustrasi" class="login-image">
+      <img src="https://placehold.co/380x400?text=Ilustrasi+CBT" alt="Ilustrasi" class="login-image">
     </div>
     <div class="login-right">
       <div class="login-header-right">
@@ -29,11 +1122,11 @@
   </div>
 </div>
 
-<!-- CBT APP (HALAMAN UJIAN) -->
+<!-- CBT APP -->
 <div id="app" style="display:none;">
   <div class="topbar">
     <div class="topbar-left">
-      <img src="logo-pharmacore.png" alt="Logo" class="topbar-logo">
+      <img src="https://placehold.co/36x36?text=Logo" alt="Logo" class="topbar-logo">
       <div class="brand">PHARMACORE CBT</div>
     </div>
     <div class="top-right">
@@ -57,12 +1150,9 @@
     </div>
     <div class="side">
       <h3>📊 Navigasi Soal</h3>
-
-      <!-- WARNING TOKEN SEKALI PAKAI DI SIDEBAR -->
       <div id="tokenWarning" class="token-warning" style="display: none;">
         <span>⚠️</span> Token ini hanya dapat digunakan SEKALI! Setelah submit, token akan hangus.
       </div>
-
       <div class="summary">
         <div class="summary-item"><span>✅ Terjawab</span><strong id="answeredSummary">0</strong></div>
         <div class="summary-item"><span>🚩 Ragu</span><strong id="raguSummary">0</strong></div>
@@ -81,7 +1171,7 @@
   </div>
 </div>
 
-<!-- MODAL REVIEW SEBELUM SUBMIT -->
+<!-- MODAL REVIEW -->
 <div id="reviewModal" class="modal" style="display:none;">
   <div class="modal-content">
     <div class="modal-header"><h2>📋 Review Jawaban</h2><button class="close-modal" onclick="closeReviewModal()">✕</button></div>
@@ -102,7 +1192,7 @@
   </div>
 </div>
 
-<!-- MODAL REVIEW & PEMBAHASAN (setelah submit) -->
+<!-- MODAL PEMBAHASAN -->
 <div id="discussionModal" class="modal" style="display:none;">
   <div class="modal-content" style="max-width: 800px; width: 90%;">
     <div class="modal-header">
@@ -124,12 +1214,6 @@
         <button class="homepage-btn" onclick="goHome()">🏠 Homepage</button>
         <button class="darkmode-btn" onclick="toggleDarkMode()">🌙 Dark Mode</button>
       </div>
-
-      <!-- WARNING TOKEN SEKALI PAKAI DI HALAMAN HASIL -->
-      <div id="resultWarning" class="token-warning" style="display: flex; margin-bottom: 20px;">
-        <span>⚠️</span> Token ini hanya dapat digunakan SEKALI! Anda tidak dapat kembali ke halaman ujian. Harap download pembahasan sekarang.
-      </div>
-
       <h2>📝 Hasil Ujian</h2>
       <div class="score-circle"><span id="scoreNumber">0</span></div>
       <p id="skor"></p>
@@ -149,51 +1233,709 @@
   </div>
 </div>
 
-<!-- CALCULATOR MODAL -->
+<!-- KALKULATOR MODAL -->
 <div id="calculatorModal" class="calculator-modal" style="display:none;">
   <div class="calculator-box">
     <div class="calculator-header"><span>🧮 Kalkulator Scientific</span><button class="close-calc" onclick="toggleCalculator()">✕</button></div>
     <input type="text" id="calcDisplay" readonly placeholder="0">
     <div class="calc-grid">
-      <button class="calc-func" data-action="sin">sin</button>
-      <button class="calc-func" data-action="cos">cos</button>
-      <button class="calc-func" data-action="tan">tan</button>
-      <button class="calc-func" data-action="log">log</button>
-      <button class="calc-func" data-action="ln">ln</button>
-      <button class="calc-func" data-action="sqrt">√</button>
-      <button class="calc-func" data-action="pow2">x²</button>
-      <button class="calc-func" data-action="pow3">x³</button>
-      <button class="calc-func" data-action="reciprocal">1/x</button>
-      <button class="calc-func" data-action="pi">π</button>
-      <button class="calc-mem" data-action="mc">MC</button>
-      <button class="calc-mem" data-action="mplus">M+</button>
-      <button class="calc-mem" data-action="mminus">M-</button>
-      <button class="calc-mem" data-action="mr">MR</button>
-      <button class="calc-mem" data-action="ms">MS</button>
-      <button class="calc-num" data-num="7">7</button>
-      <button class="calc-num" data-num="8">8</button>
-      <button class="calc-num" data-num="9">9</button>
-      <button class="calc-operator" data-op="/">÷</button>
-      <button class="calc-clear" data-action="clear">C</button>
-      <button class="calc-num" data-num="4">4</button>
-      <button class="calc-num" data-num="5">5</button>
-      <button class="calc-num" data-num="6">6</button>
-      <button class="calc-operator" data-op="*">×</button>
-      <button class="calc-clear" data-action="backspace">⌫</button>
-      <button class="calc-num" data-num="1">1</button>
-      <button class="calc-num" data-num="2">2</button>
-      <button class="calc-num" data-num="3">3</button>
-      <button class="calc-operator" data-op="-">-</button>
-      <button class="calc-operator" data-op="(">(</button>
-      <button class="calc-num" data-num="0">0</button>
-      <button class="calc-num" data-num=".">.</button>
-      <button class="calc-func" data-action="equal">=</button>
-      <button class="calc-operator" data-op="+">+</button>
+      <button class="calc-func" data-action="sin">sin</button><button class="calc-func" data-action="cos">cos</button>
+      <button class="calc-func" data-action="tan">tan</button><button class="calc-func" data-action="log">log</button>
+      <button class="calc-func" data-action="ln">ln</button><button class="calc-func" data-action="sqrt">√</button>
+      <button class="calc-func" data-action="pow2">x²</button><button class="calc-func" data-action="pow3">x³</button>
+      <button class="calc-func" data-action="reciprocal">1/x</button><button class="calc-func" data-action="pi">π</button>
+      <button class="calc-mem" data-action="mc">MC</button><button class="calc-mem" data-action="mplus">M+</button>
+      <button class="calc-mem" data-action="mminus">M-</button><button class="calc-mem" data-action="mr">MR</button>
+      <button class="calc-mem" data-action="ms">MS</button><button class="calc-num" data-num="7">7</button>
+      <button class="calc-num" data-num="8">8</button><button class="calc-num" data-num="9">9</button>
+      <button class="calc-operator" data-op="/">÷</button><button class="calc-clear" data-action="clear">C</button>
+      <button class="calc-num" data-num="4">4</button><button class="calc-num" data-num="5">5</button>
+      <button class="calc-num" data-num="6">6</button><button class="calc-operator" data-op="*">×</button>
+      <button class="calc-clear" data-action="backspace">⌫</button><button class="calc-num" data-num="1">1</button>
+      <button class="calc-num" data-num="2">2</button><button class="calc-num" data-num="3">3</button>
+      <button class="calc-operator" data-op="-">-</button><button class="calc-operator" data-op="(">(</button>
+      <button class="calc-num" data-num="0">0</button><button class="calc-num" data-num=".">.</button>
+      <button class="calc-func" data-action="equal">=</button><button class="calc-operator" data-op="+">+</button>
       <button class="calc-operator" data-op=")">)</button>
     </div>
   </div>
 </div>
 
-<script src="script.js"></script>
+<script>
+// ========== KONFIGURASI ==========
+const API = "https://script.google.com/macros/s/AKfycbzKqVY45csFN2NyQT0xs64CctdceoMUQ4mxH-1xuoukaSfa42TrsdN4SRydq-AId-ecBg/exec";
+const OPTIONS = ['A', 'B', 'C', 'D', 'E'];
+
+let currentQuestion = 0, answers = {}, ragu = {}, soal = [], token = "", nama = "";
+let timer = null, isDone = false, timeLeft = 0, isLoggedIn = false, calcMemory = 0, completionTimeSeconds = 0;
+let currentSheetSoal = "", currentDurasi = 3600;
+
+// ========== SAVE/LOAD STATE ==========
+function saveState() {
+  localStorage.setItem("cbt_answers", JSON.stringify(answers));
+  localStorage.setItem("cbt_ragu", JSON.stringify(ragu));
+  localStorage.setItem("cbt_current", currentQuestion);
+  localStorage.setItem("cbt_time", timeLeft);
+  localStorage.setItem("cbt_isLoggedIn", isLoggedIn);
+  localStorage.setItem("cbt_nama", nama);
+  localStorage.setItem("cbt_token", token);
+  if (soal.length) localStorage.setItem("cbt_soal", JSON.stringify(soal));
+  localStorage.setItem("cbt_sheetSoal", currentSheetSoal);
+  localStorage.setItem("cbt_durasi", currentDurasi);
+}
+
+function loadSavedState() {
+  const sAns = localStorage.getItem("cbt_answers");
+  const sRag = localStorage.getItem("cbt_ragu");
+  const sCur = localStorage.getItem("cbt_current");
+  const sTime = localStorage.getItem("cbt_time");
+  const sLogged = localStorage.getItem("cbt_isLoggedIn");
+  const sNama = localStorage.getItem("cbt_nama");
+  const sToken = localStorage.getItem("cbt_token");
+  const sSoal = localStorage.getItem("cbt_soal");
+  const sSheet = localStorage.getItem("cbt_sheetSoal");
+  const sDurasi = localStorage.getItem("cbt_durasi");
+  if (sAns) answers = JSON.parse(sAns);
+  if (sRag) ragu = JSON.parse(sRag);
+  if (sCur) currentQuestion = parseInt(sCur);
+  if (sTime) timeLeft = parseInt(sTime);
+  if (sLogged === "true") { isLoggedIn = true; nama = sNama || ""; token = sToken || ""; }
+  if (sSoal) soal = JSON.parse(sSoal);
+  if (sSheet) currentSheetSoal = sSheet;
+  if (sDurasi) currentDurasi = parseInt(sDurasi);
+}
+
+function clearExamData() {
+  localStorage.removeItem("cbt_answers");
+  localStorage.removeItem("cbt_ragu");
+  localStorage.removeItem("cbt_current");
+  localStorage.removeItem("cbt_time");
+  localStorage.removeItem("cbt_submitted");
+  localStorage.removeItem("cbt_score");
+  localStorage.removeItem("cbt_results");
+  localStorage.removeItem("cbt_completion_time");
+  localStorage.removeItem("cbt_soal");
+  localStorage.removeItem("cbt_sheetSoal");
+  localStorage.removeItem("cbt_durasi");
+  answers = {};
+  ragu = {};
+  currentQuestion = 0;
+  isDone = false;
+  timeLeft = currentDurasi;
+  completionTimeSeconds = 0;
+  soal = [];
+  currentSheetSoal = "";
+}
+
+function clearSession() {
+  localStorage.clear();
+  answers = {}; ragu = {}; currentQuestion = 0; isDone = false; isLoggedIn = false; soal = []; nama = ""; token = ""; currentSheetSoal = "";
+  timeLeft = currentDurasi;
+  if (timer) { clearInterval(timer); timer = null; }
+}
+
+// ========== UI HELPERS ==========
+function updateProgress() {
+  if (!soal.length) return;
+  let progress = ((currentQuestion + 1) / soal.length) * 100;
+  let fill = document.getElementById("progressFill");
+  if (fill) fill.style.width = progress + "%";
+}
+
+function updateStats() {
+  if (!soal.length) return;
+  const answered = Object.keys(answers).length;
+  const raguCount = Object.keys(ragu).length;
+  document.getElementById("answeredCount").innerText = answered;
+  document.getElementById("answeredSummary").innerText = answered;
+  document.getElementById("raguSummary").innerText = raguCount;
+  document.getElementById("unansweredSummary").innerText = soal.length - answered;
+}
+
+function updateNavGrid() {
+  if (!soal.length) return;
+  let html = "";
+  for (let i = 0; i < soal.length; i++) {
+    let cls = [];
+    if (answers[i]) cls.push("done");
+    if (ragu[i]) cls.push("ragu");
+    if (i === currentQuestion) cls.push("activeQ");
+    html += `<button class="${cls.join(' ')}" onclick="goToQuestion(${i})">${i + 1}</button>`;
+  }
+  document.getElementById("nav").innerHTML = html;
+}
+
+function goToQuestion(idx) {
+  currentQuestion = idx;
+  renderQuestion();
+  updateNavGrid();
+  updateStats();
+  updateProgress();
+  saveState();
+}
+
+function renderQuestion() {
+  if (!soal.length) return;
+  const s = soal[currentQuestion];
+  document.getElementById("questionLabel").innerHTML = "Soal " + (currentQuestion + 1);
+  document.getElementById("q").innerHTML = s.Pertanyaan || "Soal tidak tersedia";
+  let optHtml = "";
+  for (let opt of OPTIONS) {
+    let optText = s[opt] || '';
+    if (optText === '') optText = `Opsi ${opt}`;
+    optHtml += `<div class="opt ${answers[currentQuestion] == opt ? 'active' : ''}" onclick="pick('${opt}')">
+      <div class="letter">${opt}</div><div>${optText}</div></div>`;
+  }
+  document.getElementById("opt").innerHTML = optHtml;
+  const raguBtn = document.getElementById("raguBtn");
+  if (ragu[currentQuestion]) {
+    raguBtn.classList.add("active");
+    raguBtn.innerHTML = "🚩 Ditandai Ragu";
+  } else {
+    raguBtn.classList.remove("active");
+    raguBtn.innerHTML = "🚩 Ragu";
+  }
+  updateProgress();
+}
+
+function pick(ans) {
+  answers[currentQuestion] = ans;
+  if (ragu[currentQuestion]) delete ragu[currentQuestion];
+  saveState();
+  renderQuestion();
+  updateNavGrid();
+  updateStats();
+}
+
+function nextQuestion() {
+  if (currentQuestion < soal.length - 1) {
+    currentQuestion++;
+    renderQuestion();
+    updateNavGrid();
+    updateStats();
+    updateProgress();
+    saveState();
+  } else {
+    if (confirm("Anda sudah di soal terakhir. Apakah ingin mengumpulkan jawaban?")) showReviewModal();
+  }
+}
+
+function prevQuestion() {
+  if (currentQuestion > 0) {
+    currentQuestion--;
+    renderQuestion();
+    updateNavGrid();
+    updateStats();
+    updateProgress();
+    saveState();
+  }
+}
+
+function toggleRagu() {
+  if (ragu[currentQuestion]) {
+    delete ragu[currentQuestion];
+  } else {
+    ragu[currentQuestion] = true;
+  }
+  saveState();
+  renderQuestion();
+  updateNavGrid();
+  updateStats();
+}
+
+// ========== TIMER ==========
+function startTimer() {
+  if (localStorage.getItem("cbt_submitted") === "true") return;
+  if (timer) clearInterval(timer);
+  timer = setInterval(() => {
+    if (isDone) return;
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      alert("⏰ Waktu habis! Jawaban akan dikumpulkan otomatis.");
+      submit();
+    } else {
+      timeLeft--;
+      saveState();
+      let m = Math.floor(timeLeft / 60);
+      let s = timeLeft % 60;
+      let timerEl = document.getElementById("timer");
+      if (timerEl) timerEl.innerHTML = `${m}:${s < 10 ? '0' + s : s}`;
+      if (timeLeft === 300) showToast("⏰ Peringatan! Waktu tersisa 5 menit.", "warning");
+      if (timeLeft === 60) showToast("⏰ Peringatan! Waktu tersisa 1 menit!", "danger");
+    }
+  }, 1000);
+}
+
+function showToast(message, type = "warning") {
+  const toast = document.createElement("div");
+  toast.className = `toast-warning ${type === "danger" ? "danger" : ""}`;
+  toast.innerText = message;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// ========== REVIEW MODAL SEBELUM SUBMIT ==========
+function showReviewModal() {
+  if (!soal.length) return;
+  const answered = Object.keys(answers).length;
+  const raguCount = Object.keys(ragu).length;
+  document.getElementById("reviewTotal").innerText = soal.length;
+  document.getElementById("reviewAnswered").innerText = answered;
+  document.getElementById("reviewRagu").innerText = raguCount;
+  document.getElementById("reviewUnanswered").innerText = soal.length - answered;
+  let listHtml = "";
+  for (let i = 0; i < soal.length; i++) {
+    let status = "", cls = "";
+    if (answers[i]) { status = `✅ Terjawab: ${answers[i]}`; cls = "answered"; }
+    else if (ragu[i]) { status = "🚩 Ditandai Ragu"; cls = "ragu"; }
+    else { status = "❌ Belum dijawab"; cls = "unanswered"; }
+    listHtml += `<div class="review-question-item ${cls}">
+      <span><strong>Soal ${i + 1}</strong></span>
+      <span>${status}</span>
+      <button class="secondary-btn lanjutkan-link" onclick="goToQuestionFromReview(${i})">Lanjutkan</button>
+    </div>`;
+  }
+  document.getElementById("reviewQuestionList").innerHTML = listHtml;
+  document.getElementById("reviewModal").style.display = "flex";
+}
+
+function goToQuestionFromReview(idx) { closeReviewModal(); goToQuestion(idx); }
+function closeReviewModal() { document.getElementById("reviewModal").style.display = "none"; }
+function confirmSubmit() { closeReviewModal(); submit(); }
+
+// ========== SUBMIT ==========
+function formatTimeDisplay(seconds) {
+  let mins = Math.floor(seconds / 60);
+  let secs = seconds % 60;
+  return `${mins} menit ${secs} detik`;
+}
+
+async function submit() {
+  if (isDone) return;
+  if (!soal || soal.length === 0) { alert("Soal belum dimuat."); return; }
+  let unanswered = soal.length - Object.keys(answers).length;
+  if (!confirm(`Yakin kumpul? ${Object.keys(answers).length}/${soal.length} terjawab, ${unanswered} belum. Lanjutkan?`)) return;
+  isDone = true;
+  clearInterval(timer);
+  completionTimeSeconds = currentDurasi - timeLeft;
+  let score = 0;
+  let results = [];
+  for (let i = 0; i < soal.length; i++) {
+    let userAns = answers[i] ? String(answers[i]).trim() : "";
+    let correctAns = soal[i].Kunci ? String(soal[i].Kunci).trim() : "";
+    let isCorrect = (userAns === correctAns);
+    if (isCorrect) score++;
+    let options = {};
+    for (let opt of OPTIONS) options[opt] = soal[i][opt] || '';
+    results.push({
+      nomor: i + 1,
+      pertanyaan: soal[i].Pertanyaan,
+      jawabanUser: userAns || "(Tidak dijawab)",
+      kunci: correctAns,
+      benar: isCorrect,
+      pembahasan: soal[i].Pembahasan || "Tidak ada pembahasan",
+      options: options
+    });
+  }
+  
+  localStorage.setItem("cbt_submitted", "true");
+  localStorage.setItem("cbt_score", score);
+  localStorage.setItem("cbt_results", JSON.stringify(results));
+  localStorage.setItem("cbt_completion_time", completionTimeSeconds);
+  let waktuStr = formatTimeDisplay(completionTimeSeconds);
+  
+  try {
+    await fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "submit",
+        nama, token,
+        skor: score,
+        jawaban: answers,
+        total: soal.length,
+        waktu: waktuStr,
+        sheetSoal: currentSheetSoal
+      })
+    });
+  } catch(e) { console.log("Submit error:", e); }
+  
+  showResult(score);
+  setTimeout(() => openDiscussionModal(), 500);
+}
+
+function showResult(score) {
+  document.getElementById("app").style.display = "none";
+  document.getElementById("result").style.display = "flex";
+  let persen = Math.round((score / soal.length) * 100);
+  document.getElementById("scoreNumber").innerHTML = persen + "%";
+  let grade = persen >= 90 ? "🏆 Luar Biasa!" : persen >= 75 ? "✅ Sangat Baik" : persen >= 60 ? "📚 Cukup" : "📖 Perlu Belajar Lebih Lanjut";
+  document.getElementById("skor").innerHTML = `<strong>${grade}</strong><br>${score} dari ${soal.length} benar (${persen}%)`;
+  document.getElementById("resultNama").innerText = nama;
+  document.getElementById("resultBenar").innerText = score;
+  document.getElementById("resultSalah").innerText = soal.length - score;
+  let waktuStr = formatTimeDisplay(completionTimeSeconds);
+  document.getElementById("resultWaktu").innerText = waktuStr;
+  loadLeaderboard();
+}
+
+function openDiscussionModal() {
+  let results = JSON.parse(localStorage.getItem("cbt_results") || "[]");
+  let soalData = JSON.parse(localStorage.getItem("cbt_soal") || "[]");
+  let score = parseInt(localStorage.getItem("cbt_score") || "0");
+  let totalSoal = soalData.length;
+  if (!results.length) { alert("Tidak ada data."); return; }
+  let persen = Math.round((score / totalSoal) * 100);
+  let html = `<div style="text-align:center; margin-bottom:24px; padding-bottom:16px; border-bottom:2px solid #ddd;">
+      <h2 style="margin:0 0 8px 0;">📝 Hasil Ujian</h2>
+      <div style="font-size:28px; font-weight:bold; color:#10b981; margin:8px 0;">${score} / ${totalSoal} (${persen}%)</div>
+      <div style="display:flex; justify-content:center; gap:24px; flex-wrap:wrap; margin-top:12px;">
+        <div><strong>👤 Nama:</strong> ${escapeHtml(nama)}</div>
+        <div><strong>✅ Benar:</strong> ${score}</div>
+        <div><strong>❌ Salah:</strong> ${totalSoal - score}</div>
+      </div>
+    </div>`;
+  for (let i = 0; i < results.length; i++) {
+    const r = results[i];
+    const s = soalData[i];
+    const userAnswer = r.jawabanUser;
+    const correctKey = r.kunci;
+    html += `<div class="discussion-question">
+      <h4>Soal ${r.nomor}. ${r.pertanyaan}</h4>
+      <div class="options-list">`;
+    for (let opt of OPTIONS) {
+      let optText = s[opt] || '';
+      let isUser = (userAnswer === opt);
+      let isCorrectKey = (correctKey === opt);
+      let additionalClass = "";
+      let indicator = "";
+      if (isUser && isCorrectKey) {
+        additionalClass = "user-correct";
+        indicator = " ✓ (jawaban Anda benar)";
+      } else if (isUser && !isCorrectKey) {
+        additionalClass = "wrong-option";
+        indicator = " ✗ (jawaban Anda salah)";
+      } else if (!isUser && isCorrectKey) {
+        additionalClass = "correct-option";
+        indicator = " ★ (kunci jawaban)";
+      }
+      html += `<div class="option-item ${additionalClass}">
+        <strong>${opt}.</strong> ${optText} ${indicator}
+      </div>`;
+    }
+    html += `</div><div class="discussion-pembahasan"><strong>📘 Pembahasan:</strong> ${r.pembahasan}</div></div>`;
+  }
+  document.getElementById("discussionContent").innerHTML = html;
+  document.getElementById("discussionModal").style.display = "flex";
+}
+
+function closeDiscussionModal() { document.getElementById("discussionModal").style.display = "none"; }
+function exportDiscussionPDF() { window.print(); }
+
+function loadLeaderboard() {
+  const board = document.getElementById("board");
+  if (!board) return;
+  board.innerHTML = '<div style="text-align:center; padding:20px;">Memuat leaderboard...</div>';
+  fetch(API + "?action=leaderboard&token=" + encodeURIComponent(token))
+    .then(r => r.json())
+    .then(res => {
+      if (res.leaderboard && res.leaderboard.length) {
+        let data = res.leaderboard.map(item => ({ nama: item.nama, skor: item.skor, total: soal.length, waktu: item.waktu || "00:00" }));
+        data.sort((a, b) => b.skor - a.skor);
+        let podiumHtml = `<div class="podium-container">`;
+        const medals = ["🥇", "🥈", "🥉"];
+        const colors = ["podium-1", "podium-2", "podium-3"];
+        for (let i = 0; i < Math.min(3, data.length); i++) {
+          const item = data[i];
+          const persen = Math.round((item.skor / item.total) * 100);
+          podiumHtml += `
+            <div class="podium-item ${colors[i]}">
+              <div class="podium-block"><div class="medal">${medals[i]}</div></div>
+              <div class="podium-rank">#${i+1}</div>
+              <div class="podium-name">${escapeHtml(item.nama)}</div>
+              <div class="podium-score">${persen}%</div>
+              <div class="podium-time">${item.waktu}</div>
+            </div>`;
+        }
+        podiumHtml += `</div>`;
+        let listHtml = `<div class="leaderboard-list"><div class="leaderboard-header">
+          <div class="rank">#</div><div class="name">Peserta</div><div class="score">Skor</div><div class="time">Waktu</div>
+        </div>`;
+        let userRankData = null;
+        for (let i = 0; i < data.length; i++) {
+          const item = data[i];
+          const rank = i + 1;
+          const myClass = (item.nama === nama) ? "my-rank" : "";
+          const persen = Math.round((item.skor / item.total) * 100);
+          if (item.nama === nama) userRankData = { rank, persen, waktu: item.waktu };
+          listHtml += `
+            <div class="leaderboard-item ${myClass}">
+              <div class="rank">${rank}</div>
+              <div class="name">${escapeHtml(item.nama)}</div>
+              <div class="score">${persen}%</div>
+              <div class="time">${item.waktu}</div>
+            </div>`;
+        }
+        listHtml += `</div>`;
+        let yourRankHtml = userRankData ? `<div class="your-rank-card"><span>🏆</span> Peringkat Anda: #${userRankData.rank} &nbsp;|&nbsp; Skor: ${userRankData.persen}% &nbsp;|&nbsp; Waktu: ${userRankData.waktu}</div>` : `<div class="your-rank-card"><span>📊</span> Anda belum memiliki data di leaderboard.</div>`;
+        board.innerHTML = podiumHtml + listHtml + yourRankHtml;
+      } else {
+        board.innerHTML = '<div style="text-align:center; padding:20px;">🏆 Belum ada data leaderboard untuk paket ini.</div>';
+      }
+    })
+    .catch(() => board.innerHTML = '<div style="text-align:center; padding:20px;">⚠️ Gagal memuat leaderboard.</div>');
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/[&<>]/g, function(m) {
+    if (m === '&') return '&amp;';
+    if (m === '<') return '&lt;';
+    if (m === '>') return '&gt;';
+    return m;
+  });
+}
+
+function goHome() {
+  if (confirm("Yakin kembali ke halaman login? Semua progress ujian akan hilang.")) {
+    if (timer) clearInterval(timer);
+    clearExamData();
+    isLoggedIn = false;
+    isDone = false;
+    soal = [];
+    document.getElementById("app").style.display = "none";
+    document.getElementById("result").style.display = "none";
+    document.getElementById("login").style.display = "flex";
+    document.getElementById("nama").value = "";
+    document.getElementById("token").value = "";
+  }
+}
+
+// ========== LOGIN & LOAD SOAL ==========
+function login() {
+  nama = document.getElementById("nama").value.trim();
+  token = document.getElementById("token").value.trim();
+  if (!nama || !token) { alert("Lengkapi data!"); return; }
+  
+  fetch(API + "?action=validateToken&token=" + encodeURIComponent(token))
+    .then(r => r.json())
+    .then(res => {
+      if (!res.valid) { alert("Token tidak valid!"); return; }
+      if (res.used) { alert("Token sudah digunakan."); return; }
+      
+      const savedToken = localStorage.getItem("cbt_token");
+      if (savedToken && savedToken !== token) clearExamData();
+      
+      const warningDiv = document.getElementById("tokenWarning");
+      if (warningDiv) warningDiv.style.display = "flex";
+      
+      currentDurasi = res.durasi || 3600;
+      currentSheetSoal = res.sheetSoal || "SOAL A";
+      timeLeft = currentDurasi;
+      isLoggedIn = true;
+      saveState();
+      
+      document.getElementById("login").style.display = "none";
+      document.getElementById("app").style.display = "block";
+      loadQuestions();
+    })
+    .catch(err => { console.error(err); alert("Gagal validasi token"); });
+}
+
+function loadQuestions() {
+  if (soal.length) { startFromSaved(); return; }
+  fetch(API + "?action=getSoal&sheet=" + encodeURIComponent(currentSheetSoal))
+    .then(r => r.json())
+    .then(res => {
+      if (res.error) { alert("Error: " + res.error); return; }
+      if (!res.soal || !res.soal.length) { alert("Soal tidak ditemukan di sheet " + currentSheetSoal); return; }
+      soal = res.soal;
+      document.getElementById("totalCount").innerText = soal.length;
+      startFromSaved();
+      saveState();
+    })
+    .catch(err => { console.error(err); alert("Gagal load soal"); });
+}
+
+function startFromSaved() {
+  renderQuestion();
+  updateNavGrid();
+  updateStats();
+  startTimer();
+}
+
+function checkExistingSession() {
+  loadSavedState();
+  loadDarkMode();
+  
+  const submitted = localStorage.getItem("cbt_submitted") === "true";
+  if (submitted && soal.length > 0) {
+    const savedScore = localStorage.getItem("cbt_score");
+    if (savedScore) {
+      document.getElementById("login").style.display = "none";
+      document.getElementById("app").style.display = "none";
+      document.getElementById("result").style.display = "flex";
+      showResult(parseInt(savedScore));
+      return;
+    }
+  }
+  
+  if (isLoggedIn && soal.length > 0) {
+    document.getElementById("login").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    startFromSaved();
+  }
+}
+
+// ========== DARK MODE ==========
+function toggleDarkMode() {
+  document.body.classList.toggle("dark-mode");
+  localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
+}
+function loadDarkMode() {
+  if (localStorage.getItem("darkMode") === "true") document.body.classList.add("dark-mode");
+}
+
+// ========== KALKULATOR ==========
+function toggleCalculator() {
+  let modal = document.getElementById("calculatorModal");
+  if (modal.style.display === "flex") {
+    modal.style.display = "none";
+    document.removeEventListener("keydown", handleKeyboard);
+  } else {
+    modal.style.display = "flex";
+    document.addEventListener("keydown", handleKeyboard);
+    document.getElementById("calcDisplay").focus();
+  }
+}
+
+function handleKeyboard(e) {
+  let d = document.getElementById("calcDisplay");
+  if (!d) return;
+  let key = e.key;
+  if (key >= '0' && key <= '9') appendToDisplay(key);
+  else if (key === '.') appendToDisplay('.');
+  else if (key === '+' || key === '-' || key === '*' || key === '/') {
+    let op = key === '*' ? '×' : (key === '/' ? '÷' : key);
+    appendToDisplay(op);
+  } else if (key === 'Enter' || key === '=') calculateResult();
+  else if (key === 'Escape') toggleCalculator();
+  else if (key === 'Backspace') deleteLastCalc();
+  else if (key === 'c' || key === 'C') clearCalc();
+}
+
+function appendToDisplay(v) {
+  let d = document.getElementById("calcDisplay");
+  if (d) {
+    if (d.value === "Error") d.value = "";
+    d.value += v;
+  }
+}
+
+function clearCalc() {
+  document.getElementById("calcDisplay").value = "";
+}
+
+function deleteLastCalc() {
+  let d = document.getElementById("calcDisplay");
+  if (d) d.value = d.value.slice(0, -1);
+}
+
+function calculateResult() {
+  let d = document.getElementById("calcDisplay");
+  try {
+    let expr = d.value.replace(/×/g, '*').replace(/÷/g, '/');
+    let result = Function('"use strict"; return (' + expr + ')')();
+    d.value = result;
+  } catch(e) {
+    d.value = "Error";
+  }
+}
+
+function calcFunction(action) {
+  let d = document.getElementById("calcDisplay");
+  let val = parseFloat(d.value) || 0;
+  
+  switch(action) {
+    case 'sin': d.value = Math.sin(val * Math.PI / 180); break;
+    case 'cos': d.value = Math.cos(val * Math.PI / 180); break;
+    case 'tan': d.value = Math.tan(val * Math.PI / 180); break;
+    case 'log': d.value = Math.log10(val); break;
+    case 'ln': d.value = Math.log(val); break;
+    case 'sqrt': d.value = Math.sqrt(val); break;
+    case 'pow2': d.value = val * val; break;
+    case 'pow3': d.value = val * val * val; break;
+    case 'reciprocal': d.value = 1 / val; break;
+    case 'pi': d.value = Math.PI; break;
+    case 'e': d.value = Math.E; break;
+    case 'percent': d.value = val / 100; break;
+    case 'equal': calculateResult(); break;
+    case 'clear': clearCalc(); break;
+    case 'backspace': deleteLastCalc(); break;
+    case 'mplus': calcMemory += val; break;
+    case 'mminus': calcMemory -= val; break;
+    case 'mc': calcMemory = 0; break;
+    case 'mr': d.value += calcMemory; break;
+    case 'ms': calcMemory = val; break;
+  }
+}
+
+function initCalculator() {
+  document.querySelectorAll('.calc-num').forEach(btn => {
+    btn.onclick = () => appendToDisplay(btn.getAttribute('data-num'));
+  });
+  document.querySelectorAll('.calc-operator').forEach(btn => {
+    btn.onclick = () => appendToDisplay(btn.getAttribute('data-op'));
+  });
+  document.querySelectorAll('.calc-func, .calc-mem, .calc-clear').forEach(btn => {
+    btn.onclick = () => calcFunction(btn.getAttribute('data-action'));
+  });
+}
+
+// ========== GLOBAL FUNCTIONS & INIT ==========
+window.login = login;
+window.toggleDarkMode = toggleDarkMode;
+window.goHome = goHome;
+window.prevQuestion = prevQuestion;
+window.nextQuestion = nextQuestion;
+window.toggleRagu = toggleRagu;
+window.showReviewModal = showReviewModal;
+window.closeReviewModal = closeReviewModal;
+window.confirmSubmit = confirmSubmit;
+window.openDiscussionModal = openDiscussionModal;
+window.closeDiscussionModal = closeDiscussionModal;
+window.exportDiscussionPDF = exportDiscussionPDF;
+window.toggleCalculator = toggleCalculator;
+window.goToQuestion = goToQuestion;
+
+window.onclick = function(event) {
+  const reviewModal = document.getElementById("reviewModal");
+  const discussionModal = document.getElementById("discussionModal");
+  const calculatorModal = document.getElementById("calculatorModal");
+  if (event.target === reviewModal) reviewModal.style.display = "none";
+  if (event.target === discussionModal) discussionModal.style.display = "none";
+  if (event.target === calculatorModal) {
+    calculatorModal.style.display = "none";
+    document.removeEventListener("keydown", handleKeyboard);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  initCalculator();
+  loadDarkMode();
+  checkExistingSession();
+  if (!isLoggedIn && !localStorage.getItem("cbt_submitted")) {
+    document.getElementById("login").style.display = "flex";
+    document.getElementById("app").style.display = "none";
+    document.getElementById("result").style.display = "none";
+  }
+  const savedToken = localStorage.getItem("cbt_token");
+  const savedNama = localStorage.getItem("cbt_nama");
+  if (savedToken && savedNama && !isLoggedIn) {
+    document.getElementById("nama").value = savedNama;
+    document.getElementById("token").value = savedToken;
+  }
+});
+</script>
 </body>
 </html>

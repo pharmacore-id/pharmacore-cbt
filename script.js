@@ -294,6 +294,10 @@ function submit() {
       sheetSoal: currentSheetSoal
     })
     }).catch(e => console.log);
+  
+  showResult(score);
+  setTimeout(() => openDiscussionModal(), 500);
+}
 
 function showResult(score) {
   document.getElementById("app").style.display = "none";

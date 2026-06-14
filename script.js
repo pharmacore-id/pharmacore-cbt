@@ -434,39 +434,52 @@ function escapeHtml(str) {
 }
 
 function goHome() {
-  if (confirm("Yakin kembali ke halaman login? Semua progress ujian akan hilang.")) {
+  if (confirm("Yakin kembali ke halaman login? Progress ujian akan tersimpan dan bisa dilanjutkan nanti dengan token yang sama.")) {
     if (timer) clearInterval(timer);
-    clearExamData();          // Hapus semua data ujian
+    // JANGAN hapus data ujian! Hanya ubah tampilan.
+    // Hapus flag isLoggedIn agar tidak otomatis masuk lagi saat refresh? Tidak, biarkan state tetap.
+    // Tapi kita set isLoggedIn = false agar tidak langsung render ulang.
     isLoggedIn = false;
-    isDone = false;
-    soal = [];
+    // Tapi jangan hapus answers, ragu, timeLeft, soal, dll.
     document.getElementById("app").style.display = "none";
     document.getElementById("result").style.display = "none";
     document.getElementById("login").style.display = "flex";
-    // Reset form
-    document.getElementById("nama").value = "";
-    document.getElementById("token").value = "";
+    // Isi form dengan data yang tersimpan agar mudah login kembali
+    const savedNama = localStorage.getItem("cbt_nama") || "";
+    const savedToken = localStorage.getItem("cbt_token") || "";
+    document.getElementById("nama").value = savedNama;
+    document.getElementById("token").value = savedToken;
   }
 }
 
 // ========== LOGIN & LOAD SOAL ==========
 function login() {
-  console.log("Login function called");
   nama = document.getElementById("nama").value.trim();
   token = document.getElementById("token").value.trim();
   if (!nama || !token) { alert("Lengkapi data!"); return; }
   
+  // Cek apakah ada session yang belum disubmit dengan token yang sama
+  const savedToken = localStorage.getItem("cbt_token");
+  const submitted = localStorage.getItem("cbt_submitted") === "true";
+  
+  if (savedToken === token && !submitted && soal.length > 0) {
+    // Lanjutkan session yang sudah ada
+    isLoggedIn = true;
+    document.getElementById("login").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    startFromSaved(); // resume timer dll
+    return;
+  }
+  
+  // Jika token berbeda atau tidak ada session, lakukan validasi ke server
   fetch(API + "?action=validateToken&token=" + encodeURIComponent(token))
     .then(r => r.json())
     .then(res => {
-      console.log("API Response:", res);
       if (!res.valid) { alert("Token tidak valid!"); return; }
       if (res.used) { alert("Token sudah digunakan."); return; }
       
-      const savedToken = localStorage.getItem("cbt_token");
-      if (savedToken && savedToken !== token) {
-        clearExamData();
-      }
+      // Jika ada session lama dengan token berbeda, hapus data lama
+      if (savedToken && savedToken !== token) clearExamData();
       
       const warningDiv = document.getElementById("tokenWarning");
       if (warningDiv) warningDiv.style.display = "flex";
@@ -475,6 +488,11 @@ function login() {
       currentSheetSoal = res.sheetSoal || "SOAL A";
       timeLeft = currentDurasi;
       isLoggedIn = true;
+      // Simpan token dan nama
+      localStorage.setItem("cbt_nama", nama);
+      localStorage.setItem("cbt_token", token);
+      localStorage.setItem("cbt_sheetSoal", currentSheetSoal);
+      localStorage.setItem("cbt_durasi", currentDurasi);
       saveState();
       
       document.getElementById("login").style.display = "none";
@@ -483,7 +501,6 @@ function login() {
     })
     .catch(err => { console.error(err); alert("Gagal validasi token"); });
 }
-
 function loadQuestions() {
   if (soal.length) { startFromSaved(); return; }
   fetch(API + "?action=getSoal&sheet=" + encodeURIComponent(currentSheetSoal))

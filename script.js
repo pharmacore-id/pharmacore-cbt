@@ -182,7 +182,7 @@ function toggleRagu() {
 // ========== TIMER ==========
 function startTimer() {
   if (localStorage.getItem("cbt_submitted") === "true") return;
-  if (timer) clearInterval(timer);
+  if (timer) clearInterval(timer); // Hapus timer lama jika ada
   timer = setInterval(() => {
     if (isDone) return;
     if (timeLeft <= 0) {
@@ -246,7 +246,7 @@ function formatTimeDisplay(seconds) {
   return `${mins} menit ${secs} detik`;
 }
 
-function submit() {
+async function submit() {
   if (isDone) return;
   if (!soal || soal.length === 0) { alert("Soal belum dimuat."); return; }
   let unanswered = soal.length - Object.keys(answers).length;
@@ -280,20 +280,22 @@ function submit() {
   localStorage.setItem("cbt_completion_time", completionTimeSeconds);
   let waktuStr = formatTimeDisplay(completionTimeSeconds);
   
-  fetch(API, {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      action: "submit",
-      nama, token,
-      skor: score,
-      jawaban: answers,
-      total: soal.length,
-      waktu: waktuStr,
-      sheetSoal: currentSheetSoal
-    })
-    }).catch(e => console.log);
+  // Kirim ke backend (tanpa no-cors agar bisa dapat response)
+  try {
+    await fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "submit",
+        nama, token,
+        skor: score,
+        jawaban: answers,
+        total: soal.length,
+        waktu: waktuStr,
+        sheetSoal: currentSheetSoal
+      })
+    });
+  } catch(e) { console.log("Submit error:", e); }
   
   showResult(score);
   setTimeout(() => openDiscussionModal(), 500);
@@ -371,7 +373,7 @@ function loadLeaderboard() {
   const board = document.getElementById("board");
   if (!board) return;
   board.innerHTML = '<div style="text-align:center; padding:20px;">Memuat leaderboard...</div>';
-  fetch(API + "?action=leaderboard&token=" + token)
+  fetch(API + "?action=leaderboard&token=" + encodeURIComponent(token))
     .then(r => r.json())
     .then(res => {
       if (res.leaderboard && res.leaderboard.length) {
@@ -387,7 +389,7 @@ function loadLeaderboard() {
             <div class="podium-item ${colors[i]}">
               <div class="podium-block"><div class="medal">${medals[i]}</div></div>
               <div class="podium-rank">#${i+1}</div>
-              <div class="podium-name">${item.nama}</div>
+              <div class="podium-name">${escapeHtml(item.nama)}</div>
               <div class="podium-score">${persen}%</div>
               <div class="podium-time">${item.waktu}</div>
             </div>`;
@@ -406,7 +408,7 @@ function loadLeaderboard() {
           listHtml += `
             <div class="leaderboard-item ${myClass}">
               <div class="rank">${rank}</div>
-              <div class="name">${item.nama}</div>
+              <div class="name">${escapeHtml(item.nama)}</div>
               <div class="score">${persen}%</div>
               <div class="time">${item.waktu}</div>
             </div>`;
@@ -421,17 +423,29 @@ function loadLeaderboard() {
     .catch(() => board.innerHTML = '<div style="text-align:center; padding:20px;">⚠️ Gagal memuat leaderboard.</div>');
 }
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/[&<>]/g, function(m) {
+    if (m === '&') return '&amp;';
+    if (m === '<') return '&lt;';
+    if (m === '>') return '&gt;';
+    return m;
+  });
+}
 
 function goHome() {
-  if (confirm("Yakin kembali ke halaman login?")) {
+  if (confirm("Yakin kembali ke halaman login? Semua progress ujian akan hilang.")) {
     if (timer) clearInterval(timer);
-    document.getElementById("app").style.display = "none";
-    document.getElementById("result").style.display = "none";
-    document.getElementById("login").style.display = "flex";
-    // Reset state
+    clearExamData();          // Hapus semua data ujian
     isLoggedIn = false;
     isDone = false;
     soal = [];
+    document.getElementById("app").style.display = "none";
+    document.getElementById("result").style.display = "none";
+    document.getElementById("login").style.display = "flex";
+    // Reset form
+    document.getElementById("nama").value = "";
+    document.getElementById("token").value = "";
   }
 }
 
@@ -442,7 +456,7 @@ function login() {
   token = document.getElementById("token").value.trim();
   if (!nama || !token) { alert("Lengkapi data!"); return; }
   
-  fetch(API + "?action=validateToken&token=" + token)
+  fetch(API + "?action=validateToken&token=" + encodeURIComponent(token))
     .then(r => r.json())
     .then(res => {
       console.log("API Response:", res);
@@ -489,7 +503,7 @@ function startFromSaved() {
   renderQuestion();
   updateNavGrid();
   updateStats();
-  startTimer();
+  startTimer();  // timer akan clear interval sebelumnya sendiri
 }
 
 function checkExistingSession() {
@@ -586,7 +600,6 @@ function calcFunction(action) {
   let val = parseFloat(d.value) || 0;
   
   switch(action) {
-    // Scientific functions
     case 'sin': d.value = Math.sin(val * Math.PI / 180); break;
     case 'cos': d.value = Math.cos(val * Math.PI / 180); break;
     case 'tan': d.value = Math.tan(val * Math.PI / 180); break;
@@ -602,36 +615,21 @@ function calcFunction(action) {
     case 'equal': calculateResult(); break;
     case 'clear': clearCalc(); break;
     case 'backspace': deleteLastCalc(); break;
-    
-    // Memory functions
-    case 'mplus': 
-      calcMemory += val;
-      break;
-    case 'mminus': 
-      calcMemory -= val;
-      break;
-    case 'mc': 
-      calcMemory = 0;
-      break;
-    case 'mr': 
-      d.value += calcMemory;
-      break;
-    case 'ms':
-      calcMemory = val;
-      break;
+    case 'mplus': calcMemory += val; break;
+    case 'mminus': calcMemory -= val; break;
+    case 'mc': calcMemory = 0; break;
+    case 'mr': d.value += calcMemory; break;
+    case 'ms': calcMemory = val; break;
   }
 }
 
 function initCalculator() {
-  // Tombol angka
   document.querySelectorAll('.calc-num').forEach(btn => {
     btn.onclick = () => appendToDisplay(btn.getAttribute('data-num'));
   });
-  // Tombol operator
   document.querySelectorAll('.calc-operator').forEach(btn => {
     btn.onclick = () => appendToDisplay(btn.getAttribute('data-op'));
   });
-  // Tombol fungsi, memori, dan clear
   document.querySelectorAll('.calc-func, .calc-mem, .calc-clear').forEach(btn => {
     btn.onclick = () => calcFunction(btn.getAttribute('data-action'));
   });
@@ -651,6 +649,7 @@ window.openDiscussionModal = openDiscussionModal;
 window.closeDiscussionModal = closeDiscussionModal;
 window.exportDiscussionPDF = exportDiscussionPDF;
 window.toggleCalculator = toggleCalculator;
+window.goToQuestion = goToQuestion;
 
 // ========== PERBAIKAN CLOSE MODAL DENGAN KLIK DI LUAR ==========
 window.onclick = function(event) {
@@ -658,12 +657,8 @@ window.onclick = function(event) {
   const discussionModal = document.getElementById("discussionModal");
   const calculatorModal = document.getElementById("calculatorModal");
   
-  if (event.target === reviewModal) {
-    reviewModal.style.display = "none";
-  }
-  if (event.target === discussionModal) {
-    discussionModal.style.display = "none";
-  }
+  if (event.target === reviewModal) reviewModal.style.display = "none";
+  if (event.target === discussionModal) discussionModal.style.display = "none";
   if (event.target === calculatorModal) {
     calculatorModal.style.display = "none";
     document.removeEventListener("keydown", handleKeyboard);
@@ -673,17 +668,21 @@ window.onclick = function(event) {
 // ========== INIT ==========
 document.addEventListener("DOMContentLoaded", function() {
   initCalculator();
-  loadDarkMode();  // Ganti checkExistingSession dengan loadDarkMode saja
+  loadDarkMode();
+  // Cek apakah ada session yang tersimpan (refresh page)
+  checkExistingSession();
   
-  // Pastikan state awal yang benar
-  document.getElementById("login").style.display = "flex";
-  document.getElementById("app").style.display = "none";
-  document.getElementById("result").style.display = "none";
+  // Pastikan state awal yang benar (jika tidak ada session, tampilkan login)
+  if (!isLoggedIn && !localStorage.getItem("cbt_submitted")) {
+    document.getElementById("login").style.display = "flex";
+    document.getElementById("app").style.display = "none";
+    document.getElementById("result").style.display = "none";
+  }
   
-  // Isi form jika ada data tersimpan
+  // Isi form jika ada data tersimpan (hanya untuk kemudahan, tapi tidak otomatis login)
   const savedToken = localStorage.getItem("cbt_token");
   const savedNama = localStorage.getItem("cbt_nama");
-  if (savedToken && savedNama) {
+  if (savedToken && savedNama && !isLoggedIn) {
     document.getElementById("nama").value = savedNama;
     document.getElementById("token").value = savedToken;
   }

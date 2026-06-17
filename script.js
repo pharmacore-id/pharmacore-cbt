@@ -684,20 +684,44 @@ window.onclick = function(event) {
 document.addEventListener("DOMContentLoaded", function() {
   initCalculator();
   loadDarkMode();
-  // Cek apakah ada session yang tersimpan (refresh page)
-  checkExistingSession();
   
-  // Pastikan state awal yang benar (jika tidak ada session, tampilkan login)
-  if (!isLoggedIn && !localStorage.getItem("cbt_submitted")) {
+  // Muat state dari localStorage
+  loadSavedState();
+  
+  // Tentukan halaman berdasarkan state
+  const submitted = localStorage.getItem("cbt_submitted") === "true";
+  
+  if (submitted && soal.length > 0) {
+    // Tampilkan hasil
+    document.getElementById("login").style.display = "none";
+    document.getElementById("app").style.display = "none";
+    document.getElementById("result").style.display = "flex";
+    const savedScore = localStorage.getItem("cbt_score");
+    if (savedScore !== null) {
+      showResult(parseInt(savedScore));
+    }
+  } 
+  else if (isLoggedIn && soal.length > 0) {
+    // Tampilkan ujian
+    document.getElementById("login").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    document.getElementById("result").style.display = "none";
+    renderQuestion();
+    updateNavGrid();
+    updateStats();
+    startTimer();
+  } 
+  else {
+    // Tampilkan login
     document.getElementById("login").style.display = "flex";
     document.getElementById("app").style.display = "none";
     document.getElementById("result").style.display = "none";
   }
   
-  // Isi form jika ada data tersimpan (hanya untuk kemudahan, tapi tidak otomatis login)
+  // Isi form login dengan data tersimpan (jika ada)
   const savedToken = localStorage.getItem("cbt_token");
   const savedNama = localStorage.getItem("cbt_nama");
-  if (savedToken && savedNama && !isLoggedIn) {
+  if (savedToken && savedNama) {
     document.getElementById("nama").value = savedNama;
     document.getElementById("token").value = savedToken;
   }

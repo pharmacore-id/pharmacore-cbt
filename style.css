@@ -956,6 +956,13 @@ body.dark-mode .timer {
 /* ========== PRINT (PDF) ========== */
 /* ========== PRINT (PDF) PEMBAHASAN - FINAL ========== */
 @media print {
+  /* Paksa semua elemen ke light mode */
+  * {
+    color: #1f2937 !important;
+    background-color: transparent !important;
+    border-color: #e5e7eb !important;
+  }
+
   /* Sembunyikan semua elemen selain modal pembahasan */
   body * {
     visibility: hidden;
@@ -971,35 +978,39 @@ body.dark-mode .timer {
     left: 0;
     width: 100%;
     margin: 0;
-    padding: 20px 30px !important; /* ← Tambah padding untuk margin halaman */
+    padding: 20px 30px !important;
     background: white !important;
     overflow: visible !important;
     height: auto !important;
     max-height: none !important;
+    color: #1f2937 !important;
   }
   
   .modal-content {
     box-shadow: none;
-    padding: 10px 0 !important; /* ← Hapus padding horizontal di sini, biar modal yang ngatur */
+    padding: 10px 0 !important;
     overflow: visible !important;
     max-height: none !important;
     height: auto;
     margin: 0 auto;
     max-width: 100% !important;
+    background: white !important;
   }
   
   .modal-body {
     overflow: visible !important;
     max-height: none !important;
     height: auto;
-    padding: 0 !important; /* ← Reset padding biar rapi */
+    padding: 0 !important;
+    margin: 0 !important;
+    background: white !important;
   }
   
   /* ========== HEADER HASIL UJIAN - GRADIENT ========== */
   .discussion-header {
     text-align: center;
-    margin: 0 0 24px 0 !important; /* ← Tambah margin bottom */
-    padding: 24px 20px !important; /* ← Tambah padding */
+    margin: 0 0 20px 0 !important;
+    padding: 20px 20px !important;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
     border-radius: 16px !important;
     color: white !important;
@@ -1009,66 +1020,88 @@ body.dark-mode .timer {
     box-sizing: border-box !important;
   }
   
-  .discussion-header h2 {
-    font-size: 22px !important; /* ← Sedikit lebih besar */
-    margin: 0 0 8px 0 !important;
+  .discussion-header * {
     color: white !important;
+    background: transparent !important;
+  }
+  
+  .discussion-header h2 {
+    font-size: 20px !important;
+    margin: 0 0 6px 0 !important;
     font-weight: 700 !important;
+    color: white !important;
   }
   
   .discussion-score {
-    font-size: 36px !important; /* ← Lebih besar biar menonjol */
+    font-size: 32px !important;
     font-weight: 800 !important;
     color: #fbbf24 !important;
-    margin: 8px 0 !important;
+    margin: 6px 0 !important;
   }
   
   .discussion-info {
     display: flex;
     justify-content: center;
-    gap: 32px; /* ← Jarak antar info lebih longgar */
-    margin-top: 16px;
+    gap: 24px !important;
+    margin-top: 12px;
     flex-wrap: wrap;
     background: rgba(255, 255, 255, 0.15) !important;
-    padding: 10px 24px !important; /* ← Tambah padding horizontal */
+    padding: 8px 20px !important;
     border-radius: 40px !important;
   }
   
   .discussion-info div {
-    font-size: 13px !important; /* ← Sedikit lebih besar */
+    font-size: 12px !important;
     color: white !important;
+    background: transparent !important;
   }
   
   .discussion-info strong {
     font-weight: 700 !important;
     color: #fbbf24 !important;
+    background: transparent !important;
   }
   
-  /* ========== CARD SOAL - LEBAR FULL DENGAN PADDING ========== */
+  /* ========== CARD SOAL - JARAK KONSISTEN ========== */
   .discussion-question {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
     
-    margin: 14px 0 !important; /* ← Hapus margin auto, pakai margin vertikal */
-    padding: 16px 20px !important; /* ← Tambah padding dalam card */
-    border-radius: 12px; /* ← Sedikit lebih besar */
-    border-left: 5px solid #8b5cf6; /* ← Lebih tebal */
+    margin: 8px 0 !important;
+    padding: 12px 16px !important;
+    border-radius: 10px;
+    border-left: 4px solid #8b5cf6 !important;
     background: #f9fafb !important;
     width: 100% !important;
     box-sizing: border-box !important;
+    color: #1f2937 !important;
   }
   
-  .discussion-question:first-of-type {
+  .discussion-question * {
+    background: transparent !important;
+    color: #1f2937 !important;
+  }
+  
+  /* Reset margin untuk card pertama */
+  .discussion-question:first-of-type,
+  .discussion-question:first-child {
     margin-top: 0 !important;
   }
   
-  .discussion-question:last-of-type {
+  /* Reset margin untuk card terakhir */
+  .discussion-question:last-of-type,
+  .discussion-question:last-child {
     margin-bottom: 0 !important;
   }
   
+  /* Pastikan jarak antar card konsisten */
+  .discussion-question + .discussion-question {
+    margin-top: 8px !important;
+  }
+  
   .discussion-question h4 {
-    margin: 0 0 12px 0 !important; /* ← Tambah margin bottom */
-    font-size: 14px !important; /* ← Sedikit lebih besar */
+    margin: 0 0 8px 0 !important;
+    font-size: 13px !important;
     font-weight: 700 !important;
     color: #1f2937 !important;
   }
@@ -1076,26 +1109,28 @@ body.dark-mode .timer {
   .options-list {
     display: flex;
     flex-direction: column;
-    gap: 6px; /* ← Jarak antar opsi */
-    margin-bottom: 10px; /* ← Tambah margin bottom */
+    gap: 4px !important;
+    margin-bottom: 6px !important;
   }
   
   .option-item {
-    padding: 8px 14px !important; /* ← Tambah padding */
-    border-radius: 8px !important;
+    padding: 6px 12px !important;
+    border-radius: 6px !important;
     border: 1px solid #e5e7eb !important;
-    font-size: 12px !important; /* ← Sedikit lebih besar */
+    font-size: 11px !important;
     background: white !important;
-    line-height: 1.5 !important;
+    line-height: 1.4 !important;
+    color: #1f2937 !important;
   }
   
   .discussion-pembahasan {
-    margin-top: 10px; /* ← Tambah margin top */
-    padding: 10px 14px !important; /* ← Tambah padding */
+    margin-top: 6px !important;
+    padding: 6px 10px !important;
     background: #f3f4f6 !important;
-    border-radius: 8px !important;
-    font-size: 12px !important; /* ← Sedikit lebih besar */
-    line-height: 1.5 !important;
+    border-radius: 6px !important;
+    font-size: 11px !important;
+    line-height: 1.4 !important;
+    color: #1f2937 !important;
   }
   
   .discussion-pembahasan strong {
@@ -1112,6 +1147,10 @@ body.dark-mode .timer {
     print-color-adjust: exact;
   }
   
+  .user-correct * {
+    color: #065f46 !important;
+  }
+  
   .wrong-option {
     background: #fee2e2 !important;
     color: #991b1b !important;
@@ -1120,12 +1159,20 @@ body.dark-mode .timer {
     print-color-adjust: exact;
   }
   
+  .wrong-option * {
+    color: #991b1b !important;
+  }
+  
   .correct-option {
     background: #fef9c3 !important;
     color: #854d0e !important;
     border-color: #f59e0b !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+  }
+  
+  .correct-option * {
+    color: #854d0e !important;
   }
   
   /* ========== SEMBUNYIKAN TOMBOL ========== */
@@ -1138,37 +1185,78 @@ body.dark-mode .timer {
   }
   
   .modal-header {
-    border-bottom: 1px solid #ddd;
-    margin-bottom: 16px;
-    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd !important;
+    margin-bottom: 12px !important;
+    padding-bottom: 8px !important;
+    background: white !important;
   }
   
   .modal-header h2 {
     display: block !important;
-    font-size: 18px !important;
+    font-size: 16px !important;
     margin: 0 !important;
+    color: #1f2937 !important;
   }
 }
 
-/* ========== TAMBAHAN UNTUK KONSISTENSI DARK MODE DI PRINT ========== */
+/* ========== HAPUS SEMUA ATURAN DARK MODE DI PRINT ========== */
 @media print and (prefers-color-scheme: dark) {
+  /* Reset semua ke default */
   #discussionModal,
   .modal-content,
   .modal-body,
   .discussion-question,
   .option-item,
-  .discussion-pembahasan {
-    background: white !important;
-    color: #1f2937 !important;
+  .discussion-pembahasan,
+  .discussion-header,
+  * {
+    background-color: initial !important;
+    color: initial !important;
+  }
+  
+  /* Tetap pertahankan warna spesifik */
+  .user-correct {
+    background: #d1fae5 !important;
+    color: #065f46 !important;
+    border-color: #10b981 !important;
+  }
+  
+  .user-correct * {
+    color: #065f46 !important;
+  }
+  
+  .wrong-option {
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+    border-color: #ef4444 !important;
+  }
+  
+  .wrong-option * {
+    color: #991b1b !important;
+  }
+  
+  .correct-option {
+    background: #fef9c3 !important;
+    color: #854d0e !important;
+    border-color: #f59e0b !important;
+  }
+  
+  .correct-option * {
+    color: #854d0e !important;
   }
   
   .discussion-header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
   }
   
+  .discussion-header * {
+    color: white !important;
+  }
+  
   .discussion-header h2,
   .discussion-header div,
-  .discussion-info div {
+  .discussion-info div,
+  .discussion-info strong {
     color: white !important;
   }
 }

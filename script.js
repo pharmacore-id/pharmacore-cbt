@@ -434,19 +434,13 @@ function escapeHtml(str) {
 function goHome() {
   if (confirm("Yakin kembali ke halaman login? Progress ujian akan tersimpan dan bisa dilanjutkan nanti dengan token yang sama.")) {
     if (timer) clearInterval(timer);
-    // JANGAN hapus data ujian! Hanya ubah tampilan.
-    // Hapus flag isLoggedIn agar tidak otomatis masuk lagi saat refresh? Tidak, biarkan state tetap.
-    // Tapi kita set isLoggedIn = false agar tidak langsung render ulang.
+    // Simpan status loggedIn = false, tapi tetap pertahankan data ujian
     isLoggedIn = false;
-    // Tapi jangan hapus answers, ragu, timeLeft, soal, dll.
+    localStorage.setItem("cbt_isLoggedIn", "false");
+    // Tampilkan login
     document.getElementById("app").style.display = "none";
     document.getElementById("result").style.display = "none";
     document.getElementById("login").style.display = "flex";
-    // Isi form dengan data yang tersimpan agar mudah login kembali
-    const savedNama = localStorage.getItem("cbt_nama") || "";
-    const savedToken = localStorage.getItem("cbt_token") || "";
-    document.getElementById("nama").value = savedNama;
-    document.getElementById("token").value = savedToken;
   }
 }
 
@@ -485,7 +479,9 @@ function login() {
       currentDurasi = res.durasi || 3600;
       currentSheetSoal = res.sheetSoal || "SOAL A";
       timeLeft = currentDurasi;
+      localStorage.setItem("cbt_isLoggedIn", "true");
       isLoggedIn = true;
+      
       // Simpan token dan nama
       localStorage.setItem("cbt_nama", nama);
       localStorage.setItem("cbt_token", token);
@@ -684,15 +680,18 @@ window.onclick = function(event) {
 document.addEventListener("DOMContentLoaded", function() {
   initCalculator();
   loadDarkMode();
-  
-  // Muat state dari localStorage
+
+  // Muat semua state dari localStorage
   loadSavedState();
-  
-  // Tentukan halaman berdasarkan state
+
+  // Cek status
   const submitted = localStorage.getItem("cbt_submitted") === "true";
-  
-  if (submitted && soal.length > 0) {
-    // Tampilkan hasil
+  const hasSoal = soal && soal.length > 0;
+  const loggedIn = isLoggedIn; // dari loadSavedState()
+
+  // Tentukan tampilan
+  if (submitted && hasSoal && loggedIn) {
+    // Sudah submit dan login -> tampilkan hasil
     document.getElementById("login").style.display = "none";
     document.getElementById("app").style.display = "none";
     document.getElementById("result").style.display = "flex";
@@ -700,9 +699,8 @@ document.addEventListener("DOMContentLoaded", function() {
     if (savedScore !== null) {
       showResult(parseInt(savedScore));
     }
-  } 
-  else if (isLoggedIn && soal.length > 0) {
-    // Tampilkan ujian
+  } else if (loggedIn && hasSoal) {
+    // Sedang ujian -> tampilkan ujian
     document.getElementById("login").style.display = "none";
     document.getElementById("app").style.display = "block";
     document.getElementById("result").style.display = "none";
@@ -710,14 +708,13 @@ document.addEventListener("DOMContentLoaded", function() {
     updateNavGrid();
     updateStats();
     startTimer();
-  } 
-  else {
-    // Tampilkan login
+  } else {
+    // Belum login -> tampilkan login
     document.getElementById("login").style.display = "flex";
     document.getElementById("app").style.display = "none";
     document.getElementById("result").style.display = "none";
   }
-  
+
   // Isi form login dengan data tersimpan (jika ada)
   const savedToken = localStorage.getItem("cbt_token");
   const savedNama = localStorage.getItem("cbt_nama");

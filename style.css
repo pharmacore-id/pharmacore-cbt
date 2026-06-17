@@ -954,8 +954,6 @@ body.dark-mode .timer {
 }
 
 /* ========== PRINT (PDF) PEMBAHASAN - FINAL ========== */
-
-/* ========== PRINT (PDF) PEMBAHASAN - FINAL ========== */
 @media print {
   /* Paksa semua elemen ke light mode */
   * {
@@ -1007,10 +1005,21 @@ body.dark-mode .timer {
     background: white !important;
   }
   
-  /* HAPUS semua margin dan padding dari child elements di modal-body */
-  .modal-body > * {
+  /* ========== KUNCI: SEMBUNYIKAN SEMUA ELEMEN KECUALI CARD SOAL ========== */
+  .modal-body > *:not(.discussion-question) {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
+    border: none !important;
+    overflow: hidden !important;
+  }
+  
+  /* TAMPILKAN SEMUA CARD SOAL DENGAN JARAK KONSISTEN */
+  .modal-body > .discussion-question {
+    display: block !important;
+    visibility: visible !important;
   }
   
   /* ========== HEADER HASIL UJIAN - GRADIENT ========== */
@@ -1025,6 +1034,8 @@ body.dark-mode .timer {
     page-break-inside: avoid !important;
     width: 100% !important;
     box-sizing: border-box !important;
+    display: block !important;
+    visibility: visible !important;
   }
   
   .discussion-header * {
@@ -1047,7 +1058,7 @@ body.dark-mode .timer {
   }
   
   .discussion-info {
-    display: flex;
+    display: flex !important;
     justify-content: center;
     gap: 20px !important;
     margin-top: 10px;
@@ -1055,6 +1066,7 @@ body.dark-mode .timer {
     background: rgba(255, 255, 255, 0.15) !important;
     padding: 6px 16px !important;
     border-radius: 40px !important;
+    visibility: visible !important;
   }
   
   .discussion-info div {
@@ -1074,54 +1086,45 @@ body.dark-mode .timer {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
     
-    margin: 4px 0 !important; /* ← DIPERKECIL LAGI jadi 4px */
-    padding: 10px 14px !important; /* ← DIPERKECIL LAGI */
+    margin: 6px 0 !important;
+    padding: 10px 14px !important;
     border-radius: 8px;
     border-left: 4px solid #8b5cf6 !important;
     background: #f9fafb !important;
     width: 100% !important;
     box-sizing: border-box !important;
     color: #1f2937 !important;
+    display: block !important;
+    visibility: visible !important;
   }
   
   .discussion-question * {
     background: transparent !important;
     color: #1f2937 !important;
+    visibility: visible !important;
   }
   
-  /* PASTIKAN SEMUA CARD PERTAMA TIDAK PUNYA MARGIN ATAS */
+  /* SEMUA CARD PAKAI MARGIN YANG SAMA */
+  .discussion-question {
+    margin-top: 6px !important;
+    margin-bottom: 6px !important;
+  }
+  
+  /* KHUSUS CARD PERTAMA - HAPUS MARGIN ATAS */
   .discussion-question:first-of-type,
-  .discussion-question:first-child,
-  .discussion-question:nth-child(1) {
+  .discussion-question:first-child {
     margin-top: 0 !important;
   }
   
-  /* PASTIKAN SEMUA CARD TERAKHIR TIDAK PUNYA MARGIN BAWAH */
+  /* KHUSUS CARD TERAKHIR - HAPUS MARGIN BAWAH */
   .discussion-question:last-of-type,
   .discussion-question:last-child {
     margin-bottom: 0 !important;
   }
   
-  /* FORCE semua card punya margin yang sama */
-  .discussion-question {
-    margin-top: 4px !important;
-    margin-bottom: 4px !important;
-  }
-  
-  /* KHUSUS card pertama - hapus margin top */
+  /* PASTIKAN TIDAK ADA JARAK DARI ELEMEN SEBELUMNYA */
   .discussion-question:first-of-type {
     margin-top: 0 !important;
-  }
-  
-  /* KHUSUS card terakhir - hapus margin bottom */
-  .discussion-question:last-of-type {
-    margin-bottom: 0 !important;
-  }
-  
-  /* HAPUS semua margin dari elemen di dalam modal-body */
-  .modal-body > div:not(.discussion-question) {
-    margin: 0 !important;
-    padding: 0 !important;
   }
   
   .discussion-question h4 {
@@ -1132,10 +1135,11 @@ body.dark-mode .timer {
   }
   
   .options-list {
-    display: flex;
+    display: flex !important;
     flex-direction: column;
     gap: 3px !important;
     margin-bottom: 4px !important;
+    visibility: visible !important;
   }
   
   .option-item {

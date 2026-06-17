@@ -280,22 +280,20 @@ async function submit() {
   localStorage.setItem("cbt_completion_time", completionTimeSeconds);
   let waktuStr = formatTimeDisplay(completionTimeSeconds);
   
-  // Kirim ke backend (tanpa no-cors agar bisa dapat response)
-  try {
-    await fetch(API, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "submit",
-        nama, token,
-        skor: score,
-        jawaban: answers,
-        total: soal.length,
-        waktu: waktuStr,
-        sheetSoal: currentSheetSoal
-      })
-    });
-  } catch(e) { console.log("Submit error:", e); }
+fetch(API, {
+  method: "POST",
+  mode: "no-cors",              // <-- ADD THIS LINE
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    action: "submit",
+    nama, token,
+    skor: score,
+    jawaban: answers,
+    total: soal.length,
+    waktu: waktuStr,
+    sheetSoal: currentSheetSoal
+  })
+}).catch(e => console.log);
   
   showResult(score);
   setTimeout(() => openDiscussionModal(), 500);

@@ -1032,6 +1032,7 @@ body.dark-mode .timer {
     color: white !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
     page-break-inside: avoid !important;
+    page-break-after: avoid !important; /* Mencegah header terpisah dari soal pertama */
     width: 100% !important;
     box-sizing: border-box !important;
     display: block !important;
@@ -1081,10 +1082,27 @@ body.dark-mode .timer {
     background: transparent !important;
   }
   
-  /* ========== CARD SOAL - JARAK SANGAT RAPAT ========== */
+  /* ========== KUNCI: SEMBUNYIKAN HEADER DI HALAMAN > 1 ========== */
+  /* Hanya tampilkan header di halaman pertama */
+  .discussion-header {
+    display: block !important;
+  }
+  
+  /* Sembunyikan header jika ada lebih dari 1 halaman */
+  .discussion-header ~ .discussion-question:nth-of-type(10) ~ .discussion-header {
+    display: none !important;
+  }
+  
+  /* Cara lebih aman: Sembunyikan semua header kecuali yang pertama */
+  .discussion-header:not(:first-of-type) {
+    display: none !important;
+  }
+  
+  /* ========== CARD SOAL - PASTIKAN TIDAK ADA BARIS TERPOTONG ========== */
   .discussion-question {
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
+    /* Card BISA terpotong antar halaman */
+    page-break-inside: auto !important;
+    break-inside: auto !important;
     
     margin: 6px 0 !important;
     padding: 10px 14px !important;
@@ -1096,6 +1114,9 @@ body.dark-mode .timer {
     color: #1f2937 !important;
     display: block !important;
     visibility: visible !important;
+    
+    font-size: 12px !important;
+    line-height: 1.6 !important;
   }
   
   .discussion-question * {
@@ -1104,34 +1125,46 @@ body.dark-mode .timer {
     visibility: visible !important;
   }
   
-  /* SEMUA CARD PAKAI MARGIN YANG SAMA */
-  .discussion-question {
-    margin-top: 6px !important;
-    margin-bottom: 6px !important;
-  }
-  
-  /* KHUSUS CARD PERTAMA - HAPUS MARGIN ATAS */
-  .discussion-question:first-of-type,
-  .discussion-question:first-child {
-    margin-top: 0 !important;
-  }
-  
-  /* KHUSUS CARD TERAKHIR - HAPUS MARGIN BAWAH */
-  .discussion-question:last-of-type,
-  .discussion-question:last-child {
-    margin-bottom: 0 !important;
-  }
-  
-  /* PASTIKAN TIDAK ADA JARAK DARI ELEMEN SEBELUMNYA */
-  .discussion-question:first-of-type {
-    margin-top: 0 !important;
-  }
-  
+  /* ========== KUNCI: PASTIKAN SETIAP BARIS TEKS TIDAK TERPOTONG ========== */
   .discussion-question h4 {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    page-break-after: avoid !important;
     margin: 0 0 6px 0 !important;
     font-size: 13px !important;
     font-weight: 700 !important;
     color: #1f2937 !important;
+    
+    widows: 3 !important;
+    orphans: 3 !important;
+  }
+  
+  .discussion-question .question-text,
+  .discussion-question > p,
+  .discussion-question > div:not(.options-list):not(.discussion-pembahasan) {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    page-break-after: avoid !important;
+    
+    widows: 3 !important;
+    orphans: 3 !important;
+  }
+  
+  .option-item {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    page-break-after: avoid !important;
+    
+    padding: 4px 10px !important;
+    border-radius: 6px !important;
+    border: 1px solid #e5e7eb !important;
+    font-size: 11px !important;
+    background: white !important;
+    line-height: 1.4 !important;
+    color: #1f2937 !important;
+    
+    widows: 3 !important;
+    orphans: 3 !important;
   }
   
   .options-list {
@@ -1140,19 +1173,15 @@ body.dark-mode .timer {
     gap: 3px !important;
     margin-bottom: 4px !important;
     visibility: visible !important;
-  }
-  
-  .option-item {
-    padding: 4px 10px !important;
-    border-radius: 6px !important;
-    border: 1px solid #e5e7eb !important;
-    font-size: 11px !important;
-    background: white !important;
-    line-height: 1.4 !important;
-    color: #1f2937 !important;
+    
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
   
   .discussion-pembahasan {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    
     margin-top: 4px !important;
     padding: 4px 10px !important;
     background: #f3f4f6 !important;
@@ -1160,11 +1189,40 @@ body.dark-mode .timer {
     font-size: 11px !important;
     line-height: 1.4 !important;
     color: #1f2937 !important;
+    
+    widows: 3 !important;
+    orphans: 3 !important;
   }
   
   .discussion-pembahasan strong {
     font-weight: 700 !important;
     color: #1f2937 !important;
+  }
+  
+  .discussion-question p,
+  .discussion-question span,
+  .discussion-question div {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    
+    widows: 3 !important;
+    orphans: 3 !important;
+  }
+  
+  /* SEMUA CARD PAKAI MARGIN YANG SAMA */
+  .discussion-question {
+    margin-top: 6px !important;
+    margin-bottom: 6px !important;
+  }
+  
+  .discussion-question:first-of-type,
+  .discussion-question:first-child {
+    margin-top: 0 !important;
+  }
+  
+  .discussion-question:last-of-type,
+  .discussion-question:last-child {
+    margin-bottom: 0 !important;
   }
   
   /* ========== WARNA JAWABAN ========== */
@@ -1230,7 +1288,6 @@ body.dark-mode .timer {
 
 /* ========== HAPUS SEMUA ATURAN DARK MODE DI PRINT ========== */
 @media print and (prefers-color-scheme: dark) {
-  /* Reset semua ke default */
   #discussionModal,
   .modal-content,
   .modal-body,
@@ -1243,7 +1300,6 @@ body.dark-mode .timer {
     color: initial !important;
   }
   
-  /* Tetap pertahankan warna spesifik */
   .user-correct {
     background: #d1fae5 !important;
     color: #065f46 !important;
@@ -1289,6 +1345,7 @@ body.dark-mode .timer {
     color: white !important;
   }
 }
+
 /* ========== RESPONSIF ========== */
 @media (max-width: 860px) {
   .wrapper {

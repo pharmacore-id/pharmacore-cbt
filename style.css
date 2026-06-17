@@ -953,9 +953,12 @@ body.dark-mode .timer {
   box-shadow: none !important;
 }
 
+/* === PRINT PDF PEMBAHASAN === */
 @media print {
 
-  /* === FORCE LIGHT MODE === */
+  /* ===================== */
+  /* FORCE LIGHT MODE */
+  /* ===================== */
   html, body {
     color-scheme: light !important;
   }
@@ -966,7 +969,9 @@ body.dark-mode .timer {
     border-color: #e5e7eb !important;
   }
 
-  /* === SHOW ONLY MODAL === */
+  /* ===================== */
+  /* SHOW ONLY MODAL */
+  /* ===================== */
   body * {
     visibility: hidden;
   }
@@ -984,25 +989,43 @@ body.dark-mode .timer {
     padding: 20px 28px !important;
     margin: 0 !important;
     background: white !important;
-    overflow: visible !important;
   }
 
-  .modal-body,
-  .modal-content {
-    background: white !important;
-    height: auto !important;
-    max-height: none !important;
-    overflow: visible !important;
-  }
-
-  /* === FLEX LAYOUT (CONSISTENT SPACING) === */
   .modal-body {
     display: flex !important;
     flex-direction: column !important;
     gap: 10px !important;
   }
 
-  /* === QUESTION CARD === */
+  .modal-content,
+  .modal-body {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  /* ===================== */
+  /* PAGE BREAK: HASIL UJIAN */
+  /* ===================== */
+  .discussion-header {
+    break-after: page;
+    page-break-after: always;
+
+    margin-bottom: 0 !important;
+    padding: 14px 18px !important;
+    border-radius: 14px !important;
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    color: white !important;
+  }
+
+  .discussion-header * {
+    color: white !important;
+    background: transparent !important;
+  }
+
+  /* ===================== */
+  /* QUESTION CARDS (AUTO FLOW) */
+  /* ===================== */
   .discussion-question {
     margin: 0 !important;
     padding: 10px 14px !important;
@@ -1010,17 +1033,27 @@ body.dark-mode .timer {
     border-left: 4px solid #8b5cf6 !important;
     background: #f9fafb !important;
 
-    /* KEY: prevent cut inside card */
+    /* allow split antar halaman */
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+
+  /* ===================== */
+  /* CEGAH BARIS TEKS KEPOTONG */
+  /* ===================== */
+  p, h1, h2, h3, h4, li {
     break-inside: avoid;
     page-break-inside: avoid;
   }
 
-  .discussion-question h4 {
-    margin: 0 0 6px 0 !important;
-    font-size: 13px !important;
+  .discussion-question * {
+    orphans: 2;
+    widows: 2;
   }
 
-  /* === OPTIONS === */
+  /* ===================== */
+  /* OPTIONS */
+  /* ===================== */
   .options-list {
     display: flex !important;
     flex-direction: column;
@@ -1044,23 +1077,9 @@ body.dark-mode .timer {
     border-radius: 6px !important;
   }
 
-  /* === HEADER === */
-  .discussion-header {
-    margin-bottom: 12px !important;
-    padding: 14px 18px !important;
-    border-radius: 14px !important;
-    background: linear-gradient(135deg, #667eea, #764ba2) !important;
-    color: white !important;
-
-    break-inside: avoid;
-  }
-
-  .discussion-header * {
-    color: white !important;
-    background: transparent !important;
-  }
-
-  /* === ANSWER COLORS SAFE PRINT === */
+  /* ===================== */
+  /* ANSWER COLORS */
+  /* ===================== */
   .user-correct {
     background: #d1fae5 !important;
     color: #065f46 !important;
@@ -1085,17 +1104,14 @@ body.dark-mode .timer {
     print-color-adjust: exact;
   }
 
-  /* === HIDE UI BUTTONS === */
+  /* ===================== */
+  /* HIDE UI BUTTONS */
+  /* ===================== */
   button,
   .close-modal,
   .secondary-btn,
   .modal-footer {
     display: none !important;
-  }
-
-  /* === OPTIONAL: REMOVE EXTRA WHITESPACE AT END === */
-  .discussion-question:last-child {
-    margin-bottom: 0 !important;
   }
 }
 

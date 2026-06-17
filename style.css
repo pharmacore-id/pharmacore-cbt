@@ -954,20 +954,16 @@ body.dark-mode .timer {
 }
 
 /* ========== PRINT (PDF) PEMBAHASAN - FINAL ========== */
+/* ========== PRINT (PDF) PEMBAHASAN - FINAL ========== */
 @media print {
-  /* Paksa semua elemen ke light mode */
-  * {
-    color: #1f2937 !important;
-    background-color: transparent !important;
-    border-color: #e5e7eb !important;
-  }
-
-  /* Sembunyikan semua elemen selain modal pembahasan */
+  /* Sembunyikan semua */
   body * {
     visibility: hidden;
   }
   
-  #discussionModal, #discussionModal * {
+  /* Tampilkan modal pembahasan */
+  #discussionModal, 
+  #discussionModal * {
     visibility: visible;
   }
   
@@ -976,162 +972,121 @@ body.dark-mode .timer {
     top: 0;
     left: 0;
     width: 100%;
-    margin: 0;
-    padding: 15px 25px !important;
+    padding: 20px 30px !important;
     background: white !important;
-    overflow: visible !important;
-    height: auto !important;
-    max-height: none !important;
     color: #1f2937 !important;
   }
   
   .modal-content {
-    box-shadow: none;
-    padding: 5px 0 !important;
-    overflow: visible !important;
-    max-height: none !important;
-    height: auto;
-    margin: 0 auto;
-    max-width: 100% !important;
     background: white !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    max-width: 100% !important;
   }
   
   .modal-body {
-    overflow: visible !important;
-    max-height: none !important;
-    height: auto;
+    background: white !important;
     padding: 0 !important;
     margin: 0 !important;
-    background: white !important;
   }
   
-  /* ========== KUNCI: SEMBUNYIKAN SEMUA ELEMEN KECUALI CARD SOAL ========== */
-  .modal-body > *:not(.discussion-question) {
+  /* ===== SEMBUNYIKAN SEMUA ELEMEN KECUALI HEADER & CARD SOAL ===== */
+  .modal-body > *:not(.discussion-question):not(.discussion-header) {
     display: none !important;
-    visibility: hidden !important;
     height: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
-    border: none !important;
-    overflow: hidden !important;
   }
   
-  /* TAMPILKAN SEMUA CARD SOAL DENGAN JARAK KONSISTEN */
-  .modal-body > .discussion-question {
-    display: block !important;
-    visibility: visible !important;
-  }
-  
-  /* ========== HEADER HASIL UJIAN - GRADIENT ========== */
+  /* ===== HEADER ===== */
   .discussion-header {
-    text-align: center;
-    margin: 0 0 12px 0 !important;
-    padding: 14px 16px !important;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    padding: 16px 20px !important;
     border-radius: 12px !important;
+    margin: 0 0 12px 0 !important;
     color: white !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-    page-break-inside: avoid !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
     display: block !important;
-    visibility: visible !important;
   }
   
   .discussion-header * {
     color: white !important;
-    background: transparent !important;
   }
   
   .discussion-header h2 {
     font-size: 18px !important;
     margin: 0 0 4px 0 !important;
     font-weight: 700 !important;
-    color: white !important;
+  }
+  
+  .discussion-nama {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    margin: 2px 0 4px 0 !important;
+    color: rgba(255,255,255,0.9) !important;
   }
   
   .discussion-score {
-    font-size: 28px !important;
-    font-weight: 800 !important;
     color: #fbbf24 !important;
+    font-size: 30px !important;
+    font-weight: 800 !important;
     margin: 4px 0 !important;
   }
   
   .discussion-info {
     display: flex !important;
     justify-content: center;
-    gap: 16px !important;
-    margin-top: 8px;
-    flex-wrap: wrap;
-    background: rgba(255, 255, 255, 0.15) !important;
-    padding: 4px 14px !important;
+    gap: 24px !important;
+    background: rgba(255,255,255,0.15) !important;
+    padding: 6px 16px !important;
     border-radius: 40px !important;
-    visibility: visible !important;
+    margin-top: 6px !important;
   }
   
   .discussion-info div {
-    font-size: 11px !important;
     color: white !important;
-    background: transparent !important;
+    font-size: 12px !important;
   }
   
   .discussion-info strong {
-    font-weight: 700 !important;
     color: #fbbf24 !important;
-    background: transparent !important;
   }
   
-  /* ========== CARD SOAL - JARAK KONSISTEN ========== */
+  /* ===== CARD SOAL - KONSISTEN ===== */
   .discussion-question {
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-    page-break-after: avoid !important;
-    
-    padding: 8px 12px !important;
-    border-radius: 8px;
-    border-left: 4px solid #8b5cf6 !important;
     background: #f9fafb !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-    color: #1f2937 !important;
+    border-left: 4px solid #8b5cf6 !important;
+    border-radius: 6px !important;
+    padding: 8px 12px !important;
+    margin: 4px 0 !important;
     display: block !important;
-    visibility: visible !important;
     
-    /* KONSISTEN: semua card pakai margin yang SAMA PERSIS */
-    margin-top: 6px !important;
-    margin-bottom: 6px !important;
+    /* HAPUS semua page-break */
+    page-break-inside: auto !important;
+    break-inside: auto !important;
+    page-break-after: auto !important;
+    page-break-before: auto !important;
   }
   
-  /* KHUSUS CARD PERTAMA - HAPUS MARGIN ATAS AGAR TIDAK ADA JARAK DENGAN HEADER */
-  .discussion-question:first-of-type,
+  /* SEMUA CARD PAKAI MARGIN YANG SAMA */
+  .discussion-question {
+    margin-top: 4px !important;
+    margin-bottom: 4px !important;
+  }
+  
+  /* CARD PERTAMA - TIDAK ADA MARGIN ATAS */
   .discussion-question:first-child {
     margin-top: 0 !important;
   }
   
-  /* KHUSUS CARD TERAKHIR - HAPUS MARGIN BAWAH */
-  .discussion-question:last-of-type,
+  /* CARD TERAKHIR - TIDAK ADA MARGIN BAWAH */
   .discussion-question:last-child {
     margin-bottom: 0 !important;
   }
   
-  /* PASTIKAN SEMUA CARD LAINNYA PUNYA MARGIN YANG SAMA PERSIS */
-  .discussion-question:not(:first-of-type):not(:last-of-type) {
-    margin-top: 6px !important;
-    margin-bottom: 6px !important;
-  }
-  
-  /* TAMBAHAN: pastikan tidak ada margin dari dalam card yang mempengaruhi */
-  .discussion-question * {
-    background: transparent !important;
-    color: #1f2937 !important;
-    visibility: visible !important;
-    margin: 0 !important;
-  }
-  
   .discussion-question h4 {
-    margin: 0 0 4px 0 !important;
     font-size: 12px !important;
     font-weight: 700 !important;
+    margin: 0 0 4px 0 !important;
     color: #1f2937 !important;
   }
   
@@ -1141,20 +1096,16 @@ body.dark-mode .timer {
     gap: 2px !important;
     margin: 0 !important;
     padding: 0 !important;
-    visibility: visible !important;
   }
   
   .option-item {
     padding: 3px 8px !important;
     border-radius: 4px !important;
     border: 1px solid #e5e7eb !important;
-    font-size: 10px !important;
     background: white !important;
-    line-height: 1.3 !important;
+    font-size: 10px !important;
     color: #1f2937 !important;
-    word-wrap: break-word !important;
-    overflow-wrap: break-word !important;
-    margin: 0 !important;
+    line-height: 1.3 !important;
   }
   
   .discussion-pembahasan {
@@ -1163,133 +1114,64 @@ body.dark-mode .timer {
     background: #f3f4f6 !important;
     border-radius: 4px !important;
     font-size: 10px !important;
+    color: #1f2937 !important;
     line-height: 1.3 !important;
-    color: #1f2937 !important;
-    word-wrap: break-word !important;
-    overflow-wrap: break-word !important;
-    margin: 0 !important;
   }
   
-  .discussion-pembahasan strong {
-    font-weight: 700 !important;
-    color: #1f2937 !important;
-  }
-  
-  /* ========== MENCEGAH TEKS TERPOTONG ========== */
-  .discussion-question h4,
-  .option-item,
-  .discussion-pembahasan,
-  .discussion-question {
-    word-wrap: break-word !important;
-    overflow-wrap: break-word !important;
-    white-space: normal !important;
-  }
-  
-  /* ========== WARNA JAWABAN ========== */
+  /* ===== WARNA JAWABAN ===== */
   .user-correct {
     background: #d1fae5 !important;
-    color: #065f46 !important;
     border-color: #10b981 !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  
-  .user-correct * {
     color: #065f46 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
   
   .wrong-option {
     background: #fee2e2 !important;
-    color: #991b1b !important;
     border-color: #ef4444 !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  
-  .wrong-option * {
     color: #991b1b !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
   
   .correct-option {
     background: #fef9c3 !important;
-    color: #854d0e !important;
     border-color: #f59e0b !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  
-  .correct-option * {
     color: #854d0e !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
   
-  /* ========== SEMBUNYIKAN TOMBOL ========== */
-  .close-modal, 
-  .secondary-btn, 
-  .modal-header button,
+  /* ===== SEMBUNYIKAN TOMBOL ===== */
+  .close-modal,
   .modal-footer,
-  button:not(.discussion-header *) {
+  button {
     display: none !important;
   }
   
   .modal-header {
     border-bottom: 1px solid #ddd !important;
-    margin-bottom: 8px !important;
-    padding-bottom: 4px !important;
-    background: white !important;
+    padding-bottom: 6px !important;
+    margin-bottom: 10px !important;
   }
   
   .modal-header h2 {
-    display: block !important;
-    font-size: 14px !important;
-    margin: 0 !important;
+    font-size: 16px !important;
     color: #1f2937 !important;
   }
 }
 
-/* ========== HAPUS SEMUA ATURAN DARK MODE DI PRINT ========== */
+/* ===== DARK MODE DI PRINT - TETAP LIGHT ===== */
 @media print and (prefers-color-scheme: dark) {
-  /* Reset semua ke default */
   #discussionModal,
   .modal-content,
   .modal-body,
   .discussion-question,
   .option-item,
-  .discussion-pembahasan,
-  .discussion-header,
-  * {
-    background-color: initial !important;
-    color: initial !important;
-  }
-  
-  /* Tetap pertahankan warna spesifik */
-  .user-correct {
-    background: #d1fae5 !important;
-    color: #065f46 !important;
-    border-color: #10b981 !important;
-  }
-  
-  .user-correct * {
-    color: #065f46 !important;
-  }
-  
-  .wrong-option {
-    background: #fee2e2 !important;
-    color: #991b1b !important;
-    border-color: #ef4444 !important;
-  }
-  
-  .wrong-option * {
-    color: #991b1b !important;
-  }
-  
-  .correct-option {
-    background: #fef9c3 !important;
-    color: #854d0e !important;
-    border-color: #f59e0b !important;
-  }
-  
-  .correct-option * {
-    color: #854d0e !important;
+  .discussion-pembahasan {
+    background: white !important;
+    color: #1f2937 !important;
   }
   
   .discussion-header {
@@ -1300,11 +1182,22 @@ body.dark-mode .timer {
     color: white !important;
   }
   
-  .discussion-header h2,
-  .discussion-header div,
-  .discussion-info div,
-  .discussion-info strong {
-    color: white !important;
+  .user-correct {
+    background: #d1fae5 !important;
+    color: #065f46 !important;
+    border-color: #10b981 !important;
+  }
+  
+  .wrong-option {
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+    border-color: #ef4444 !important;
+  }
+  
+  .correct-option {
+    background: #fef9c3 !important;
+    color: #854d0e !important;
+    border-color: #f59e0b !important;
   }
 }
 

@@ -954,66 +954,222 @@ body.dark-mode .timer {
 }
 
 /* ========== PRINT (PDF) ========== */
+/* ========== PRINT (PDF) PEMBAHASAN - FINAL ========== */
 @media print {
+  /* Sembunyikan semua elemen selain modal pembahasan */
   body * {
     visibility: hidden;
   }
+  
   #discussionModal, #discussionModal * {
     visibility: visible;
   }
+  
   #discussionModal {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     margin: 0;
-    padding: 20px;
+    padding: 20px 30px !important; /* ← Tambah padding untuk margin halaman */
     background: white !important;
     overflow: visible !important;
     height: auto !important;
     max-height: none !important;
   }
+  
   .modal-content {
     box-shadow: none;
-    padding: 0;
+    padding: 10px 0 !important; /* ← Hapus padding horizontal di sini, biar modal yang ngatur */
     overflow: visible !important;
     max-height: none !important;
     height: auto;
+    margin: 0 auto;
+    max-width: 100% !important;
   }
+  
   .modal-body {
     overflow: visible !important;
     max-height: none !important;
     height: auto;
+    padding: 0 !important; /* ← Reset padding biar rapi */
   }
+  
+  /* ========== HEADER HASIL UJIAN - GRADIENT ========== */
+  .discussion-header {
+    text-align: center;
+    margin: 0 0 24px 0 !important; /* ← Tambah margin bottom */
+    padding: 24px 20px !important; /* ← Tambah padding */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border-radius: 16px !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    page-break-inside: avoid !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .discussion-header h2 {
+    font-size: 22px !important; /* ← Sedikit lebih besar */
+    margin: 0 0 8px 0 !important;
+    color: white !important;
+    font-weight: 700 !important;
+  }
+  
+  .discussion-score {
+    font-size: 36px !important; /* ← Lebih besar biar menonjol */
+    font-weight: 800 !important;
+    color: #fbbf24 !important;
+    margin: 8px 0 !important;
+  }
+  
+  .discussion-info {
+    display: flex;
+    justify-content: center;
+    gap: 32px; /* ← Jarak antar info lebih longgar */
+    margin-top: 16px;
+    flex-wrap: wrap;
+    background: rgba(255, 255, 255, 0.15) !important;
+    padding: 10px 24px !important; /* ← Tambah padding horizontal */
+    border-radius: 40px !important;
+  }
+  
+  .discussion-info div {
+    font-size: 13px !important; /* ← Sedikit lebih besar */
+    color: white !important;
+  }
+  
+  .discussion-info strong {
+    font-weight: 700 !important;
+    color: #fbbf24 !important;
+  }
+  
+  /* ========== CARD SOAL - LEBAR FULL DENGAN PADDING ========== */
   .discussion-question {
-    page-break-inside: avoid;
-    break-inside: avoid;
-    margin-bottom: 30px;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    
+    margin: 14px 0 !important; /* ← Hapus margin auto, pakai margin vertikal */
+    padding: 16px 20px !important; /* ← Tambah padding dalam card */
+    border-radius: 12px; /* ← Sedikit lebih besar */
+    border-left: 5px solid #8b5cf6; /* ← Lebih tebal */
+    background: #f9fafb !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
-  .close-modal, .secondary-btn, .modal-header button {
-    display: none !important;
+  
+  .discussion-question:first-of-type {
+    margin-top: 0 !important;
   }
-  .modal-header {
-    border-bottom: 1px solid #ddd;
-    margin-bottom: 20px;
+  
+  .discussion-question:last-of-type {
+    margin-bottom: 0 !important;
   }
+  
+  .discussion-question h4 {
+    margin: 0 0 12px 0 !important; /* ← Tambah margin bottom */
+    font-size: 14px !important; /* ← Sedikit lebih besar */
+    font-weight: 700 !important;
+    color: #1f2937 !important;
+  }
+  
+  .options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px; /* ← Jarak antar opsi */
+    margin-bottom: 10px; /* ← Tambah margin bottom */
+  }
+  
+  .option-item {
+    padding: 8px 14px !important; /* ← Tambah padding */
+    border-radius: 8px !important;
+    border: 1px solid #e5e7eb !important;
+    font-size: 12px !important; /* ← Sedikit lebih besar */
+    background: white !important;
+    line-height: 1.5 !important;
+  }
+  
+  .discussion-pembahasan {
+    margin-top: 10px; /* ← Tambah margin top */
+    padding: 10px 14px !important; /* ← Tambah padding */
+    background: #f3f4f6 !important;
+    border-radius: 8px !important;
+    font-size: 12px !important; /* ← Sedikit lebih besar */
+    line-height: 1.5 !important;
+  }
+  
+  .discussion-pembahasan strong {
+    font-weight: 700 !important;
+    color: #1f2937 !important;
+  }
+  
+  /* ========== WARNA JAWABAN ========== */
   .user-correct {
     background: #d1fae5 !important;
     color: #065f46 !important;
+    border-color: #10b981 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
+  
   .wrong-option {
     background: #fee2e2 !important;
     color: #991b1b !important;
+    border-color: #ef4444 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
+  
   .correct-option {
     background: #fef9c3 !important;
     color: #854d0e !important;
+    border-color: #f59e0b !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+  }
+  
+  /* ========== SEMBUNYIKAN TOMBOL ========== */
+  .close-modal, 
+  .secondary-btn, 
+  .modal-header button,
+  .modal-footer,
+  button:not(.discussion-header *) {
+    display: none !important;
+  }
+  
+  .modal-header {
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+  }
+  
+  .modal-header h2 {
+    display: block !important;
+    font-size: 18px !important;
+    margin: 0 !important;
+  }
+}
+
+/* ========== TAMBAHAN UNTUK KONSISTENSI DARK MODE DI PRINT ========== */
+@media print and (prefers-color-scheme: dark) {
+  #discussionModal,
+  .modal-content,
+  .modal-body,
+  .discussion-question,
+  .option-item,
+  .discussion-pembahasan {
+    background: white !important;
+    color: #1f2937 !important;
+  }
+  
+  .discussion-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  }
+  
+  .discussion-header h2,
+  .discussion-header div,
+  .discussion-info div {
+    color: white !important;
   }
 }
 

@@ -953,133 +953,221 @@ body.dark-mode .timer {
   box-shadow: none !important;
 }
 
-/* === PRINT PDF PEMBAHASAN === */
+/* ========== PRINT (PDF) PEMBAHASAN - FINAL ========== */
 @media print {
-
-  /* ===================== */
-  /* FORCE LIGHT MODE */
-  /* ===================== */
-  html, body {
-    color-scheme: light !important;
-  }
-
+  /* Paksa semua elemen ke light mode */
   * {
     color: #1f2937 !important;
-    background: white !important;
+    background-color: transparent !important;
     border-color: #e5e7eb !important;
   }
 
-  /* ===================== */
-  /* SHOW ONLY MODAL */
-  /* ===================== */
+  /* Sembunyikan semua elemen selain modal pembahasan */
   body * {
     visibility: hidden;
   }
-
-  #discussionModal,
-  #discussionModal * {
+  
+  #discussionModal, #discussionModal * {
     visibility: visible;
   }
-
+  
   #discussionModal {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    padding: 20px 28px !important;
+    margin: 0;
+    padding: 20px 30px !important;
+    background: white !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    color: #1f2937 !important;
+  }
+  
+  .modal-content {
+    box-shadow: none;
+    padding: 10px 0 !important;
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto;
+    margin: 0 auto;
+    max-width: 100% !important;
+    background: white !important;
+  }
+  
+  .modal-body {
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto;
+    padding: 0 !important;
     margin: 0 !important;
     background: white !important;
   }
-
-  .modal-body {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 10px !important;
+  
+  /* ========== KUNCI: SEMBUNYIKAN SEMUA ELEMEN KECUALI CARD SOAL ========== */
+  .modal-body > *:not(.discussion-question) {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    overflow: hidden !important;
   }
-
-  .modal-content,
-  .modal-body {
-    height: auto !important;
-    max-height: none !important;
-    overflow: visible !important;
+  
+  /* TAMPILKAN SEMUA CARD SOAL DENGAN JARAK KONSISTEN */
+  .modal-body > .discussion-question {
+    display: block !important;
+    visibility: visible !important;
   }
-
-  /* ===================== */
-  /* PAGE BREAK: HASIL UJIAN */
-  /* ===================== */
+  
+  /* ========== HEADER HASIL UJIAN - GRADIENT ========== */
   .discussion-header {
-    break-after: page;
-    page-break-after: always;
-
-    margin-bottom: 0 !important;
-    padding: 14px 18px !important;
-    border-radius: 14px !important;
-    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    text-align: center;
+    margin: 0 0 16px 0 !important;
+    padding: 16px 20px !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border-radius: 16px !important;
     color: white !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    page-break-inside: avoid !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    display: block !important;
+    visibility: visible !important;
   }
-
+  
   .discussion-header * {
     color: white !important;
     background: transparent !important;
   }
-
-  /* ===================== */
-  /* QUESTION CARDS (AUTO FLOW) */
-  /* ===================== */
+  
+  .discussion-header h2 {
+    font-size: 20px !important;
+    margin: 0 0 4px 0 !important;
+    font-weight: 700 !important;
+    color: white !important;
+  }
+  
+  .discussion-score {
+    font-size: 32px !important;
+    font-weight: 800 !important;
+    color: #fbbf24 !important;
+    margin: 4px 0 !important;
+  }
+  
+  .discussion-info {
+    display: flex !important;
+    justify-content: center;
+    gap: 20px !important;
+    margin-top: 10px;
+    flex-wrap: wrap;
+    background: rgba(255, 255, 255, 0.15) !important;
+    padding: 6px 16px !important;
+    border-radius: 40px !important;
+    visibility: visible !important;
+  }
+  
+  .discussion-info div {
+    font-size: 12px !important;
+    color: white !important;
+    background: transparent !important;
+  }
+  
+  .discussion-info strong {
+    font-weight: 700 !important;
+    color: #fbbf24 !important;
+    background: transparent !important;
+  }
+  
+  /* ========== CARD SOAL - JARAK SANGAT RAPAT ========== */
   .discussion-question {
-    margin: 0 !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    
+    margin: 6px 0 !important;
     padding: 10px 14px !important;
     border-radius: 8px;
     border-left: 4px solid #8b5cf6 !important;
     background: #f9fafb !important;
-
-    /* allow split antar halaman */
-    break-inside: auto;
-    page-break-inside: auto;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    color: #1f2937 !important;
+    display: block !important;
+    visibility: visible !important;
   }
-
-  /* ===================== */
-  /* CEGAH BARIS TEKS KEPOTONG */
-  /* ===================== */
-  p, h1, h2, h3, h4, li {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-
+  
   .discussion-question * {
-    orphans: 2;
-    widows: 2;
+    background: transparent !important;
+    color: #1f2937 !important;
+    visibility: visible !important;
   }
-
-  /* ===================== */
-  /* OPTIONS */
-  /* ===================== */
+  
+  /* SEMUA CARD PAKAI MARGIN YANG SAMA */
+  .discussion-question {
+    margin-top: 6px !important;
+    margin-bottom: 6px !important;
+  }
+  
+  /* KHUSUS CARD PERTAMA - HAPUS MARGIN ATAS */
+  .discussion-question:first-of-type,
+  .discussion-question:first-child {
+    margin-top: 0 !important;
+  }
+  
+  /* KHUSUS CARD TERAKHIR - HAPUS MARGIN BAWAH */
+  .discussion-question:last-of-type,
+  .discussion-question:last-child {
+    margin-bottom: 0 !important;
+  }
+  
+  /* PASTIKAN TIDAK ADA JARAK DARI ELEMEN SEBELUMNYA */
+  .discussion-question:first-of-type {
+    margin-top: 0 !important;
+  }
+  
+  .discussion-question h4 {
+    margin: 0 0 6px 0 !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #1f2937 !important;
+  }
+  
   .options-list {
     display: flex !important;
     flex-direction: column;
     gap: 3px !important;
     margin-bottom: 4px !important;
+    visibility: visible !important;
   }
-
+  
   .option-item {
     padding: 4px 10px !important;
-    font-size: 11px !important;
-    border: 1px solid #e5e7eb !important;
     border-radius: 6px !important;
-    background: white !important;
-  }
-
-  .discussion-pembahasan {
-    margin-top: 6px !important;
-    padding: 6px 10px !important;
+    border: 1px solid #e5e7eb !important;
     font-size: 11px !important;
+    background: white !important;
+    line-height: 1.4 !important;
+    color: #1f2937 !important;
+  }
+  
+  .discussion-pembahasan {
+    margin-top: 4px !important;
+    padding: 4px 10px !important;
     background: #f3f4f6 !important;
     border-radius: 6px !important;
+    font-size: 11px !important;
+    line-height: 1.4 !important;
+    color: #1f2937 !important;
   }
-
-  /* ===================== */
-  /* ANSWER COLORS */
-  /* ===================== */
+  
+  .discussion-pembahasan strong {
+    font-weight: 700 !important;
+    color: #1f2937 !important;
+  }
+  
+  /* ========== WARNA JAWABAN ========== */
   .user-correct {
     background: #d1fae5 !important;
     color: #065f46 !important;
@@ -1087,7 +1175,11 @@ body.dark-mode .timer {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-
+  
+  .user-correct * {
+    color: #065f46 !important;
+  }
+  
   .wrong-option {
     background: #fee2e2 !important;
     color: #991b1b !important;
@@ -1095,7 +1187,11 @@ body.dark-mode .timer {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-
+  
+  .wrong-option * {
+    color: #991b1b !important;
+  }
+  
   .correct-option {
     background: #fef9c3 !important;
     color: #854d0e !important;
@@ -1103,18 +1199,96 @@ body.dark-mode .timer {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-
-  /* ===================== */
-  /* HIDE UI BUTTONS */
-  /* ===================== */
-  button,
-  .close-modal,
-  .secondary-btn,
-  .modal-footer {
+  
+  .correct-option * {
+    color: #854d0e !important;
+  }
+  
+  /* ========== SEMBUNYIKAN TOMBOL ========== */
+  .close-modal, 
+  .secondary-btn, 
+  .modal-header button,
+  .modal-footer,
+  button:not(.discussion-header *) {
     display: none !important;
+  }
+  
+  .modal-header {
+    border-bottom: 1px solid #ddd !important;
+    margin-bottom: 10px !important;
+    padding-bottom: 6px !important;
+    background: white !important;
+  }
+  
+  .modal-header h2 {
+    display: block !important;
+    font-size: 16px !important;
+    margin: 0 !important;
+    color: #1f2937 !important;
   }
 }
 
+/* ========== HAPUS SEMUA ATURAN DARK MODE DI PRINT ========== */
+@media print and (prefers-color-scheme: dark) {
+  /* Reset semua ke default */
+  #discussionModal,
+  .modal-content,
+  .modal-body,
+  .discussion-question,
+  .option-item,
+  .discussion-pembahasan,
+  .discussion-header,
+  * {
+    background-color: initial !important;
+    color: initial !important;
+  }
+  
+  /* Tetap pertahankan warna spesifik */
+  .user-correct {
+    background: #d1fae5 !important;
+    color: #065f46 !important;
+    border-color: #10b981 !important;
+  }
+  
+  .user-correct * {
+    color: #065f46 !important;
+  }
+  
+  .wrong-option {
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+    border-color: #ef4444 !important;
+  }
+  
+  .wrong-option * {
+    color: #991b1b !important;
+  }
+  
+  .correct-option {
+    background: #fef9c3 !important;
+    color: #854d0e !important;
+    border-color: #f59e0b !important;
+  }
+  
+  .correct-option * {
+    color: #854d0e !important;
+  }
+  
+  .discussion-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  }
+  
+  .discussion-header * {
+    color: white !important;
+  }
+  
+  .discussion-header h2,
+  .discussion-header div,
+  .discussion-info div,
+  .discussion-info strong {
+    color: white !important;
+  }
+}
 /* ========== RESPONSIF ========== */
 @media (max-width: 860px) {
   .wrapper {
